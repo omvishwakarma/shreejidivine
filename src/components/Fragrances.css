@@ -1,0 +1,94 @@
+.fragrances {
+  padding: var(--section-pad) 0;
+  background: var(--brown-deep);
+  color: var(--text-on-dark);
+}
+
+.fragrances .section-label {
+  color: var(--gold);
+}
+
+.fragrances .section-title {
+  color: var(--cream);
+}
+
+.fragrances .section-lead {
+  color: rgba(243, 235, 224, 0.65);
+}
+
+.fragrances__head {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.fragrances__head .section-lead {
+  margin-inline: auto;
+}
+
+.fragrances__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.fragrance {
+  display: flex;
+  gap: 1.35rem;
+  align-items: center;
+  padding: 1.5rem 1.4rem;
+  border: 1px solid rgba(201, 168, 76, 0.18);
+  background: linear-gradient(135deg, rgba(61, 42, 31, 0.6), rgba(43, 30, 22, 0.4));
+  transition: border-color 0.35s, transform 0.4s var(--ease-out);
+}
+
+.fragrance:hover {
+  border-color: rgba(201, 168, 76, 0.45);
+  transform: translateY(-3px);
+}
+
+.fragrance__swatch {
+  flex-shrink: 0;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  display: grid;
+  place-items: center;
+}
+
+.fragrance__swatch span {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--f-color) 70%, white), var(--f-color));
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--f-color) 40%, transparent);
+}
+
+.fragrance__tag {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.35rem;
+}
+
+.fragrance h3 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.fragrance__body > p:last-child {
+  margin-top: 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: rgba(243, 235, 224, 0.65);
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .fragrances__grid {
+    grid-template-columns: 1fr;
+  }
+}

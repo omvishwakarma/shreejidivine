@@ -1,0 +1,51 @@
+.perfect {
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  background:
+    linear-gradient(180deg, var(--brown-mid), var(--brown-deep));
+  color: var(--text-on-dark);
+  text-align: center;
+}
+
+.perfect__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+}
+
+.perfect__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem 0;
+  margin-bottom: 2rem;
+}
+
+.perfect__list li {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.8vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--cream);
+  padding: 0 1.15rem;
+  position: relative;
+}
+
+.perfect__list li:not(:last-child)::after {
+  content: "|";
+  position: absolute;
+  right: -0.15rem;
+  color: rgba(201, 168, 76, 0.45);
+  font-weight: 300;
+}
+
+.perfect__closing {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  color: rgba(228, 200, 120, 0.85);
+  line-height: 1.55;
+  max-width: 28rem;
+  margin-inline: auto;
+}

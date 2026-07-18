@@ -1,0 +1,109 @@
+.inside {
+  position: relative;
+  padding: var(--section-pad) 0;
+  background: var(--brown);
+  color: var(--text-on-dark);
+  overflow: hidden;
+}
+
+.inside__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 20%, rgba(201, 168, 76, 0.12), transparent 40%),
+    radial-gradient(ellipse at 10% 90%, rgba(201, 168, 76, 0.06), transparent 35%);
+  pointer-events: none;
+}
+
+.inside .section-label {
+  color: var(--gold);
+}
+
+.inside .section-title {
+  color: var(--cream);
+}
+
+.inside .section-lead {
+  color: rgba(243, 235, 224, 0.7);
+}
+
+.inside__layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.inside__list {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.inside__list li {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.inside__dot {
+  flex-shrink: 0;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: 0.45rem;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px rgba(201, 168, 76, 0.5);
+}
+
+.inside__list strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  letter-spacing: 0.02em;
+}
+
+.inside__list span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: rgba(243, 235, 224, 0.65);
+}
+
+.inside__figure {
+  position: relative;
+}
+
+.inside__figure img {
+  width: 100%;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  transition: transform 0.6s var(--ease-out);
+}
+
+.inside__figure:hover img {
+  transform: translateY(-6px);
+}
+
+.inside__figure figcaption {
+  margin-top: 1.1rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: rgba(228, 200, 120, 0.8);
+}
+
+@media (max-width: 860px) {
+  .inside__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .inside__figure {
+    order: -1;
+  }
+}
