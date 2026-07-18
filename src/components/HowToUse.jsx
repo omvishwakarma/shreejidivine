@@ -25,11 +25,13 @@ const steps = [
 
 export default function HowToUse() {
   return (
-    <section className="howto" id="how-to-use">
+    <section className="howto" id="how-to-use" aria-labelledby="howto-heading">
       <div className="container">
         <div className="howto__head reveal">
           <p className="section-label">Simple Ritual</p>
-          <h2 className="section-title">How to Use</h2>
+          <h2 id="howto-heading" className="section-title">
+            How to Use
+          </h2>
           <p className="section-lead">
             Four quiet steps to transform any corner into a sacred space.
           </p>

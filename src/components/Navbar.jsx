@@ -1,4 +1,7 @@
+'use client'
+
 import { useState, useEffect } from 'react'
+import BrandLogo from './BrandLogo'
 import './Navbar.css'
 
 const links = [
@@ -23,14 +26,13 @@ export default function Navbar() {
     <header className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
       <div className="nav__inner container">
         <a href="#top" className="nav__brand" aria-label="Shreeji Divine home">
-          <span className="nav__om" aria-hidden="true">ॐ</span>
-          <span className="nav__name">
-            <strong>SHREEJI</strong>
-            <em>DIVINE</em>
-          </span>
+          <BrandLogo height={scrolled ? 64 : 76} priority />
         </a>
 
-        <nav className={`nav__links ${open ? 'nav__links--open' : ''}`}>
+        <nav
+          className={`nav__links ${open ? 'nav__links--open' : ''}`}
+          aria-label="Primary"
+        >
           {links.map((l) => (
             <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
               {l.label}

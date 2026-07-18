@@ -1,16 +1,18 @@
-import { useEffect } from 'react'
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import ProductGrid from './components/ProductGrid'
-import WhatsInside from './components/WhatsInside'
-import Stones from './components/Stones'
-import Fragrances from './components/Fragrances'
-import HowToUse from './components/HowToUse'
-import Features from './components/Features'
-import PerfectFor from './components/PerfectFor'
-import Footer from './components/Footer'
+'use client'
 
-function App() {
+import { useEffect } from 'react'
+import Navbar from './Navbar'
+import Hero from './Hero'
+import ProductGrid from './ProductGrid'
+import WhatsInside from './WhatsInside'
+import Stones from './Stones'
+import Fragrances from './Fragrances'
+import HowToUse from './HowToUse'
+import Features from './Features'
+import PerfectFor from './PerfectFor'
+import Footer from './Footer'
+
+export default function HomeContent() {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal')
     const observer = new IntersectionObserver(
@@ -29,8 +31,11 @@ function App() {
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Navbar />
-      <main>
+      <main id="main-content">
         <Hero />
         <ProductGrid />
         <WhatsInside />
@@ -44,5 +49,3 @@ function App() {
     </>
   )
 }
-
-export default App

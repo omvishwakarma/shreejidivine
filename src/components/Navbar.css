@@ -2,15 +2,15 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 100;
-  padding: 1.05rem 0;
+  padding: 0.85rem 0;
   transition: background 0.4s var(--ease-out), padding 0.4s, box-shadow 0.4s,
     color 0.3s;
   color: var(--brown);
 }
 
 .nav--scrolled {
-  padding: 0.65rem 0;
-  background: rgba(253, 248, 241, 0.94);
+  padding: 0.5rem 0;
+  background: rgba(253, 248, 241, 0.97);
   backdrop-filter: blur(14px);
   box-shadow: 0 4px 24px rgba(43, 30, 22, 0.08);
 }
@@ -25,35 +25,7 @@
 .nav__brand {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  color: var(--brown);
-}
-
-.nav__om {
-  font-size: 1.55rem;
-  line-height: 1;
-  color: var(--gold-dark);
-}
-
-.nav__name {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-
-.nav__name strong {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-}
-
-.nav__name em {
-  font-style: normal;
-  font-size: 0.6rem;
-  font-weight: 400;
-  letter-spacing: 0.32em;
-  color: var(--gold-dark);
+  flex-shrink: 0;
 }
 
 .nav__links {

@@ -18,6 +18,12 @@
   margin-bottom: 0.35rem;
 }
 
+.footer__logo {
+  width: min(220px, 100%);
+  height: auto;
+  margin-bottom: 0.35rem;
+}
+
 .footer__brand strong {
   display: block;
   font-family: var(--font-display);
@@ -42,13 +48,27 @@
   gap: 0.55rem;
 }
 
-.footer__links h3,
-.footer__contact h3 {
+.footer__nav-title {
   font-size: 0.7rem;
+  font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 0.5rem;
+}
+
+.footer__url {
+  margin-top: 0.75rem !important;
+}
+
+.footer__url a {
+  color: var(--gold-light);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.footer__url a:hover {
+  text-decoration: underline;
 }
 
 .footer__links a {

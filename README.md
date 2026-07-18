@@ -1,8 +1,8 @@
 # Shreeji Divine — Aroma Stone
 
-Premium product website for **Shreeji Divine** aroma stones and fragrance oils.
+Premium product website for **Shreeji Divine**, built with **Next.js (App Router)**.
 
-Built with **Vite + React**.
+**Live domain:** [https://shreejidivinearoma.com](https://shreejidivinearoma.com)
 
 ## Run locally
 
@@ -11,21 +11,21 @@ npm install
 npm run dev
 ```
 
-Open the URL shown in the terminal (usually `http://localhost:5173`).
+Open [http://localhost:3000](http://localhost:3000).
 
-## Build
+## Scripts
 
-```bash
-npm run build
-npm run preview
-```
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm start` | Start production server |
 
-## Sections
+## SEO
 
-- Hero — brand, tagline, USPs
-- Collection — four fragrance variants
-- What's Inside — Divine Ritual Kit contents
-- Stones & Fragrances — designs and scents
-- How to Use — four-step ritual
-- Features & Perfect For
-- Footer / contact
+- Canonical + Open Graph + Twitter cards (`shreejidivinearoma.com`)
+- JSON-LD: Organization, WebSite, WebPage, Product list, FAQ
+- `sitemap.xml` & `robots.txt`
+- Web app manifest
+- Semantic headings, alt text, skip link
+- Optimized images via `next/image`

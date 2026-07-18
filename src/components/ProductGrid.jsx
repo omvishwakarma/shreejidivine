@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import './ProductGrid.css'
 
 const products = [
@@ -37,11 +38,13 @@ const products = [
 
 export default function ProductGrid() {
   return (
-    <section className="products" id="products">
+    <section className="products" id="products" aria-labelledby="products-heading">
       <div className="container">
         <div className="products__head reveal">
           <p className="section-label">The Collection</p>
-          <h2 className="section-title">Four Fragrances. One Divine Feeling.</h2>
+          <h2 id="products-heading" className="section-title">
+            Four Fragrances. One Divine Feeling.
+          </h2>
           <p className="section-lead">
             Each set pairs a handcrafted aroma stone with a 10ml bottle of concentrated fragrance oil —
             gift-ready in a premium magnetic box.
@@ -49,9 +52,12 @@ export default function ProductGrid() {
         </div>
 
         <div className="products__visual reveal reveal-delay-1">
-          <img
+          <Image
             src="/images/aroma-variants.png"
-            alt="Shreeji Divine Aroma Stone variants — Mogra Royale, Rose Majesty, Lavender Bliss, and Royal Chandan"
+            alt="Shreeji Divine Aroma Stone variants — Mogra Royale, Rose Majesty, Lavender Bliss, and Royal Chandan gift boxes"
+            width={1400}
+            height={700}
+            sizes="(max-width: 1120px) 100vw, 1120px"
           />
         </div>
 

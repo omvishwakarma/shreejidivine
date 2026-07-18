@@ -1,3 +1,5 @@
+import Image from 'next/image'
+import BrandLogo from './BrandLogo'
 import './Hero.css'
 
 const usps = [
@@ -73,54 +75,44 @@ const assurances = [
 
 export default function Hero() {
   return (
-    <section className="hero" id="top">
-      {/* Full designed banner — desktop */}
+    <section className="hero" id="top" aria-label="Shreeji Divine Aroma Stone">
+      <h1 className="sr-only">
+        Shreeji Divine Aroma Stone — Ghar Par Mandir Ki Feeling | Premium Fragrance Stones &amp; Oils
+      </h1>
+
       <div className="hero__banner">
-        <img
+        <Image
           src="/images/hero-banner.png"
-          alt="Shreeji Divine Aroma Stone — Ghar Par Mandir Ki Feeling. Premium gift set with fragrance oils and carved stones."
+          alt="Shreeji Divine Aroma Stone gift set with fragrance oils, carved stones, and premium packaging — Ghar Par Mandir Ki Feeling"
+          width={1600}
+          height={900}
+          priority
+          sizes="100vw"
+          className="hero__banner-img"
         />
         <a href="#products" className="hero__banner-cta">
           Shop the Divine Experience
         </a>
       </div>
 
-      {/* Matching layout — mobile / small screens */}
       <div className="hero__mobile">
         <div className="hero__mobile-photo">
-          <img
+          <Image
             src="/images/hero-banner.png"
-            alt="Shreeji Divine Aroma Stone gift set"
+            alt="Shreeji Divine Aroma Stone premium gift set with stones and oils"
+            width={1200}
+            height={800}
+            priority
+            sizes="100vw"
           />
         </div>
 
         <div className="hero__left">
           <div className="hero__brand">
-            <div className="hero__logo" aria-hidden="true">
-              <svg viewBox="0 0 72 72" className="hero__lotus-svg">
-                <defs>
-                  <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#e4c878" />
-                    <stop offset="50%" stopColor="#c9a84c" />
-                    <stop offset="100%" stopColor="#9a7b2f" />
-                  </linearGradient>
-                </defs>
-                <circle cx="36" cy="36" r="34" fill="none" stroke="url(#goldGrad)" strokeWidth="1.2" />
-                <path
-                  d="M36 14c-2.5 7-9 11-9 18a9 9 0 0018 0c0-7-6.5-11-9-18z"
-                  fill="url(#goldGrad)"
-                  opacity="0.9"
-                />
-                <ellipse cx="36" cy="52" rx="16" ry="5" fill="none" stroke="url(#goldGrad)" strokeWidth="1.1" />
-              </svg>
-            </div>
-            <p className="hero__brand-name">
-              SHREEJI
-              <span>— DIVINE —</span>
-            </p>
+            <BrandLogo height={110} />
           </div>
 
-          <h1 className="hero__title">AROMA STONE</h1>
+          <p className="hero__title">AROMA STONE</p>
 
           <p className="hero__tagline">
             <span className="hero__rule" aria-hidden="true" />

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import './WhatsInside.css'
 
 const items = [
@@ -25,12 +26,14 @@ const items = [
 
 export default function WhatsInside() {
   return (
-    <section className="inside" id="inside">
+    <section className="inside" id="inside" aria-labelledby="inside-heading">
       <div className="inside__bg" aria-hidden="true" />
       <div className="container inside__layout">
         <div className="inside__copy reveal">
           <p className="section-label">The Divine Ritual Kit</p>
-          <h2 className="section-title">What&apos;s Inside</h2>
+          <h2 id="inside-heading" className="section-title">
+            What&apos;s Inside
+          </h2>
           <p className="section-lead">
             Not just a fragrance — a complete divine experience. Open the box and invite peace,
             prosperity &amp; blessings into your space.
@@ -50,9 +53,12 @@ export default function WhatsInside() {
         </div>
 
         <figure className="inside__figure reveal reveal-delay-2">
-          <img
+          <Image
             src="/images/aroma-collection.png"
-            alt="Open Shreeji Divine gift box showing aroma stones and fragrance oils"
+            alt="Open Shreeji Divine Divine Ritual Kit gift box with four aroma stones and four fragrance oils"
+            width={900}
+            height={900}
+            sizes="(max-width: 860px) 100vw, 560px"
           />
           <figcaption>
             May every breath bring peace, prosperity &amp; divine blessings.

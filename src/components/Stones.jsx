@@ -25,11 +25,13 @@ const stones = [
 
 export default function Stones() {
   return (
-    <section className="stones" id="stones">
+    <section className="stones" id="stones" aria-labelledby="stones-heading">
       <div className="container">
         <div className="stones__head reveal">
           <p className="section-label">Handcrafted Forms</p>
-          <h2 className="section-title">Four Divine Aroma Stones</h2>
+          <h2 id="stones-heading" className="section-title">
+            Four Divine Aroma Stones
+          </h2>
           <p className="section-lead">
             Carved from natural gypsum and clay — matte white forms that hold fragrance and meaning.
           </p>

@@ -33,11 +33,13 @@ const fragrances = [
 
 export default function Fragrances() {
   return (
-    <section className="fragrances" id="fragrances">
+    <section className="fragrances" id="fragrances" aria-labelledby="fragrances-heading">
       <div className="container">
         <div className="fragrances__head reveal">
           <p className="section-label">Signature Scents</p>
-          <h2 className="section-title">Four Fragrance Oils</h2>
+          <h2 id="fragrances-heading" className="section-title">
+            Four Fragrance Oils
+          </h2>
           <p className="section-lead">
             Concentrated oils in amber glass with gold caps — a few drops awaken hours of divine aroma.
           </p>

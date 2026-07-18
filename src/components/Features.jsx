@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import './Features.css'
 
 const features = [
@@ -29,11 +30,13 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="features" id="features">
+    <section className="features" id="features" aria-labelledby="features-heading">
       <div className="container">
         <div className="features__head reveal">
           <p className="section-label">Why Shreeji Divine</p>
-          <h2 className="section-title">Fragrance That Brings Divine Presence Home</h2>
+          <h2 id="features-heading" className="section-title">
+            Fragrance That Brings Divine Presence Home
+          </h2>
         </div>
 
         <ul className="features__grid">
@@ -47,9 +50,12 @@ export default function Features() {
         </ul>
 
         <figure className="features__visual reveal">
-          <img
+          <Image
             src="/images/aroma-brochure.png"
-            alt="Shreeji Divine Aroma Stone product details and packaging"
+            alt="Shreeji Divine Aroma Stone product brochure showing designs, fragrances, and premium packaging"
+            width={1400}
+            height={800}
+            sizes="(max-width: 1120px) 100vw, 1120px"
           />
         </figure>
       </div>
