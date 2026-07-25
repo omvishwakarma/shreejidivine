@@ -1,10 +1,23 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { CONTACT_EMAIL, SITE_URL } from '../lib/site'
+import { APP_VERSION } from '../lib/appVersion'
 import './Footer.css'
 
 export default function Footer() {
   const year = new Date().getFullYear()
+  const [version, setVersion] = useState(`v${APP_VERSION}`)
+
+  useEffect(() => {
+    const sha =
+      process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ||
+      process.env.VERCEL_GIT_COMMIT_SHA ||
+      ''
+    if (sha) setVersion(`v${APP_VERSION} · ${sha.slice(0, 7)}`)
+  }, [])
 
   return (
     <footer className="footer" id="contact" aria-labelledby="contact-heading">
@@ -50,7 +63,12 @@ export default function Footer() {
       <div className="footer__bottom">
         <div className="container footer__bottom-inner">
           <p>© {year} Shreeji Divine. Made in India. All rights reserved.</p>
-          <p className="footer__tag">Ghar Par Mandir Ki Feeling</p>
+          <p className="footer__meta">
+            <span className="footer__tag">Ghar Par Mandir Ki Feeling</span>
+            <span className="footer__version" title="Deploy version">
+              {version}
+            </span>
+          </p>
         </div>
       </div>
     </footer>

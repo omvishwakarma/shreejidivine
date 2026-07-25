@@ -119,6 +119,20 @@
   color: rgba(201, 168, 76, 0.55);
 }
 
+.footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.footer__version {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(243, 235, 224, 0.35);
+}
+
 @media (max-width: 760px) {
   .footer__grid {
     grid-template-columns: 1fr;

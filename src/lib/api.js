@@ -20,15 +20,29 @@ export async function api(path, options = {}) {
   const token = getToken()
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers,
-  })
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    throw new Error(data.error || `Request failed (${res.status})`)
+  const controller = new AbortController()
+  const timeoutMs = options.timeoutMs ?? 12000
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(data.error || `Request failed (${res.status})`)
+    }
+    return data
+  } catch (err) {
+    if (err?.name === 'AbortError') {
+      throw new Error('API timeout — is the server running and MongoDB reachable?')
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
   }
-  return data
 }
 
 export { API_URL }

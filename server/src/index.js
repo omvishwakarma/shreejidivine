@@ -46,7 +46,12 @@ app.use((err, _req, res, _next) => {
 
 async function start() {
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/shreeji'
-  await mongoose.connect(uri)
+  mongoose.set('strictQuery', true)
+  await mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 8000,
+    connectTimeoutMS: 8000,
+    socketTimeoutMS: 20000,
+  })
   console.log('MongoDB connected')
   app.listen(PORT, () => {
     console.log(`API running on http://127.0.0.1:${PORT}`)

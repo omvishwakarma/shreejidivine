@@ -43,7 +43,10 @@ export default function ShopClient() {
         {error ? (
           <div className="empty-state">
             <p>Could not load products: {error}</p>
-            <p>Make sure the API is running on port 5001.</p>
+            <p>
+              Check that the API is running (<code>npm run dev:api</code>) and that your IP is
+              allowed in MongoDB Atlas → Network Access.
+            </p>
           </div>
         ) : null}
 

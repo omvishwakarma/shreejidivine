@@ -214,20 +214,28 @@ ul {
   animation: fade-up 0.35s var(--ease-out);
 }
 
+/* Reveal animations — visible by default; JS enhances with .will-animate */
 .reveal {
-  opacity: 0;
-  transform: translateY(28px);
+  opacity: 1;
+  transform: none;
   transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
 }
 
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
+@media (prefers-reduced-motion: no-preference) {
+  .reveal.will-animate {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* If JS fails, still show content after a moment */
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  .reveal,
+  .reveal.will-animate {
     opacity: 1;
     transform: none;
     transition: none;

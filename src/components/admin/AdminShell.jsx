@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { clearAdminAuth, getAdminUser } from '../../lib/adminApi'
+import { APP_VERSION } from '../../lib/appVersion'
 
 const links = [
   { href: '/admin', label: 'Dashboard', end: true },
@@ -40,6 +41,9 @@ export default function AdminShell({ children }) {
           }}
         >
           {user?.email}
+        </div>
+        <div className="admin-version" title="Deploy version">
+          v{APP_VERSION}
         </div>
         <button
           type="button"

@@ -17,20 +17,25 @@ export default function HomeContent() {
     const els = Array.from(document.querySelectorAll('.reveal'))
     if (!els.length) return undefined
 
-    // Show anything already in / near the viewport immediately
-    const showIfVisible = (el) => {
+    const inView = (el) => {
       const rect = el.getBoundingClientRect()
-      if (rect.top < window.innerHeight * 0.92) {
-        el.classList.add('visible')
-      }
+      return rect.top < window.innerHeight * 0.92
     }
-    els.forEach(showIfVisible)
+
+    els.forEach((el) => {
+      if (inView(el)) {
+        el.classList.add('visible')
+      } else {
+        el.classList.add('will-animate')
+      }
+    })
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible')
+            entry.target.classList.remove('will-animate')
             observer.unobserve(entry.target)
           }
         })

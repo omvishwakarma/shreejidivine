@@ -1,6 +1,7 @@
-:root {
+.admin-root {
   --admin-border: rgba(43, 30, 22, 0.1);
   --admin-muted: #6b5648;
+  min-height: 100vh;
 }
 
 .admin-loading {
@@ -75,6 +76,14 @@
 
 .admin-main {
   padding: 1.75rem 2rem 3rem;
+}
+
+.admin-version {
+  padding: 0.35rem 0.75rem 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: rgba(228, 200, 120, 0.45);
 }
 
 .admin-page-title {
