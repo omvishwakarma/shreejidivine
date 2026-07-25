@@ -8,6 +8,7 @@ import ShopNav from '../../../../components/ShopNav'
 import Footer from '../../../../components/Footer'
 import { useAuth } from '../../../../context/AuthContext'
 import { formatINR } from '../../../../lib/products'
+import { api } from '../../../../lib/api'
 import '../../../ecom.css'
 
 export default function OrderDetailClient() {
@@ -25,12 +26,8 @@ export default function OrderDetailClient() {
 
   useEffect(() => {
     if (!user || !id) return
-    fetch(`/api/orders/${id}`)
-      .then(async (r) => {
-        const data = await r.json()
-        if (!r.ok) throw new Error(data.error || 'Not found')
-        setOrder(data.order)
-      })
+    api(`/api/orders/${id}`)
+      .then((data) => setOrder(data.order))
       .catch((err) => setError(err.message))
   }, [user, id])
 

@@ -8,6 +8,7 @@ import Footer from '../../components/Footer'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { formatINR, SHIPPING_FEE, FREE_SHIPPING_NOTE } from '../../lib/products'
+import { api } from '../../lib/api'
 import '../ecom.css'
 
 const emptyShipping = {
@@ -39,8 +40,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!user) return
-    fetch('/api/addresses')
-      .then((r) => (r.ok ? r.json() : { addresses: [] }))
+    api('/api/addresses')
       .then((data) => {
         setAddresses(data.addresses || [])
         const def = (data.addresses || []).find((a) => a.isDefault) || data.addresses?.[0]
@@ -66,9 +66,8 @@ export default function CheckoutPage() {
     setError('')
     setSubmitting(true)
     try {
-      const res = await fetch('/api/orders', {
+      const data = await api('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
           shipping,
@@ -78,8 +77,6 @@ export default function CheckoutPage() {
           addressLabel: 'Home',
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Checkout failed')
       clearCart()
       router.push(`/profile/orders/${data.order.id}?placed=1`)
     } catch (err) {

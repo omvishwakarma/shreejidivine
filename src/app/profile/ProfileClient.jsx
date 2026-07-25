@@ -7,6 +7,7 @@ import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
 import { useAuth } from '../../context/AuthContext'
 import { formatINR } from '../../lib/products'
+import { api } from '../../lib/api'
 import '../ecom.css'
 
 export default function ProfileClient() {
@@ -36,12 +37,10 @@ export default function ProfileClient() {
 
   useEffect(() => {
     if (!user) return
-    fetch('/api/orders')
-      .then((r) => (r.ok ? r.json() : { orders: [] }))
+    api('/api/orders')
       .then((d) => setOrders(d.orders || []))
       .catch(() => {})
-    fetch('/api/addresses')
-      .then((r) => (r.ok ? r.json() : { addresses: [] }))
+    api('/api/addresses')
       .then((d) => setAddresses(d.addresses || []))
       .catch(() => {})
     setAddrForm((f) => ({
@@ -55,23 +54,25 @@ export default function ProfileClient() {
     e.preventDefault()
     setError('')
     setMsg('')
-    const res = await fetch('/api/addresses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(addrForm),
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setError(data.error || 'Failed')
-      return
+    try {
+      const data = await api('/api/addresses', {
+        method: 'POST',
+        body: JSON.stringify(addrForm),
+      })
+      setAddresses((prev) => [data.address, ...prev])
+      setMsg('Address saved')
+    } catch (err) {
+      setError(err.message || 'Failed')
     }
-    setAddresses((prev) => [data.address, ...prev])
-    setMsg('Address saved')
   }
 
   async function removeAddress(id) {
-    const res = await fetch(`/api/addresses/${id}`, { method: 'DELETE' })
-    if (res.ok) setAddresses((prev) => prev.filter((a) => a.id !== id))
+    try {
+      await api(`/api/addresses/${id}`, { method: 'DELETE' })
+      setAddresses((prev) => prev.filter((a) => a.id !== id))
+    } catch {
+      /* ignore */
+    }
   }
 
   if (loading || !user) {

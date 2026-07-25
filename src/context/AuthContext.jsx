@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { api, getToken, setToken } from '../lib/api'
 
 const AuthContext = createContext(null)
 
@@ -10,14 +11,14 @@ export function AuthProvider({ children }) {
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch('/api/auth/me')
-      if (res.ok) {
-        const data = await res.json()
-        setUser(data.user)
-      } else {
+      if (!getToken()) {
         setUser(null)
+        return
       }
+      const data = await api('/api/auth/me')
+      setUser(data.user)
     } catch {
+      setToken('')
       setUser(null)
     } finally {
       setLoading(false)
@@ -29,31 +30,27 @@ export function AuthProvider({ children }) {
   }, [refresh])
 
   const login = useCallback(async (email, password) => {
-    const res = await fetch('/api/auth/login', {
+    const data = await api('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Login failed')
+    setToken(data.token)
     setUser(data.user)
     return data.user
   }, [])
 
   const signup = useCallback(async (payload) => {
-    const res = await fetch('/api/auth/signup', {
+    const data = await api('/api/auth/signup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Signup failed')
+    setToken(data.token)
     setUser(data.user)
     return data.user
   }, [])
 
   const logout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
+    setToken('')
     setUser(null)
   }, [])
 
