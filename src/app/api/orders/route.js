@@ -4,10 +4,10 @@ import {
   dbConnect,
   requireUser,
   generateOrderNumber,
-} from '../../../../lib/mongo/auth'
-import { Order } from '../../../../lib/mongo/Order'
-import { Product } from '../../../../lib/mongo/Product'
-import { Address } from '../../../../lib/mongo/Address'
+} from '@/lib/mongo/auth'
+import { Order } from '@/lib/mongo/Order'
+import { Product } from '@/lib/mongo/Product'
+import { Address } from '@/lib/mongo/Address'
 
 const SHIPPING_FEE = 0
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { dbConnect, requireUser } from '../../../../lib/mongo/auth'
-import { Address } from '../../../../lib/mongo/Address'
+import { dbConnect, requireUser } from '@/lib/mongo/auth'
+import { Address } from '@/lib/mongo/Address'
 
 const schema = z.object({
   label: z.string().min(1).default('Home'),

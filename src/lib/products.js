@@ -29,3 +29,6 @@ export const FALLBACK_PRODUCTS = [
   { id: 'fallback-lavender', slug: 'lavender-bliss', name: 'Lavender Bliss', price: 699, image: '/images/aroma-variants.png' },
   { id: 'fallback-chandan', slug: 'royal-chandan', name: 'Royal Chandan', price: 699, image: '/images/aroma-variants.png' },
 ]
+
+/** @deprecated use FALLBACK_PRODUCTS — kept so older sitemap imports don't break builds */
+export const PRODUCTS = FALLBACK_PRODUCTS

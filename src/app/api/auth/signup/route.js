@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { dbConnect, signToken } from '../../../../lib/mongo/auth'
-import { User } from '../../../../lib/mongo/User'
+import { dbConnect, signToken } from '@/lib/mongo/auth'
+import { User } from '@/lib/mongo/User'
 
 export async function POST(request) {
   try {

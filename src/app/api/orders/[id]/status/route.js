@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { dbConnect, requireAdmin } from '../../../../../../lib/mongo/auth'
-import { Order } from '../../../../../../lib/mongo/Order'
+import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
+import { Order } from '@/lib/mongo/Order'
 
 export async function PATCH(request, { params }) {
   const gate = await requireAdmin(request)

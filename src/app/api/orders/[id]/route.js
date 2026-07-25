@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { dbConnect, requireUser, requireAdmin } from '../../../../../lib/mongo/auth'
-import { Order } from '../../../../../lib/mongo/Order'
+import { dbConnect, requireUser } from '@/lib/mongo/auth'
+import { Order } from '@/lib/mongo/Order'
 
 export async function GET(request, { params }) {
   const gate = await requireUser(request)

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { dbConnect, requireAdmin } from '../../../lib/mongo/auth'
-import { Product } from '../../../lib/mongo/Product'
+import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
+import { Product } from '@/lib/mongo/Product'
 
 export async function GET() {
   try {
