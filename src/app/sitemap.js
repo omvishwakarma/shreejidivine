@@ -1,5 +1,5 @@
 import { SITE_URL } from '../lib/site'
-import { PRODUCTS } from '../lib/products'
+import { FALLBACK_PRODUCTS } from '../lib/products'
 
 export default function sitemap() {
   const lastModified = new Date()
@@ -11,7 +11,7 @@ export default function sitemap() {
     priority: path === '' ? 1 : path === '/shop' ? 0.9 : 0.6,
   }))
 
-  const products = PRODUCTS.map((p) => ({
+  const products = FALLBACK_PRODUCTS.map((p) => ({
     url: `${SITE_URL}/shop/${p.slug}`,
     lastModified,
     changeFrequency: 'weekly',

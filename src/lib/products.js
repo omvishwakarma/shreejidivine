@@ -9,7 +9,7 @@ export function formatINR(n) {
 export const SHIPPING_FEE = 0
 export const FREE_SHIPPING_NOTE = 'Pan-India free shipping on all orders'
 
-/** Fallback catalog if API is offline (dev only) */
+/** Fallback catalog / sitemap slugs if API is offline */
 export const FALLBACK_PRODUCTS = [
   {
     id: 'fallback-ritual',
@@ -24,4 +24,8 @@ export const FALLBACK_PRODUCTS = [
     description: 'Complete Divine Ritual Kit with stones and oils.',
     highlights: ['4 Stones', '4 Oils', 'Gift Box'],
   },
+  { id: 'fallback-mogra', slug: 'mogra-royale', name: 'Mogra Royale', price: 699, image: '/images/aroma-variants.png' },
+  { id: 'fallback-rose', slug: 'rose-majesty', name: 'Rose Majesty', price: 699, image: '/images/aroma-variants.png' },
+  { id: 'fallback-lavender', slug: 'lavender-bliss', name: 'Lavender Bliss', price: 699, image: '/images/aroma-variants.png' },
+  { id: 'fallback-chandan', slug: 'royal-chandan', name: 'Royal Chandan', price: 699, image: '/images/aroma-variants.png' },
 ]

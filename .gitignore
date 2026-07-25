@@ -35,6 +35,10 @@ pnpm-debug.log*
 .env
 .env*.local
 
+# server deps (must never be committed)
+/server/node_modules
+/admin/node_modules
+
 # prisma
 /prisma/dev.db
 /prisma/dev.db-journal
