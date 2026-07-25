@@ -25,8 +25,9 @@ export function getAdminUser() {
 }
 
 export async function adminApi(path, options = {}) {
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData
   const headers = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(options.headers || {}),
   }
   const token = getAdminToken()

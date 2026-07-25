@@ -37,6 +37,8 @@ productSchema.methods.toPublicJSON = function () {
     description: this.description,
     highlights: this.highlights,
     active: this.active,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
   }
 }
 
