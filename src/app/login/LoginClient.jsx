@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import ShopNav from '../../components/ShopNav'
-import Footer from '../../components/Footer'
+import AuthShell from '../../components/AuthShell'
 import { useAuth } from '../../context/AuthContext'
-import '../ecom.css'
 
 export default function LoginClient() {
   const { login } = useAuth()
@@ -15,6 +13,8 @@ export default function LoginClient() {
   const next = search.get('next') || '/profile'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -33,53 +33,63 @@ export default function LoginClient() {
   }
 
   return (
-    <div className="ecom-page">
-      <ShopNav />
-      <div className="ecom-wrap">
-        <div className="auth-card">
-          <h1 className="ecom-title" style={{ fontSize: '2rem', textAlign: 'center' }}>
-            Welcome Back
-          </h1>
-          <p className="ecom-lead" style={{ textAlign: 'center', marginInline: 'auto' }}>
-            Login to checkout, track orders &amp; manage addresses.
-          </p>
-          <form className="form-stack" onSubmit={onSubmit}>
-            <div className="form-field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="form-field">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error ? <p className="form-error">{error}</p> : null}
-            <button type="submit" className="btn-sm btn-primary btn-full" disabled={loading}>
-              {loading ? 'Signing in…' : 'Login'}
-            </button>
-          </form>
-          <p className="form-foot">
-            New here?{' '}
-            <Link href={`/signup${next !== '/profile' ? `?next=${encodeURIComponent(next)}` : ''}`}>
-              Create an account
-            </Link>
-          </p>
+    <AuthShell mode="login" next={next}>
+      <form className="auth-form" onSubmit={onSubmit}>
+        <div className="auth-field">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
-      </div>
-      <Footer />
-    </div>
+        <div className="auth-field auth-field--password">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            className="auth-eye"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </div>
+
+        <div className="auth-row">
+          <label className="auth-check">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            Remember me
+          </label>
+        </div>
+
+        {error ? <p className="auth-error">{error}</p> : null}
+
+        <button type="submit" className="auth-submit" disabled={loading}>
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
+
+      <p className="auth-foot">
+        New here?{' '}
+        <Link href={`/signup${next !== '/profile' ? `?next=${encodeURIComponent(next)}` : ''}`}>
+          Create an account
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

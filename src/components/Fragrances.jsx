@@ -1,69 +1,49 @@
+import Image from 'next/image'
+import Link from 'next/link'
+import { CAMPAIGN_SCENTS } from '../lib/campaign'
 import './Fragrances.css'
-
-const fragrances = [
-  {
-    id: 'mogra',
-    name: 'Mogra Royale',
-    tag: 'Temple Jasmine',
-    desc: 'Traditional temple aroma that uplifts the soul.',
-    color: '#1b4332',
-  },
-  {
-    id: 'rose',
-    name: 'Rose Majesty',
-    tag: 'Royal Floral',
-    desc: 'Luxurious floral fragrance for a soothing ambiance.',
-    color: '#7b1e2e',
-  },
-  {
-    id: 'lavender',
-    name: 'Lavender Bliss',
-    tag: 'Calm & Restore',
-    desc: 'Calm your mind, relax your senses and heal naturally.',
-    color: '#4a2c6a',
-  },
-  {
-    id: 'chandan',
-    name: 'Royal Chandan',
-    tag: 'Sacred Sandalwood',
-    desc: 'Sacred sandalwood fragrance for purity & positivity.',
-    color: '#8b6914',
-  },
-]
 
 export default function Fragrances() {
   return (
     <section className="fragrances" id="fragrances" aria-labelledby="fragrances-heading">
-      <div className="container">
-        <div className="fragrances__head reveal">
-          <p className="section-label">Signature Scents</p>
-          <h2 id="fragrances-heading" className="section-title">
-            Four Fragrance Oils
-          </h2>
-          <p className="section-lead">
-            Concentrated oils in amber glass with gold caps — a few drops awaken hours of divine aroma.
-          </p>
-        </div>
-
-        <ul className="fragrances__grid">
-          {fragrances.map((f, i) => (
-            <li
-              key={f.id}
-              className={`fragrance reveal reveal-delay-${(i % 4) + 1}`}
-              style={{ '--f-color': f.color }}
-            >
-              <div className="fragrance__swatch" aria-hidden="true">
-                <span />
-              </div>
-              <div className="fragrance__body">
-                <p className="fragrance__tag">{f.tag}</p>
-                <h3>{f.name}</h3>
-                <p>{f.desc}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+      <div className="container fragrances__intro reveal">
+        <p className="section-label">Signature scents</p>
+        <h2 id="fragrances-heading" className="section-title">
+          Five fragrance stories
+        </h2>
+        <p className="section-lead">
+          From monsoon earth to temple jasmine — each oil is crafted for aroma stones, diffusers,
+          and quiet luxury at home.
+        </p>
       </div>
+
+      <ul className="fragrances__stories">
+        {CAMPAIGN_SCENTS.map((scent, i) => (
+          <li
+            key={scent.id}
+            className={`fragrance-story reveal ${i % 2 === 1 ? 'fragrance-story--flip' : ''}`}
+            style={{ '--f-tone': scent.tone }}
+          >
+            <div className="fragrance-story__media">
+              <Image
+                src={scent.image}
+                alt={`${scent.name} campaign — ${scent.headline}`}
+                width={576}
+                height={1024}
+                sizes="(max-width: 900px) 100vw, 42vw"
+              />
+            </div>
+            <div className="fragrance-story__body">
+              <p className="fragrance-story__tag">{scent.name}</p>
+              <h3>{scent.headline}</h3>
+              <p>{scent.line}</p>
+              <Link href="/shop" className="fragrance-story__link">
+                Shop this scent
+              </Link>
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

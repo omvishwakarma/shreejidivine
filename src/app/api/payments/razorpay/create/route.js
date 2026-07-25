@@ -2,30 +2,27 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
-import { sendOrderEmail } from '@/lib/mail'
+import { getRazorpayClient, getRazorpayKeyId } from '@/lib/razorpay'
 import {
   buildOrderLineItems,
   maybeSaveAddress,
   orderPayloadFromShipping,
 } from '@/lib/orderHelpers'
 
-export async function GET(request) {
-  const gate = await requireUser(request)
-  if (gate.error) return gate.error
-  await dbConnect()
-  const { searchParams } = new URL(request.url)
-  const all = searchParams.get('all') === '1'
-  const filter =
-    gate.auth.role === 'admin' && all ? {} : { user: gate.auth.sub }
-  const orders = await Order.find(filter)
-    .populate('user', 'name email')
-    .sort({ createdAt: -1 })
-  return NextResponse.json({ orders: orders.map((o) => o.toJSONSafe()) })
-}
+const shippingSchema = z.object({
+  fullName: z.string().min(2),
+  phone: z.string().min(10),
+  line1: z.string().min(3),
+  line2: z.string().optional().or(z.literal('')),
+  city: z.string().min(2),
+  state: z.string().min(2),
+  pincode: z.string().min(5),
+})
 
 export async function POST(request) {
   const gate = await requireUser(request)
   if (gate.error) return gate.error
+
   try {
     await dbConnect()
     const schema = z.object({
@@ -37,26 +34,21 @@ export async function POST(request) {
           })
         )
         .min(1),
-      shipping: z.object({
-        fullName: z.string().min(2),
-        phone: z.string().min(10),
-        line1: z.string().min(3),
-        line2: z.string().optional().or(z.literal('')),
-        city: z.string().min(2),
-        state: z.string().min(2),
-        pincode: z.string().min(5),
-      }),
-      paymentMethod: z.enum(['COD', 'RAZORPAY']).default('COD'),
+      shipping: shippingSchema,
       notes: z.string().optional().or(z.literal('')),
       saveAddress: z.boolean().optional(),
       addressLabel: z.string().optional(),
     })
     const data = schema.parse(await request.json())
 
-    if (data.paymentMethod === 'RAZORPAY') {
+    const keyId = getRazorpayKeyId()
+    if (!keyId || !process.env.RAZORPAY_KEY_SECRET) {
       return NextResponse.json(
-        { error: 'Use /api/payments/razorpay/create for online payments' },
-        { status: 400 }
+        {
+          error:
+            'Razorpay is not configured. Add NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.',
+        },
+        { status: 500 }
       )
     }
 
@@ -76,18 +68,40 @@ export async function POST(request) {
         lineItems,
         subtotal,
         total,
-        paymentMethod: 'COD',
+        paymentMethod: 'RAZORPAY',
         paymentStatus: 'PENDING',
-        status: 'CONFIRMED',
+        status: 'PENDING',
       })
     )
 
-    void sendOrderEmail(order, {
-      email: gate.auth.email,
-      name: gate.auth.name || data.shipping.fullName,
+    const razorpay = getRazorpayClient()
+    const amountPaise = Math.round(total * 100)
+    const rzpOrder = await razorpay.orders.create({
+      amount: amountPaise,
+      currency: 'INR',
+      receipt: order.orderNumber,
+      notes: {
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+      },
     })
 
-    return NextResponse.json({ order: order.toJSONSafe() }, { status: 201 })
+    order.razorpayOrderId = rzpOrder.id
+    await order.save()
+
+    return NextResponse.json({
+      keyId,
+      amount: amountPaise,
+      currency: 'INR',
+      razorpayOrderId: rzpOrder.id,
+      orderId: order._id.toString(),
+      orderNumber: order.orderNumber,
+      customer: {
+        name: data.shipping.fullName,
+        email: gate.auth.email || '',
+        contact: data.shipping.phone,
+      },
+    })
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json(
@@ -97,7 +111,7 @@ export async function POST(request) {
     }
     console.error(err)
     return NextResponse.json(
-      { error: err.message || 'Could not place order' },
+      { error: err.message || 'Could not start Razorpay payment' },
       { status: 500 }
     )
   }

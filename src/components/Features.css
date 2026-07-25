@@ -46,11 +46,17 @@
 
 .features__visual {
   overflow: hidden;
+  max-width: 420px;
+  margin: 0 auto;
+  aspect-ratio: 3 / 4;
+  background: #1a120e;
 }
 
 .features__visual img {
   width: 100%;
-  box-shadow: 0 24px 60px rgba(43, 30, 22, 0.1);
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 24px 60px rgba(43, 30, 22, 0.18);
 }
 
 @media (max-width: 800px) {

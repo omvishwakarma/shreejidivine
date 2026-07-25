@@ -56,13 +56,27 @@ export default function ProductGrid() {
           </p>
         </div>
 
-        <div className="products__visual reveal reveal-delay-1">
+        <div className="products__visual products__visual--campaign reveal reveal-delay-1">
           <Image
-            src="/images/aroma-variants.png"
-            alt="Shreeji Divine Aroma Stone variants — Mogra Royale, Rose Majesty, Lavender Bliss, and Royal Chandan gift boxes"
-            width={1400}
-            height={700}
-            sizes="(max-width: 1120px) 100vw, 1120px"
+            src="/images/campaign/mogra-product.jpg"
+            alt="Shreeji Divine Mogra Bloom premium fragrance oil"
+            width={576}
+            height={1024}
+            sizes="(max-width: 700px) 100vw, 360px"
+          />
+          <Image
+            src="/images/campaign/divine-rose.jpg"
+            alt="Shreeji Divine Rose premium fragrance oil"
+            width={576}
+            height={1024}
+            sizes="(max-width: 700px) 100vw, 360px"
+          />
+          <Image
+            src="/images/campaign/royal-chandan.jpg"
+            alt="Shreeji Divine Royal Chandan premium fragrance oil"
+            width={576}
+            height={1024}
+            sizes="(max-width: 700px) 100vw, 360px"
           />
         </div>
 

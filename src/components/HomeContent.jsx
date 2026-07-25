@@ -8,7 +8,6 @@ import WhatsInside from './WhatsInside'
 import Stones from './Stones'
 import Fragrances from './Fragrances'
 import HowToUse from './HowToUse'
-import Features from './Features'
 import PerfectFor from './PerfectFor'
 import Footer from './Footer'
 
@@ -63,7 +62,6 @@ export default function HomeContent() {
         <Stones />
         <Fragrances />
         <HowToUse />
-        <Features />
         <PerfectFor />
       </main>
       <Footer />

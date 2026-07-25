@@ -117,6 +117,24 @@ ul {
   color: var(--brown);
 }
 
+/* Prices / totals: clear sans numerals site-wide */
+.money,
+.product-card__price,
+.product-card__price strong,
+.product-detail__price strong,
+.cart-line__total,
+.cart-summary__rows .is-total,
+.ck-product__body strong,
+.ck-total,
+.od-item__total,
+.od-rows__total,
+.summary-row.total,
+.cart-line__right strong {
+  font-family: var(--font-body), system-ui, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
 .section-lead {
   font-size: 1.05rem;
   font-weight: 300;

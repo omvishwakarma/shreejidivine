@@ -19,6 +19,12 @@
   overflow: hidden;
 }
 
+.products__visual--campaign {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+
 .products__visual img {
   width: 100%;
   height: auto;
@@ -26,8 +32,23 @@
   transition: transform 0.7s var(--ease-out);
 }
 
+.products__visual--campaign img {
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: center top;
+  filter: none;
+}
+
 .products__visual:hover img {
   transform: scale(1.015);
+}
+
+.products__visual--campaign:hover img {
+  transform: none;
+}
+
+.products__visual--campaign img:hover {
+  transform: scale(1.02);
 }
 
 .products__grid {
@@ -97,10 +118,26 @@
   .products__grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .products__visual--campaign {
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    overflow-x: auto;
+    gap: 0.65rem;
+    padding-bottom: 0.25rem;
+  }
 }
 
 @media (max-width: 520px) {
   .products__grid {
     grid-template-columns: 1fr;
+  }
+
+  .products__visual--campaign {
+    display: flex;
+  }
+
+  .products__visual--campaign img {
+    flex: 0 0 68vw;
+    width: 68vw;
   }
 }

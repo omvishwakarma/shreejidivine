@@ -2,17 +2,17 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 100;
-  padding: 0.85rem 0;
-  transition: background 0.4s var(--ease-out), padding 0.4s, box-shadow 0.4s,
-    color 0.3s;
+  padding: 0.75rem 0;
+  background: #fdf8f1;
+  border-bottom: 1px solid rgba(43, 30, 22, 0.06);
+  box-shadow: 0 4px 20px rgba(43, 30, 22, 0.05);
   color: var(--brown);
+  transition: padding 0.35s var(--ease-out), box-shadow 0.35s;
 }
 
 .nav--scrolled {
   padding: 0.5rem 0;
-  background: rgba(253, 248, 241, 0.97);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 4px 24px rgba(43, 30, 22, 0.08);
+  box-shadow: 0 6px 24px rgba(43, 30, 22, 0.08);
 }
 
 .nav__inner {
@@ -103,7 +103,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 1.25rem;
-    background: rgba(253, 248, 241, 0.98);
+    background: #fdf8f1;
     transform: translateY(-110%);
     opacity: 0;
     pointer-events: none;

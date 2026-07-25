@@ -1,6 +1,8 @@
 .fragrances {
-  padding: var(--section-pad) 0;
-  background: var(--brown-deep);
+  padding: clamp(3.5rem, 7vw, 6rem) 0 clamp(4rem, 8vw, 7rem);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(201, 168, 76, 0.08), transparent 40%),
+    linear-gradient(180deg, #1a120e 0%, #241810 50%, #1a120e 100%);
   color: var(--text-on-dark);
 }
 
@@ -13,82 +15,136 @@
 }
 
 .fragrances .section-lead {
-  color: rgba(243, 235, 224, 0.65);
+  color: rgba(243, 235, 224, 0.68);
 }
 
-.fragrances__head {
+.fragrances__intro {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: clamp(2.5rem, 5vw, 3.75rem);
 }
 
-.fragrances__head .section-lead {
+.fragrances__intro .section-lead {
   margin-inline: auto;
 }
 
-.fragrances__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
-}
-
-.fragrance {
+.fragrances__stories {
   display: flex;
-  gap: 1.35rem;
-  align-items: center;
-  padding: 1.5rem 1.4rem;
-  border: 1px solid rgba(201, 168, 76, 0.18);
-  background: linear-gradient(135deg, rgba(61, 42, 31, 0.6), rgba(43, 30, 22, 0.4));
-  transition: border-color 0.35s, transform 0.4s var(--ease-out);
+  flex-direction: column;
+  gap: clamp(2.5rem, 6vw, 4.5rem);
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
 }
 
-.fragrance:hover {
-  border-color: rgba(201, 168, 76, 0.45);
-  transform: translateY(-3px);
-}
-
-.fragrance__swatch {
-  flex-shrink: 0;
-  width: 4.25rem;
-  height: 4.25rem;
-  border-radius: 50%;
-  border: 1px solid rgba(201, 168, 76, 0.35);
+.fragrance-story {
   display: grid;
-  place-items: center;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(1.25rem, 4vw, 3rem);
+  align-items: center;
 }
 
-.fragrance__swatch span {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--f-color) 70%, white), var(--f-color));
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--f-color) 40%, transparent);
+.fragrance-story--flip {
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
 }
 
-.fragrance__tag {
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
+.fragrance-story--flip .fragrance-story__media {
+  order: 2;
+}
+
+.fragrance-story--flip .fragrance-story__body {
+  order: 1;
+  text-align: right;
+  margin-left: auto;
+}
+
+.fragrance-story--flip .fragrance-story__link {
+  margin-left: auto;
+}
+
+.fragrance-story__media {
+  position: relative;
+  overflow: hidden;
+  background: var(--f-tone, #2a1a12);
+  aspect-ratio: 3 / 4;
+  max-height: 640px;
+}
+
+.fragrance-story__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.8s var(--ease-out);
+}
+
+.fragrance-story:hover .fragrance-story__media img {
+  transform: scale(1.04);
+}
+
+.fragrance-story__body {
+  max-width: 28rem;
+}
+
+.fragrance-story__tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.75rem;
 }
 
-.fragrance h3 {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
+.fragrance-story h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.75rem, 3.5vw, 2.55rem);
   font-weight: 600;
-  color: var(--cream);
+  line-height: 1.15;
+  color: #fff;
 }
 
-.fragrance__body > p:last-child {
-  margin-top: 0.45rem;
-  font-size: 0.92rem;
+.fragrance-story__body > p:not(.fragrance-story__tag) {
+  margin-top: 0.85rem;
+  font-size: 1.02rem;
   font-weight: 300;
-  color: rgba(243, 235, 224, 0.65);
-  line-height: 1.5;
+  line-height: 1.6;
+  color: rgba(243, 235, 224, 0.72);
 }
 
-@media (max-width: 700px) {
-  .fragrances__grid {
+.fragrance-story__link {
+  display: inline-flex;
+  margin-top: 1.35rem;
+  padding-bottom: 0.2rem;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.45);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.fragrance-story__link:hover {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+@media (max-width: 860px) {
+  .fragrance-story,
+  .fragrance-story--flip {
     grid-template-columns: 1fr;
+  }
+
+  .fragrance-story--flip .fragrance-story__media,
+  .fragrance-story--flip .fragrance-story__body {
+    order: unset;
+    text-align: left;
+    margin-left: 0;
+  }
+
+  .fragrance-story--flip .fragrance-story__link {
+    margin-left: 0;
+  }
+
+  .fragrance-story__media {
+    max-height: 520px;
   }
 }

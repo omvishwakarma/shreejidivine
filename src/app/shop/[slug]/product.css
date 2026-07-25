@@ -32,9 +32,10 @@
 }
 
 .product-detail__price strong {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.75rem;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 1.5rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--brown);
 }
 

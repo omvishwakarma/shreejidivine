@@ -10,7 +10,7 @@ import './Navbar.css'
 const links = [
   { href: '/shop', label: 'Shop' },
   { href: '#products', label: 'Collection' },
-  { href: '#inside', label: "What's Inside" },
+  { href: '#fragrances', label: 'Scents' },
   { href: '#how-to-use', label: 'How to Use' },
 ]
 
@@ -30,7 +30,7 @@ export default function Navbar() {
     <header className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
       <div className="nav__inner container">
         <a href="#top" className="nav__brand" aria-label="Shreeji Divine home">
-          <BrandLogo height={scrolled ? 64 : 76} priority />
+          <BrandLogo height={scrolled ? 64 : 72} priority />
         </a>
 
         <nav

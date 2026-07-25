@@ -1,7 +1,7 @@
 {
   "name": "shreeji",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "scripts": {
     "dev": "next dev",
     "dev:api": "npm run dev --prefix server",
@@ -17,14 +17,19 @@
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
+    "html2canvas": "^1.4.1",
     "jose": "^6.2.4",
+    "jspdf": "^4.2.1",
     "mongoose": "^8.24.1",
     "next": "^15.5.2",
+    "nodemailer": "^9.0.3",
+    "razorpay": "^2.9.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/nodemailer": "^8.0.1",
     "concurrently": "^9.2.4",
     "prisma": "^5.22.0"
   }

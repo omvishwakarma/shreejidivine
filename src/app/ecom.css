@@ -162,9 +162,10 @@
 }
 
 .product-card__price strong {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.25rem;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 1.15rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--brown);
 }
 
@@ -421,8 +422,10 @@
 }
 
 .cart-line__right strong {
-  font-family: var(--font-display), Georgia, serif;
-  font-size: 1.15rem;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--brown);
 }
 
@@ -489,6 +492,47 @@
   line-height: 1.45;
 }
 
+.pay-options {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 1.15rem;
+}
+
+.pay-option {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(201, 168, 76, 0.28);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  color: rgba(243, 235, 224, 0.85);
+}
+
+.pay-option.is-active {
+  border-color: rgba(201, 168, 76, 0.65);
+  background: rgba(201, 168, 76, 0.12);
+}
+
+.pay-option input {
+  margin-top: 0.2rem;
+  accent-color: var(--gold);
+}
+
+.pay-option strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--gold-light);
+}
+
+.pay-option small {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: rgba(243, 235, 224, 0.55);
+  line-height: 1.35;
+}
+
 .summary-row {
   display: flex;
   justify-content: space-between;
@@ -505,7 +549,8 @@
   color: var(--gold-light);
   font-weight: 600;
   font-size: 1.1rem;
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 .summary-box .btn-primary {

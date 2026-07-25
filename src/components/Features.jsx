@@ -51,11 +51,11 @@ export default function Features() {
 
         <figure className="features__visual reveal">
           <Image
-            src="/images/aroma-brochure.png"
-            alt="Shreeji Divine Aroma Stone product brochure showing designs, fragrances, and premium packaging"
-            width={1400}
-            height={800}
-            sizes="(max-width: 1120px) 100vw, 1120px"
+            src="/images/campaign/gilli-mitti-lifestyle.jpg"
+            alt="Shreeji Divine fragrance oil with aroma stone diffuser — the scent of home"
+            width={900}
+            height={1200}
+            sizes="(max-width: 1120px) 100vw, 560px"
           />
         </figure>
       </div>

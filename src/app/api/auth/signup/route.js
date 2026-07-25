@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { dbConnect, signToken } from '@/lib/mongo/auth'
 import { User } from '@/lib/mongo/User'
+import { sendWelcomeEmail } from '@/lib/mail'
 
 export async function POST(request) {
   try {
@@ -25,6 +26,10 @@ export async function POST(request) {
       role: 'user',
     })
     const token = await signToken(user)
+
+    // Don't block signup if mail fails / isn't configured
+    void sendWelcomeEmail(user.toSafeJSON())
+
     return NextResponse.json({ user: user.toSafeJSON(), token }, { status: 201 })
   } catch (err) {
     if (err instanceof z.ZodError) {

@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, Outfit } from 'next/font/google'
+import { Lora, Outfit } from 'next/font/google'
 import {
   SITE_URL,
   SITE_NAME,
@@ -9,7 +9,7 @@ import {
 import Providers from '../components/Providers'
 import './globals.css'
 
-const cormorant = Cormorant_Garamond({
+const lora = Lora({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
@@ -19,7 +19,7 @@ const cormorant = Cormorant_Garamond({
 
 const outfit = Outfit({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['300', '400', '500', '600', '700'],
   variable: '--font-body',
   display: 'swap',
 })
@@ -96,7 +96,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en-IN" className={`${cormorant.variable} ${outfit.variable}`}>
+    <html lang="en-IN" className={`${lora.variable} ${outfit.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>
