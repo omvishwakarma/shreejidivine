@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import BrandLogo from './BrandLogo'
 import './Hero.css'
 
@@ -90,9 +91,9 @@ export default function Hero() {
           sizes="100vw"
           className="hero__banner-img"
         />
-        <a href="#products" className="hero__banner-cta">
+        <Link href="/shop" className="hero__banner-cta">
           Shop the Divine Experience
-        </a>
+        </Link>
       </div>
 
       <div className="hero__mobile">
@@ -129,10 +130,10 @@ export default function Hero() {
             ))}
           </ul>
 
-          <a href="#products" className="hero__cta">
+          <Link href="/shop" className="hero__cta">
             Shop the Divine Experience
             <span aria-hidden="true">›</span>
-          </a>
+          </Link>
         </div>
 
         <div className="hero__bar">

@@ -1,9 +1,11 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import './ProductGrid.css'
 
 const products = [
   {
     id: 'mogra',
+    slug: 'mogra-royale',
     name: 'Mogra Royale',
     stone: 'Ganesh Ji',
     desc: 'Traditional temple aroma that uplifts the soul.',
@@ -12,6 +14,7 @@ const products = [
   },
   {
     id: 'rose',
+    slug: 'rose-majesty',
     name: 'Rose Majesty',
     stone: 'Om / Lotus',
     desc: 'Royal & luxurious floral fragrance for a soothing ambiance.',
@@ -20,6 +23,7 @@ const products = [
   },
   {
     id: 'lavender',
+    slug: 'lavender-bliss',
     name: 'Lavender Bliss',
     stone: 'Charan Paduka',
     desc: 'Calm your mind, relax your senses and heal naturally.',
@@ -28,6 +32,7 @@ const products = [
   },
   {
     id: 'chandan',
+    slug: 'royal-chandan',
     name: 'Royal Chandan',
     stone: 'Kalash',
     desc: 'Sacred sandalwood for purity & positivity.',
@@ -68,13 +73,21 @@ export default function ProductGrid() {
               className={`product-tile reveal reveal-delay-${(i % 4) + 1}`}
               style={{ '--accent': p.accent, '--base': p.color }}
             >
-              <div className="product-tile__bar" aria-hidden="true" />
-              <h3>{p.name}</h3>
-              <p className="product-tile__stone">{p.stone}</p>
-              <p className="product-tile__desc">{p.desc}</p>
+              <Link href={`/shop/${p.slug}`} className="product-tile__link">
+                <div className="product-tile__bar" aria-hidden="true" />
+                <h3>{p.name}</h3>
+                <p className="product-tile__stone">{p.stone}</p>
+                <p className="product-tile__desc">{p.desc}</p>
+              </Link>
             </li>
           ))}
         </ul>
+
+        <div className="products__cta reveal">
+          <Link href="/shop" className="btn btn-gold">
+            Shop All Products
+          </Link>
+        </div>
       </div>
     </section>
   )

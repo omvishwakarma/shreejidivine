@@ -1,31 +1,29 @@
-# Shreeji Divine — Aroma Stone
+# Shreeji Divine — E‑commerce
 
-Premium product website for **Shreeji Divine**, built with **Next.js (App Router)**.
+Next.js App Router store for **Shreeji Divine Aroma Stone**.
 
-**Live domain:** [https://shreejidivinearoma.com](https://shreejidivinearoma.com)
+**Domain:** https://shreejidivinearoma.com
 
-## Run locally
+## Features
+
+- Shop & product pages
+- Cart (localStorage)
+- Checkout (COD) with saved addresses
+- Login / Sign up
+- Profile — past orders, order detail, addresses
+
+## Setup
 
 ```bash
 npm install
+npx prisma migrate dev
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open http://localhost:3000
 
-## Scripts
+## Notes
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm start` | Start production server |
-
-## SEO
-
-- Canonical + Open Graph + Twitter cards (`shreejidivinearoma.com`)
-- JSON-LD: Organization, WebSite, WebPage, Product list, FAQ
-- `sitemap.xml` & `robots.txt`
-- Web app manifest
-- Semantic headings, alt text, skip link
-- Optimized images via `next/image`
+- SQLite DB at `prisma/dev.db`
+- Set a strong `AUTH_SECRET` in `.env` for production
+- Payment is Cash on Delivery (no gateway yet)

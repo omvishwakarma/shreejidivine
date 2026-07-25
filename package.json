@@ -4,13 +4,23 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.4",
     "next": "^15.5.2",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
   }
 }

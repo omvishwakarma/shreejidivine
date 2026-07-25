@@ -48,6 +48,13 @@
   box-shadow: 0 16px 40px rgba(43, 30, 22, 0.08);
 }
 
+.product-tile__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  height: 100%;
+}
+
 .product-tile__bar {
   width: 2rem;
   height: 2px;
@@ -78,6 +85,12 @@
   font-weight: 300;
   color: var(--text-muted);
   line-height: 1.55;
+}
+
+.products__cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 2.5rem;
 }
 
 @media (max-width: 900px) {

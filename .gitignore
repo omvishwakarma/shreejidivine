@@ -32,7 +32,15 @@ yarn-error.log*
 pnpm-debug.log*
 
 # env
+.env
 .env*.local
+
+# prisma
+/prisma/dev.db
+/prisma/dev.db-journal
+/prisma/*.db
+/prisma/*.db-journal
+
 
 # typescript
 *.tsbuildinfo
@@ -47,3 +55,5 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+/src/generated/prisma

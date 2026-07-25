@@ -201,6 +201,19 @@ ul {
   }
 }
 
+.toast {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  background: var(--brown);
+  color: var(--gold-light);
+  padding: 0.85rem 1.15rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  z-index: 200;
+  animation: fade-up 0.35s var(--ease-out);
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -210,6 +223,15 @@ ul {
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* If JS fails, still show content after a moment */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 .reveal-delay-1 {

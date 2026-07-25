@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { CONTACT_EMAIL, SITE_URL } from '../lib/site'
 import './Footer.css'
 
@@ -25,13 +26,13 @@ export default function Footer() {
 
         <nav className="footer__links" aria-label="Footer">
           <h2 id="contact-heading" className="footer__nav-title">
-            Explore
+            Shop
           </h2>
-          <a href="#products">Products</a>
-          <a href="#inside">What&apos;s Inside</a>
-          <a href="#stones">Stones</a>
-          <a href="#fragrances">Fragrances</a>
-          <a href="#how-to-use">How to Use</a>
+          <Link href="/shop">All Products</Link>
+          <Link href="/shop/divine-ritual-kit">Divine Ritual Kit</Link>
+          <Link href="/cart">Cart</Link>
+          <Link href="/profile">My Account</Link>
+          <a href="/#how-to-use">How to Use</a>
         </nav>
 
         <div className="footer__contact">
@@ -40,9 +41,9 @@ export default function Footer() {
           <a href={`mailto:${CONTACT_EMAIL}`} className="footer__email">
             {CONTACT_EMAIL}
           </a>
-          <a href="#products" className="btn btn-gold footer__btn">
-            View Collection
-          </a>
+          <Link href="/shop" className="btn btn-gold footer__btn">
+            Shop Now
+          </Link>
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import {
   SITE_KEYWORDS,
   SITE_TAGLINE,
 } from '../lib/site'
+import Providers from '../components/Providers'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -96,7 +97,9 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${outfit.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   )
 }
