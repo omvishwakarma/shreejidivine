@@ -9,7 +9,9 @@ const links = [
   { href: '/admin', label: 'Dashboard', end: true },
   { href: '/admin/products', label: 'Products' },
   { href: '/admin/orders', label: 'Orders' },
+  { href: '/admin/coupons', label: 'Coupons' },
   { href: '/admin/users', label: 'Customers' },
+  { href: '/admin/settings', label: 'Settings' },
 ]
 
 export default function AdminShell({ children }) {

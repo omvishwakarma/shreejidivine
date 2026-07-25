@@ -403,6 +403,95 @@
   color: var(--brown) !important;
 }
 
+.ck-discount {
+  color: #1b4332 !important;
+  font-weight: 500;
+}
+
+.ck-coupon {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(43, 30, 22, 0.08);
+}
+
+.ck-coupon > label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
+}
+
+.ck-coupon__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+}
+
+.ck-coupon__row input {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 0.9rem;
+  border: 1px solid rgba(43, 30, 22, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ck-coupon__btn {
+  height: 2.75rem;
+  padding: 0 1.1rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--brown);
+  color: var(--gold-light);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ck-coupon__btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.ck-coupon__applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: rgba(27, 67, 50, 0.08);
+  border: 1px solid rgba(27, 67, 50, 0.18);
+  border-radius: 0.85rem;
+  font-size: 0.88rem;
+  color: #1b4332;
+}
+
+.ck-coupon__applied button {
+  border: none;
+  background: transparent;
+  color: var(--brown);
+  font: inherit;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.ck-coupon__error {
+  margin-top: 0.45rem;
+  font-size: 0.82rem;
+  color: #8b1e1e;
+}
+
 .ck-error {
   margin-top: 0.85rem;
   padding: 0.7rem 0.85rem;

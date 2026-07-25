@@ -3,6 +3,9 @@ import { z } from 'zod'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { getRazorpayClient, getRazorpayKeyId } from '@/lib/razorpay'
+import { validateCoupon, redeemCoupon } from '@/lib/coupons'
+import { sendOrderEmail } from '@/lib/mail'
+import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
 import {
   buildOrderLineItems,
   maybeSaveAddress,
@@ -38,6 +41,7 @@ export async function POST(request) {
       notes: z.string().optional().or(z.literal('')),
       saveAddress: z.boolean().optional(),
       addressLabel: z.string().optional(),
+      couponCode: z.string().optional().or(z.literal('')),
     })
     const data = schema.parse(await request.json())
 
@@ -52,13 +56,62 @@ export async function POST(request) {
       )
     }
 
-    const { lineItems, subtotal, total } = await buildOrderLineItems(data.items)
+    const { lineItems, subtotal } = await buildOrderLineItems(data.items)
+    let discount = 0
+    let couponCode = ''
+    let couponType = ''
+    let couponValue = 0
+
+    if (data.couponCode) {
+      const applied = await validateCoupon(data.couponCode, subtotal)
+      discount = applied.discount
+      couponCode = applied.code
+      couponType = applied.type
+      couponValue = applied.value
+    }
+
+    const settings = await getStoreSettings()
+    const shippingFee = calcShippingFee(subtotal, settings)
+    const total = orderTotal({ subtotal, shipping: shippingFee, discount })
+
     await maybeSaveAddress(
       gate.auth.sub,
       data.shipping,
       data.saveAddress,
       data.addressLabel
     )
+
+    // Fully discounted orders — no Razorpay charge
+    if (total <= 0) {
+      const order = await Order.create(
+        orderPayloadFromShipping({
+          userId: gate.auth.sub,
+          shipping: data.shipping,
+          notes: data.notes,
+          lineItems,
+          subtotal,
+          total: 0,
+          shippingFee,
+          discount,
+          couponCode,
+          couponType,
+          couponValue,
+          paymentMethod: 'COD',
+          paymentStatus: 'PAID',
+          status: 'CONFIRMED',
+        })
+      )
+      if (couponCode) await redeemCoupon(couponCode)
+      void sendOrderEmail(order, {
+        email: gate.auth.email,
+        name: gate.auth.name || data.shipping.fullName,
+      })
+      return NextResponse.json({
+        freeOrder: true,
+        orderId: order._id.toString(),
+        order: order.toJSONSafe(),
+      })
+    }
 
     const order = await Order.create(
       orderPayloadFromShipping({
@@ -68,6 +121,11 @@ export async function POST(request) {
         lineItems,
         subtotal,
         total,
+        shippingFee,
+        discount,
+        couponCode,
+        couponType,
+        couponValue,
         paymentMethod: 'RAZORPAY',
         paymentStatus: 'PENDING',
         status: 'PENDING',

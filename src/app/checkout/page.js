@@ -9,10 +9,18 @@ import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
-import { formatINR, SHIPPING_FEE } from '../../lib/products'
+import { formatINR } from '../../lib/products'
 import { api } from '../../lib/api'
 import '../ecom.css'
 import './checkout.css'
+
+function calcFee(subtotal, settings) {
+  const fee = Math.max(0, Number(settings?.shippingFee) || 0)
+  const minFree = Math.max(0, Number(settings?.freeShippingMinOrder) || 0)
+  if (fee === 0) return 0
+  if (minFree > 0 && subtotal >= minFree) return 0
+  return fee
+}
 
 const emptyShipping = {
   fullName: '',
@@ -37,6 +45,21 @@ export default function CheckoutPage() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [activeItem, setActiveItem] = useState(0)
+  const [couponInput, setCouponInput] = useState('')
+  const [coupon, setCoupon] = useState(null)
+  const [couponError, setCouponError] = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [shipSettings, setShipSettings] = useState({
+    shippingFee: 0,
+    freeShippingMinOrder: 0,
+  })
+
+  useEffect(() => {
+    fetch('/api/shipping')
+      .then((r) => r.json())
+      .then((data) => setShipSettings(data))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!loading && !user) {
@@ -74,6 +97,34 @@ export default function CheckoutPage() {
     setActiveItem(0)
   }, [items.length])
 
+  useEffect(() => {
+    setCoupon(null)
+    setCouponError('')
+  }, [subtotal])
+
+  async function applyCoupon() {
+    setCouponError('')
+    setCouponLoading(true)
+    try {
+      const data = await api('/api/coupons/validate', {
+        method: 'POST',
+        body: JSON.stringify({ code: couponInput, subtotal }),
+      })
+      setCoupon(data)
+    } catch (err) {
+      setCoupon(null)
+      setCouponError(err.message)
+    } finally {
+      setCouponLoading(false)
+    }
+  }
+
+  function removeCoupon() {
+    setCoupon(null)
+    setCouponInput('')
+    setCouponError('')
+  }
+
   async function placeCodOrder() {
     const data = await api('/api/orders', {
       method: 'POST',
@@ -84,6 +135,7 @@ export default function CheckoutPage() {
         notes,
         saveAddress,
         addressLabel: 'Home',
+        couponCode: coupon?.code || '',
       }),
     })
     clearCart()
@@ -99,8 +151,15 @@ export default function CheckoutPage() {
         notes,
         saveAddress,
         addressLabel: 'Home',
+        couponCode: coupon?.code || '',
       }),
     })
+
+    if (payload.freeOrder) {
+      clearCart()
+      router.push(`/profile/orders/${payload.orderId}?placed=1`)
+      return
+    }
 
     if (!window.Razorpay) {
       throw new Error('Razorpay checkout failed to load. Please refresh and try again.')
@@ -198,7 +257,9 @@ export default function CheckoutPage() {
     )
   }
 
-  const total = subtotal + SHIPPING_FEE
+  const discount = coupon?.discount || 0
+  const shippingFee = calcFee(subtotal, shipSettings)
+  const total = Math.max(0, subtotal - discount) + shippingFee
   const current = items[Math.min(activeItem, items.length - 1)]
   const nameParts = (shipping.fullName || '').trim().split(/\s+/)
   const firstName = nameParts[0] || ''
@@ -481,12 +542,51 @@ export default function CheckoutPage() {
                 </div>
                 <div>
                   <span>Shipping</span>
-                  <span>{SHIPPING_FEE === 0 ? 'Free' : formatINR(SHIPPING_FEE)}</span>
+                  <span>{shippingFee === 0 ? 'Free' : formatINR(shippingFee)}</span>
                 </div>
+                {discount > 0 ? (
+                  <div className="ck-discount">
+                    <span>Coupon ({coupon.code})</span>
+                    <span>−{formatINR(discount)}</span>
+                  </div>
+                ) : null}
                 <div className="ck-total">
                   <span>Total</span>
                   <span>{formatINR(total)}</span>
                 </div>
+              </div>
+
+              <div className="ck-coupon">
+                <label htmlFor="coupon">Coupon code</label>
+                {coupon ? (
+                  <div className="ck-coupon__applied">
+                    <span>
+                      {coupon.code} · {coupon.message}
+                    </span>
+                    <button type="button" onClick={removeCoupon}>
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="ck-coupon__row">
+                    <input
+                      id="coupon"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      placeholder="Enter code"
+                      autoComplete="off"
+                    />
+                    <button
+                      type="button"
+                      className="ck-coupon__btn"
+                      disabled={couponLoading || !couponInput.trim()}
+                      onClick={applyCoupon}
+                    >
+                      {couponLoading ? '…' : 'Apply'}
+                    </button>
+                  </div>
+                )}
+                {couponError ? <p className="ck-coupon__error">{couponError}</p> : null}
               </div>
 
               {error ? <p className="ck-error">{error}</p> : null}

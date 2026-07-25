@@ -2,8 +2,6 @@ import { Product } from '@/lib/mongo/Product'
 import { Address } from '@/lib/mongo/Address'
 import { generateOrderNumber } from '@/lib/mongo/auth'
 
-export const SHIPPING_FEE = 0
-
 export async function buildOrderLineItems(items) {
   const lineItems = []
   let subtotal = 0
@@ -22,7 +20,7 @@ export async function buildOrderLineItems(items) {
       image: product.image,
     })
   }
-  return { lineItems, subtotal, total: subtotal + SHIPPING_FEE }
+  return { lineItems, subtotal }
 }
 
 export async function maybeSaveAddress(userId, shipping, saveAddress, addressLabel) {
@@ -47,6 +45,11 @@ export function orderPayloadFromShipping({
   paymentMethod,
   paymentStatus,
   status,
+  shippingFee = 0,
+  discount = 0,
+  couponCode = '',
+  couponType = '',
+  couponValue = 0,
 }) {
   return {
     orderNumber: generateOrderNumber(),
@@ -55,7 +58,11 @@ export function orderPayloadFromShipping({
     paymentMethod,
     paymentStatus,
     subtotal,
-    shipping: SHIPPING_FEE,
+    shipping: shippingFee,
+    discount,
+    couponCode,
+    couponType,
+    couponValue,
     total,
     shippingName: shipping.fullName,
     shippingPhone: shipping.phone,

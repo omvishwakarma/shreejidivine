@@ -4,6 +4,7 @@ import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendOrderEmail } from '@/lib/mail'
+import { redeemCoupon } from '@/lib/coupons'
 
 export async function POST(request) {
   const gate = await requireUser(request)
@@ -51,6 +52,9 @@ export async function POST(request) {
     await order.save()
 
     if (!alreadyPaid) {
+      if (order.couponCode) {
+        await redeemCoupon(order.couponCode)
+      }
       void sendOrderEmail(order, {
         email: gate.auth.email,
         name: gate.auth.name || order.shippingName,

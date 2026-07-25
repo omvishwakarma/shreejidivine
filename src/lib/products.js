@@ -6,7 +6,9 @@ export function formatINR(n) {
   }).format(n || 0)
 }
 
+/** @deprecated Prefer /api/shipping — kept for fallbacks */
 export const SHIPPING_FEE = 0
+/** @deprecated Prefer /api/shipping note */
 export const FREE_SHIPPING_NOTE = 'Pan-India free shipping on all orders'
 
 /** Fallback catalog / sitemap slugs if API is offline */

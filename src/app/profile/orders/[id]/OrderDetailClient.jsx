@@ -210,6 +210,12 @@ export default function OrderDetailClient() {
                       <span>Shipping</span>
                       <span>{order.shipping === 0 ? 'Free' : formatINR(order.shipping)}</span>
                     </div>
+                    {order.discount > 0 ? (
+                      <div>
+                        <span>Coupon{order.couponCode ? ` (${order.couponCode})` : ''}</span>
+                        <span>−{formatINR(order.discount)}</span>
+                      </div>
+                    ) : null}
                     <div className="od-rows__total">
                       <span>Total paid / due</span>
                       <span>{formatINR(order.total)}</span>

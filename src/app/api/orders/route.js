@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { sendOrderEmail } from '@/lib/mail'
+import { redeemCoupon, validateCoupon } from '@/lib/coupons'
+import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
 import {
   buildOrderLineItems,
   maybeSaveAddress,
@@ -50,6 +52,7 @@ export async function POST(request) {
       notes: z.string().optional().or(z.literal('')),
       saveAddress: z.boolean().optional(),
       addressLabel: z.string().optional(),
+      couponCode: z.string().optional().or(z.literal('')),
     })
     const data = schema.parse(await request.json())
 
@@ -60,7 +63,24 @@ export async function POST(request) {
       )
     }
 
-    const { lineItems, subtotal, total } = await buildOrderLineItems(data.items)
+    const { lineItems, subtotal } = await buildOrderLineItems(data.items)
+    let discount = 0
+    let couponCode = ''
+    let couponType = ''
+    let couponValue = 0
+
+    if (data.couponCode) {
+      const applied = await validateCoupon(data.couponCode, subtotal)
+      discount = applied.discount
+      couponCode = applied.code
+      couponType = applied.type
+      couponValue = applied.value
+    }
+
+    const settings = await getStoreSettings()
+    const shippingFee = calcShippingFee(subtotal, settings)
+    const total = orderTotal({ subtotal, shipping: shippingFee, discount })
+
     await maybeSaveAddress(
       gate.auth.sub,
       data.shipping,
@@ -76,11 +96,20 @@ export async function POST(request) {
         lineItems,
         subtotal,
         total,
+        shippingFee,
+        discount,
+        couponCode,
+        couponType,
+        couponValue,
         paymentMethod: 'COD',
         paymentStatus: 'PENDING',
         status: 'CONFIRMED',
       })
     )
+
+    if (couponCode) {
+      await redeemCoupon(couponCode)
+    }
 
     void sendOrderEmail(order, {
       email: gate.auth.email,

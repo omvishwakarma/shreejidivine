@@ -15,10 +15,13 @@ export default function AdminOrderDetailPage() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
+  const [shippingInput, setShippingInput] = useState('')
+  const [savingShip, setSavingShip] = useState(false)
 
   async function load() {
     const data = await adminApi(`/api/orders/${id}`)
     setOrder(data.order)
+    setShippingInput(String(data.order?.shipping ?? 0))
   }
 
   useEffect(() => {
@@ -41,6 +44,26 @@ export default function AdminOrderDetailPage() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function updateShipping(e) {
+    e.preventDefault()
+    setSavingShip(true)
+    setError('')
+    setMsg('')
+    try {
+      const data = await adminApi(`/api/orders/${id}/shipping`, {
+        method: 'PATCH',
+        body: JSON.stringify({ shipping: Number(shippingInput) || 0 }),
+      })
+      setOrder(data.order)
+      setShippingInput(String(data.order.shipping ?? 0))
+      setMsg('Shipping updated')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingShip(false)
     }
   }
 
@@ -137,11 +160,44 @@ export default function AdminOrderDetailPage() {
               <span>Shipping</span>
               <span>{order.shipping === 0 ? 'Free' : formatINR(order.shipping)}</span>
             </div>
+            {order.discount > 0 ? (
+              <div>
+                <span>Coupon{order.couponCode ? ` (${order.couponCode})` : ''}</span>
+                <span>−{formatINR(order.discount)}</span>
+              </div>
+            ) : null}
             <div className="is-total">
               <span>Total</span>
               <span>{formatINR(order.total)}</span>
             </div>
           </div>
+
+          <form className="admin-ship-edit" onSubmit={updateShipping}>
+            <h3>Change shipping</h3>
+            <div className="admin-ship-edit__row">
+              <label htmlFor="order-shipping">
+                Shipping charge (₹)
+                <input
+                  id="order-shipping"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={shippingInput}
+                  onChange={(e) => setShippingInput(e.target.value)}
+                />
+              </label>
+              <button
+                type="submit"
+                className="admin-btn admin-btn-primary"
+                disabled={savingShip}
+              >
+                {savingShip ? 'Saving…' : 'Update'}
+              </button>
+            </div>
+            <p className="admin-page-sub" style={{ margin: '0.5rem 0 0' }}>
+              Total recalculates as subtotal − discount + shipping
+            </p>
+          </form>
         </div>
 
         <div className="admin-order-side">

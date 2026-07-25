@@ -178,6 +178,11 @@ export function buildInvoiceHtml(order, customer = {}, { logoSrc } = {}) {
     <div class="totals">
       <div><span>Subtotal</span><span>${esc(formatINR(order.subtotal))}</span></div>
       <div><span>Shipping</span><span>${order.shipping === 0 ? 'Free' : esc(formatINR(order.shipping))}</span></div>
+      ${
+        order.discount > 0
+          ? `<div><span>Coupon${order.couponCode ? ` (${esc(order.couponCode)})` : ''}</span><span>−${esc(formatINR(order.discount))}</span></div>`
+          : ''
+      }
       <div class="grand"><span>Total</span><span>${esc(formatINR(order.total))}</span></div>
     </div>
 

@@ -1,17 +1,40 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
 import { useCart } from '../../context/CartContext'
-import { formatINR, FREE_SHIPPING_NOTE, SHIPPING_FEE } from '../../lib/products'
+import { formatINR, FREE_SHIPPING_NOTE } from '../../lib/products'
 import '../ecom.css'
 import './cart.css'
 
+function calcFee(subtotal, settings) {
+  const fee = Math.max(0, Number(settings?.shippingFee) || 0)
+  const minFree = Math.max(0, Number(settings?.freeShippingMinOrder) || 0)
+  if (fee === 0) return 0
+  if (minFree > 0 && subtotal >= minFree) return 0
+  return fee
+}
+
 export default function CartPage() {
   const { items, updateQty, removeItem, subtotal, ready, count } = useCart()
-  const total = subtotal + SHIPPING_FEE
+  const [settings, setSettings] = useState({
+    shippingFee: 0,
+    freeShippingMinOrder: 0,
+    note: FREE_SHIPPING_NOTE,
+  })
+
+  useEffect(() => {
+    fetch('/api/shipping')
+      .then((r) => r.json())
+      .then((data) => setSettings(data))
+      .catch(() => {})
+  }, [])
+
+  const shippingFee = calcFee(subtotal, settings)
+  const total = subtotal + shippingFee
 
   return (
     <div className="ecom-page cart-page">
@@ -40,7 +63,7 @@ export default function CartPage() {
                 <div>
                   <h1>Cart</h1>
                   <p className="cart-top__meta">
-                    {count} item{count === 1 ? '' : 's'} · {FREE_SHIPPING_NOTE}
+                    {count} item{count === 1 ? '' : 's'} · {settings.note || FREE_SHIPPING_NOTE}
                   </p>
                 </div>
               </div>
@@ -106,7 +129,7 @@ export default function CartPage() {
               <aside className="cart-aside">
                 <div className="cart-summary">
                   <h2>Order summary</h2>
-                  <p className="cart-summary__note">Secure checkout · Free pan-India shipping</p>
+                  <p className="cart-summary__note">{settings.note || FREE_SHIPPING_NOTE}</p>
                   <div className="cart-summary__rows">
                     <div>
                       <span>Subtotal</span>
@@ -114,7 +137,7 @@ export default function CartPage() {
                     </div>
                     <div>
                       <span>Shipping</span>
-                      <span>{SHIPPING_FEE === 0 ? 'Free' : formatINR(SHIPPING_FEE)}</span>
+                      <span>{shippingFee === 0 ? 'Free' : formatINR(shippingFee)}</span>
                     </div>
                     <div className="is-total">
                       <span>Total</span>
