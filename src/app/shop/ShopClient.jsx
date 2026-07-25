@@ -44,8 +44,9 @@ export default function ShopClient() {
           <div className="empty-state">
             <p>Could not load products: {error}</p>
             <p>
-              Check that the API is running (<code>npm run dev:api</code>) and that your IP is
-              allowed in MongoDB Atlas → Network Access.
+              Could not reach the products API. On Vercel, set{' '}
+              <code>MONGODB_URI</code> and <code>JWT_SECRET</code> in project
+              Environment Variables, then redeploy.
             </p>
           </div>
         ) : null}
