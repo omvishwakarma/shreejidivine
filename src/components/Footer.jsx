@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CONTACT_EMAIL, SITE_URL } from '../lib/site'
+import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SITE_URL } from '../lib/site'
 import { APP_VERSION } from '../lib/appVersion'
 import './Footer.css'
 
@@ -25,36 +25,45 @@ export default function Footer() {
         <div className="footer__brand">
           <Image
             src="/images/logo.png"
-            alt="Shreeji Divine"
+            alt={SITE_NAME}
             width={516}
             height={358}
             className="footer__logo"
-            sizes="220px"
+            sizes="180px"
           />
-          <p>Fragrance that brings divine presence home.</p>
+          <p>{SITE_TAGLINE}</p>
           <p className="footer__url">
             <a href={SITE_URL}>shreejidivinearoma.com</a>
           </p>
         </div>
 
-        <nav className="footer__links" aria-label="Footer">
+        <nav className="footer__links" aria-label="Quick links">
           <h2 id="contact-heading" className="footer__nav-title">
-            Shop
+            Quick links
           </h2>
-          <Link href="/shop">All Products</Link>
-          <Link href="/shop/divine-ritual-kit">Divine Ritual Kit</Link>
+          <Link href="/shop">Shop</Link>
+          <Link href="/#purpose">Our Story</Link>
+          <Link href="/#how-to-use">How to Use</Link>
           <Link href="/cart">Cart</Link>
           <Link href="/profile">My Account</Link>
-          <a href="/#how-to-use">How to Use</a>
+        </nav>
+
+        <nav className="footer__links" aria-label="Policies">
+          <h2 className="footer__nav-title">Shop</h2>
+          <Link href="/shop/divine-ritual-kit">Divine Ritual Kit</Link>
+          <Link href="/shop/mogra-royale">Mogra Royale</Link>
+          <Link href="/shop/rose-majesty">Rose Majesty</Link>
+          <Link href="/shop/lavender-bliss">Lavender Bliss</Link>
+          <Link href="/shop/royal-chandan">Royal Chandan</Link>
         </nav>
 
         <div className="footer__contact">
           <h2 className="footer__nav-title">Connect</h2>
-          <p>For orders, wholesale &amp; gifting enquiries</p>
+          <p>Orders, wholesale &amp; gifting</p>
           <a href={`mailto:${CONTACT_EMAIL}`} className="footer__email">
             {CONTACT_EMAIL}
           </a>
-          <Link href="/shop" className="btn btn-gold footer__btn">
+          <Link href="/shop" className="btn btn-ink footer__btn">
             Shop Now
           </Link>
         </div>
@@ -62,9 +71,11 @@ export default function Footer() {
 
       <div className="footer__bottom">
         <div className="container footer__bottom-inner">
-          <p>© {year} Shreeji Divine. Made in India. All rights reserved.</p>
+          <p>
+            © {year} {SITE_NAME}. Made in India.
+          </p>
           <p className="footer__meta">
-            <span className="footer__tag">Ghar Par Mandir Ki Feeling</span>
+            <span className="footer__tag">{SITE_TAGLINE}</span>
             <span className="footer__version" title="Deploy version">
               {version}
             </span>

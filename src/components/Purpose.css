@@ -1,0 +1,35 @@
+.purpose {
+  padding: var(--section-pad) 0;
+  background:
+    linear-gradient(180deg, #f3ece2 0%, #ebe3d6 100%);
+}
+
+.purpose__inner {
+  max-width: 42rem;
+  text-align: center;
+}
+
+.purpose .section-title {
+  font-size: clamp(2.4rem, 6vw, 3.75rem);
+}
+
+.purpose__tag {
+  margin-top: 0.75rem;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  font-weight: 300;
+}
+
+.purpose__copy {
+  margin-top: 1.75rem;
+  display: grid;
+  gap: 1rem;
+  color: var(--text-muted);
+  font-size: 1.02rem;
+  line-height: 1.75;
+  font-weight: 300;
+}
+
+.purpose__copy p {
+  margin: 0;
+}

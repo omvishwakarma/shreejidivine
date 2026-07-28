@@ -1,23 +1,25 @@
 :root {
-  --brown-deep: #1a120e;
-  --brown: #2b1e16;
-  --brown-mid: #3d2a1f;
-  --brown-soft: #5c4332;
-  --gold: #c9a84c;
-  --gold-light: #e4c878;
-  --gold-dark: #9a7b2f;
-  --cream: #f3ebe0;
-  --cream-warm: #ebe0d0;
-  --ivory: #faf6f0;
+  --brown-deep: #14100c;
+  --brown: #1f1712;
+  --brown-mid: #33261e;
+  --brown-soft: #5a473a;
+  --gold: #b8964a;
+  --gold-light: #d4b56a;
+  --gold-dark: #8a6d2f;
+  --cream: #f0e8dc;
+  --cream-warm: #e8dfd0;
+  --ivory: #fcfaf6;
   --mogra: #1b4332;
   --rose: #7b1e2e;
   --lavender: #4a2c6a;
   --chandan: #8b6914;
-  --text: #2b1e16;
-  --text-muted: #6b5648;
-  --text-on-dark: #f3ebe0;
+  --text: #1f1712;
+  --text-muted: #6a5748;
+  --text-on-dark: #f7f1e8;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --section-pad: clamp(4rem, 8vw, 7rem);
+  --section-pad: clamp(3.5rem, 7vw, 6.5rem);
+  --surface: #fcfaf6;
+  --surface-muted: #f3ece2;
 }
 
 *,
@@ -36,7 +38,7 @@ body {
   font-family: var(--font-body), system-ui, sans-serif;
   font-weight: 400;
   color: var(--text);
-  background: var(--ivory);
+  background: var(--surface);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -94,17 +96,17 @@ ul {
 }
 
 .container {
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(1200px, calc(100% - 2.5rem));
   margin-inline: auto;
 }
 
 .section-label {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold-dark);
+  color: var(--brown-soft);
   margin-bottom: 0.75rem;
 }
 
@@ -157,25 +159,28 @@ ul {
     box-shadow 0.3s;
 }
 
-.btn-gold {
-  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
-  color: var(--brown-deep);
-  box-shadow: 0 4px 24px rgba(201, 168, 76, 0.35);
+.btn-gold,
+.btn-ink {
+  background: var(--brown);
+  color: var(--text-on-dark);
+  box-shadow: 0 8px 24px rgba(31, 23, 18, 0.18);
 }
 
-.btn-gold:hover {
+.btn-gold:hover,
+.btn-ink:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(201, 168, 76, 0.45);
+  background: var(--brown-deep);
+  box-shadow: 0 12px 28px rgba(31, 23, 18, 0.22);
 }
 
 .btn-outline {
-  border: 1px solid rgba(201, 168, 76, 0.55);
-  color: var(--gold-light);
+  border: 1px solid rgba(247, 241, 232, 0.45);
+  color: var(--text-on-dark);
   background: transparent;
 }
 
 .btn-outline:hover {
-  background: rgba(201, 168, 76, 0.12);
+  background: rgba(247, 241, 232, 0.1);
   transform: translateY(-2px);
 }
 
@@ -224,7 +229,7 @@ ul {
   bottom: 1.25rem;
   right: 1.25rem;
   background: var(--brown);
-  color: var(--gold-light);
+  color: var(--text-on-dark);
   padding: 0.85rem 1.15rem;
   font-size: 0.8rem;
   letter-spacing: 0.06em;

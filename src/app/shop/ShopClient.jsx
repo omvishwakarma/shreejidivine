@@ -27,16 +27,11 @@ export default function ShopClient() {
       <ShopNav />
       <div className="ecom-wrap">
         <header className="ecom-hero">
-          <p className="section-label">Shreeji Divine Collection</p>
-          <h1 className="ecom-title">Shop Aroma Stones</h1>
+          <p className="section-label">Shop</p>
+          <h1 className="ecom-title">All Products</h1>
           <p className="ecom-lead">
-            Premium handcrafted stones &amp; fragrance oils — gift-ready, smoke-free, Made in India.
+            Premium aroma stones &amp; fragrance oils — smoke-free ritual for home.
           </p>
-          <div className="ecom-trust">
-            <span>Free Shipping</span>
-            <span>COD Available</span>
-            <span>Handmade</span>
-          </div>
         </header>
 
         {loading ? <div className="empty-state">Loading products…</div> : null}
@@ -66,19 +61,16 @@ export default function ShopClient() {
                   />
                 </Link>
                 <div className="product-card__body">
-                  <p className="product-card__tag">{p.tagline}</p>
                   <Link href={`/shop/${p.slug}`}>
                     <h2 className="product-card__name">{p.name}</h2>
                   </Link>
+                  <p className="product-card__tag">{p.tagline}</p>
                   <div className="product-card__price">
                     <strong>{formatINR(p.price)}</strong>
                     {p.compareAt ? <s>{formatINR(p.compareAt)}</s> : null}
                   </div>
                   <div className="product-card__actions">
                     <AddToCartButton product={p} />
-                    <Link href={`/shop/${p.slug}`} className="btn-sm btn-ghost">
-                      Details
-                    </Link>
                   </div>
                 </div>
               </article>

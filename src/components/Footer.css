@@ -6,8 +6,8 @@
 
 .footer__grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1.2fr;
-  gap: 2.5rem;
+  grid-template-columns: 1.3fr 1fr 1fr 1.1fr;
+  gap: 2.25rem;
   padding-bottom: 3rem;
 }
 
@@ -133,7 +133,14 @@
   color: rgba(243, 235, 224, 0.35);
 }
 
-@media (max-width: 760px) {
+@media (max-width: 960px) {
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
   .footer__grid {
     grid-template-columns: 1fr;
     gap: 2rem;

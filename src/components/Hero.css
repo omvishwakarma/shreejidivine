@@ -1,8 +1,8 @@
 .hero {
-  --hero-tone: #2a1a12;
+  --hero-tone: #1f1712;
   position: relative;
   width: 100%;
-  margin-top: 5.25rem;
+  margin-top: 0;
   background: var(--hero-tone);
   color: #faf6f0;
   overflow: hidden;
@@ -39,8 +39,8 @@
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
-  color: var(--brown-deep);
+  background: #f7f1e8;
+  color: #1f1712;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
   animation: hero-rise 0.7s var(--ease-out) 0.15s both;
   transition: transform 0.25s var(--ease-out), filter 0.2s;

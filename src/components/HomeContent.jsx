@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect } from 'react'
-import Navbar from './Navbar'
+import StoreHeader from './StoreHeader'
 import Hero from './Hero'
-import ProductGrid from './ProductGrid'
-import WhatsInside from './WhatsInside'
-import Stones from './Stones'
-import Fragrances from './Fragrances'
+import BestSellers from './BestSellers'
+import BrandBanner from './BrandBanner'
+import Collections from './Collections'
+import Purpose from './Purpose'
+import Features from './Features'
 import HowToUse from './HowToUse'
-import PerfectFor from './PerfectFor'
 import Footer from './Footer'
 
 export default function HomeContent() {
@@ -54,15 +54,15 @@ export default function HomeContent() {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <Navbar />
+      <StoreHeader />
       <main id="main-content">
         <Hero />
-        <ProductGrid />
-        <WhatsInside />
-        <Stones />
-        <Fragrances />
+        <BestSellers />
+        <BrandBanner />
+        <Collections />
+        <Purpose />
+        <Features />
         <HowToUse />
-        <PerfectFor />
       </main>
       <Footer />
     </>
