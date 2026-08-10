@@ -15,35 +15,25 @@
 .howto__steps {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  counter-reset: none;
+  gap: 1.25rem;
 }
 
 .howto__steps li {
   text-align: center;
-  padding: 0 0.5rem;
+  padding: 1.5rem 1rem;
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
   position: relative;
-}
-
-.howto__steps li:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 1.4rem;
-  left: calc(50% + 2.2rem);
-  right: calc(-50% + 2.2rem);
-  height: 1px;
-  background: linear-gradient(90deg, rgba(31, 23, 18, 0.25), transparent);
-  opacity: 0.8;
 }
 
 .howto__num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  margin-bottom: 1.15rem;
-  border: 1px solid rgba(31, 23, 18, 0.2);
+  width: 2.6rem;
+  height: 2.6rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(23, 18, 15, 0.18);
   border-radius: 50%;
   font-family: var(--font-display);
   font-size: 0.95rem;
@@ -52,16 +42,16 @@
 }
 
 .howto__steps h3 {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
   color: var(--brown);
   margin-bottom: 0.5rem;
 }
 
 .howto__steps p {
   font-size: 0.92rem;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-muted);
   line-height: 1.55;
 }
@@ -69,11 +59,7 @@
 @media (max-width: 800px) {
   .howto__steps {
     grid-template-columns: repeat(2, 1fr);
-    gap: 2rem 1rem;
-  }
-
-  .howto__steps li::after {
-    display: none;
+    gap: 1rem;
   }
 }
 

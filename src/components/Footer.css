@@ -1,5 +1,5 @@
 .footer {
-  background: #120c09;
+  background: var(--brown-deep);
   color: var(--text-on-dark);
   padding-top: clamp(3.5rem, 6vw, 5rem);
 }
@@ -49,11 +49,11 @@
 }
 
 .footer__nav-title {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 0.5rem;
 }
 
@@ -62,7 +62,7 @@
 }
 
 .footer__url a {
-  color: var(--gold-light);
+  color: #ffffff;
   font-size: 0.85rem;
   letter-spacing: 0.04em;
 }
@@ -79,7 +79,7 @@
 }
 
 .footer__links a:hover {
-  color: var(--gold-light);
+  color: #ffffff;
 }
 
 .footer__contact p {
@@ -90,8 +90,23 @@
 
 .footer__email {
   font-size: 1rem;
-  color: var(--gold-light);
-  margin: 0.35rem 0 1rem;
+  color: #ffffff;
+  margin: 0.35rem 0 0.65rem;
+}
+
+.footer__social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 1rem;
+  transition: color 0.2s;
+}
+
+.footer__social:hover {
+  color: #ffffff;
 }
 
 .footer__btn {
@@ -100,7 +115,7 @@
 }
 
 .footer__bottom {
-  border-top: 1px solid rgba(201, 168, 76, 0.15);
+  border-top: 1px solid rgba(248, 244, 238, 0.1);
   padding: 1.25rem 0;
 }
 
@@ -114,9 +129,9 @@
 }
 
 .footer__tag {
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(201, 168, 76, 0.55);
+  color: rgba(248, 244, 238, 0.45);
 }
 
 .footer__meta {

@@ -1,4 +1,4 @@
-import { Lora, Outfit } from 'next/font/google'
+import { Cabin, Outfit } from 'next/font/google'
 import {
   SITE_URL,
   SITE_NAME,
@@ -9,15 +9,15 @@ import {
 import Providers from '../components/Providers'
 import './globals.css'
 
-const lora = Lora({
+/** Match Gulessence: Cabin headings + Outfit body */
+const display = Cabin({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 })
 
-const outfit = Outfit({
+const body = Outfit({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-body',
@@ -87,8 +87,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#fdf8f1' },
-    { media: '(prefers-color-scheme: dark)', color: '#2b1e16' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1b18' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -96,7 +96,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en-IN" className={`${lora.variable} ${outfit.variable}`}>
+    <html lang="en-IN" className={`${display.variable} ${body.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>

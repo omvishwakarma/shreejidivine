@@ -10,7 +10,12 @@ const productSchema = new mongoose.Schema(
     image: { type: String, required: true },
     gallery: [{ type: String }],
     badge: { type: String, default: null },
+    /** Legacy free-string (kits/singles) — kept for older products */
     category: { type: String, default: 'singles' },
+    /** Parent category slug (e.g. divine, lifestyle) */
+    categorySlug: { type: String, default: '', index: true },
+    /** Child category slug (e.g. fragrance-oils) */
+    subcategorySlug: { type: String, default: '', index: true },
     stock: { type: Number, default: 0 },
     stone: { type: String, default: '' },
     description: { type: String, default: '' },
@@ -32,6 +37,8 @@ productSchema.methods.toPublicJSON = function () {
     gallery: this.gallery,
     badge: this.badge,
     category: this.category,
+    categorySlug: this.categorySlug || '',
+    subcategorySlug: this.subcategorySlug || '',
     stock: this.stock,
     stone: this.stone,
     description: this.description,

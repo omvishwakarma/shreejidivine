@@ -13,6 +13,8 @@ const empty = {
   image: '/images/aroma-variants.png',
   badge: '',
   category: 'singles',
+  categorySlug: '',
+  subcategorySlug: '',
   stock: 50,
   stone: '',
   description: '',
@@ -31,15 +33,20 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [activeFilter, setActiveFilter] = useState('all')
+  const [catTree, setCatTree] = useState([])
   const fileRef = useRef(null)
   const formRef = useRef(null)
 
   async function load() {
-    const data = await adminApi('/api/products/all')
+    const [data, cats] = await Promise.all([
+      adminApi('/api/products/all'),
+      adminApi('/api/admin/categories'),
+    ])
     const list = [...(data.products || [])].sort(
       (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
     )
     setProducts(list)
+    setCatTree(cats.categories || [])
   }
 
   useEffect(() => {
@@ -49,17 +56,28 @@ export default function AdminProductsPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return products.filter((p) => {
-      if (categoryFilter !== 'all' && (p.category || 'singles') !== categoryFilter) return false
+      if (categoryFilter !== 'all') {
+        const match =
+          p.categorySlug === categoryFilter ||
+          p.subcategorySlug === categoryFilter ||
+          p.category === categoryFilter
+        if (!match) return false
+      }
       if (activeFilter === 'active' && p.active === false) return false
       if (activeFilter === 'inactive' && p.active !== false) return false
       if (!q) return true
-      const hay = [p.name, p.slug, p.tagline, p.badge, p.description]
+      const hay = [p.name, p.slug, p.tagline, p.badge, p.description, p.categorySlug, p.subcategorySlug]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
       return hay.includes(q)
     })
   }, [products, search, categoryFilter, activeFilter])
+
+  const selectedParent = useMemo(
+    () => catTree.find((c) => c.slug === form.categorySlug),
+    [catTree, form.categorySlug]
+  )
 
   function openAdd() {
     setEditingId(null)
@@ -81,6 +99,8 @@ export default function AdminProductsPage() {
       image: p.image,
       badge: p.badge || '',
       category: p.category || 'singles',
+      categorySlug: p.categorySlug || '',
+      subcategorySlug: p.subcategorySlug || '',
       stock: p.stock,
       stone: p.stone || '',
       description: p.description || '',
@@ -256,6 +276,45 @@ export default function AdminProductsPage() {
               </div>
             </div>
 
+            <div className="admin-form-grid two">
+              <div className="admin-field">
+                <label>Category</label>
+                <select
+                  value={form.categorySlug}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      categorySlug: e.target.value,
+                      subcategorySlug: '',
+                      category: e.target.value === 'divine' ? 'kits' : 'singles',
+                    }))
+                  }
+                >
+                  <option value="">— Select —</option>
+                  {catTree.map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="admin-field">
+                <label>Subcategory</label>
+                <select
+                  value={form.subcategorySlug}
+                  onChange={(e) => setForm((f) => ({ ...f, subcategorySlug: e.target.value }))}
+                  disabled={!selectedParent}
+                >
+                  <option value="">— Optional —</option>
+                  {(selectedParent?.children || []).map((c) => (
+                    <option key={c.id} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div className="admin-field">
               <label>Stock</label>
               <input
@@ -303,8 +362,13 @@ export default function AdminProductsPage() {
         />
         <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
           <option value="all">All categories</option>
-          <option value="kits">Kits</option>
-          <option value="singles">Oils &amp; Stones</option>
+          {catTree.map((c) => (
+            <option key={c.id} value={c.slug}>
+              {c.name}
+            </option>
+          ))}
+          <option value="kits">Legacy: Kits</option>
+          <option value="singles">Legacy: Singles</option>
         </select>
         <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value)}>
           <option value="all">All status</option>
@@ -331,6 +395,7 @@ export default function AdminProductsPage() {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Category</th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Active</th>
@@ -343,6 +408,9 @@ export default function AdminProductsPage() {
                   <td>
                     <strong>{p.name}</strong>
                     <div style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>{p.slug}</div>
+                  </td>
+                  <td style={{ fontSize: '0.85rem' }}>
+                    {[p.categorySlug, p.subcategorySlug].filter(Boolean).join(' / ') || p.category || '—'}
                   </td>
                   <td>{formatINR(p.price)}</td>
                   <td>{p.stock}</td>

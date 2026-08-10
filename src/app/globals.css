@@ -1,25 +1,34 @@
 :root {
-  --brown-deep: #14100c;
-  --brown: #1f1712;
-  --brown-mid: #33261e;
-  --brown-soft: #5a473a;
-  --gold: #b8964a;
-  --gold-light: #d4b56a;
-  --gold-dark: #8a6d2f;
-  --cream: #f0e8dc;
-  --cream-warm: #e8dfd0;
-  --ivory: #fcfaf6;
+  /* Gulessence palette (from gulessence.com theme tokens) */
+  --brown-deep: #1a1b18;
+  --brown: #1a1b18;
+  --brown-mid: #282828;
+  --brown-soft: #5c5f66;
+  --gold: #b5502e;
+  --gold-light: #c96a45;
+  --gold-dark: #8f3c22;
+  --accent: #b5502e;
+  --promo: #b45615;
+  --cream: #f3f3f3;
+  --cream-warm: #ebebeb;
+  --ivory: #ffffff;
   --mogra: #1b4332;
   --rose: #7b1e2e;
   --lavender: #4a2c6a;
   --chandan: #8b6914;
-  --text: #1f1712;
-  --text-muted: #6a5748;
-  --text-on-dark: #f7f1e8;
+  --text: #212326;
+  --text-muted: #5c5f66;
+  --text-on-dark: #ffffff;
+  --sale: #d72c0d;
+  --highlight: #f4c430;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --section-pad: clamp(3.5rem, 7vw, 6.5rem);
-  --surface: #fcfaf6;
-  --surface-muted: #f3ece2;
+  --section-pad: clamp(3.75rem, 8vw, 6.75rem);
+  --surface: #ffffff;
+  --surface-muted: #f3f3f3;
+  --surface-soft: #ebebeb;
+  --line: #d2d5d9;
+  --shadow-soft: 0 12px 32px rgba(33, 35, 38, 0.08);
+  --radius-sm: 0.25rem;
 }
 
 *,
@@ -35,8 +44,8 @@ html {
 }
 
 body {
-  font-family: var(--font-body), system-ui, sans-serif;
-  font-weight: 400;
+  font-family: var(--font-body), Outfit, sans-serif;
+  font-weight: 300;
   color: var(--text);
   background: var(--surface);
   line-height: 1.6;
@@ -96,26 +105,26 @@ ul {
 }
 
 .container {
-  width: min(1200px, calc(100% - 2.5rem));
+  width: min(1240px, calc(100% - 2rem));
   margin-inline: auto;
 }
 
 .section-label {
-  font-family: var(--font-body);
-  font-size: 0.72rem;
+  font-family: var(--font-body), Outfit, sans-serif;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brown-soft);
-  margin-bottom: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 0.65rem;
 }
 
 .section-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4.5vw, 3.25rem);
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: 0.02em;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0;
   color: var(--brown);
 }
 
@@ -151,9 +160,10 @@ ul {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.9rem 1.85rem;
-  font-size: 0.8rem;
+  font-family: var(--font-body), Outfit, sans-serif;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: transform 0.35s var(--ease-out), background 0.3s, color 0.3s,
     box-shadow 0.3s;
@@ -161,16 +171,16 @@ ul {
 
 .btn-gold,
 .btn-ink {
-  background: var(--brown);
-  color: var(--text-on-dark);
-  box-shadow: 0 8px 24px rgba(31, 23, 18, 0.18);
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: none;
 }
 
 .btn-gold:hover,
 .btn-ink:hover {
-  transform: translateY(-2px);
-  background: var(--brown-deep);
-  box-shadow: 0 12px 28px rgba(31, 23, 18, 0.22);
+  transform: translateY(-1px);
+  background: var(--gold-dark);
+  box-shadow: none;
 }
 
 .btn-outline {
@@ -228,11 +238,11 @@ ul {
   position: fixed;
   bottom: 1.25rem;
   right: 1.25rem;
-  background: var(--brown);
-  color: var(--text-on-dark);
+  background: var(--accent);
+  color: #ffffff;
   padding: 0.85rem 1.15rem;
   font-size: 0.8rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   z-index: 200;
   animation: fade-up 0.35s var(--ease-out);
 }

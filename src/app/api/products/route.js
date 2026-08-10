@@ -3,10 +3,19 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Product } from '@/lib/mongo/Product'
 
-export async function GET() {
+export async function GET(request) {
   try {
     await dbConnect()
-    const products = await Product.find({ active: true }).sort({ createdAt: 1 })
+    const { searchParams } = new URL(request.url)
+    const category = searchParams.get('category') || ''
+    const subcategory = searchParams.get('subcategory') || ''
+    const filter = { active: true }
+    if (subcategory) {
+      filter.subcategorySlug = subcategory
+    } else if (category) {
+      filter.$or = [{ categorySlug: category }, { subcategorySlug: category }]
+    }
+    const products = await Product.find(filter).sort({ createdAt: 1 })
     return NextResponse.json({ products: products.map((p) => p.toPublicJSON()) })
   } catch (err) {
     console.error(err)
@@ -32,6 +41,8 @@ export async function POST(request) {
       gallery: z.array(z.string()).optional(),
       badge: z.string().nullable().optional(),
       category: z.string().optional(),
+      categorySlug: z.string().optional(),
+      subcategorySlug: z.string().optional(),
       stock: z.number().int().optional(),
       stone: z.string().optional(),
       description: z.string().optional(),

@@ -3,12 +3,14 @@
 import { useEffect } from 'react'
 import StoreHeader from './StoreHeader'
 import Hero from './Hero'
-import BestSellers from './BestSellers'
-import BrandBanner from './BrandBanner'
+import TrustBar from './TrustBar'
 import Collections from './Collections'
+import BrandBanner from './BrandBanner'
+import BestSellers from './BestSellers'
 import Purpose from './Purpose'
-import Features from './Features'
+import Testimonials from './Testimonials'
 import HowToUse from './HowToUse'
+import InstagramStrip from './InstagramStrip'
 import Footer from './Footer'
 
 export default function HomeContent() {
@@ -55,14 +57,16 @@ export default function HomeContent() {
         Skip to main content
       </a>
       <StoreHeader />
-      <main id="main-content">
+      <main id="main-content" className="home-main">
         <Hero />
-        <BestSellers />
-        <BrandBanner />
+        <TrustBar />
         <Collections />
+        <BrandBanner />
+        <BestSellers />
         <Purpose />
-        <Features />
+        <Testimonials />
         <HowToUse />
+        <InstagramStrip />
       </main>
       <Footer />
     </>

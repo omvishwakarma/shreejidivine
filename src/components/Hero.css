@@ -1,82 +1,161 @@
 .hero {
-  --hero-tone: #1f1712;
+  --hero-tone: #17120f;
   position: relative;
   width: 100%;
-  margin-top: 0;
   background: var(--hero-tone);
-  color: #faf6f0;
+  color: #f8f4ee;
   overflow: hidden;
 }
 
 .hero__stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: min(72vh, 720px);
+  aspect-ratio: 21 / 9;
+  min-height: 420px;
+  max-height: min(82vh, 780px);
 }
 
-.hero__video {
+.hero__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1s var(--ease-out);
+  pointer-events: none;
+}
+
+.hero__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.hero__video,
+.hero__slide-img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center center;
   background: var(--hero-tone);
+  transform: scale(1.02);
+}
+
+.hero__stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(12, 9, 7, 0.62) 0%, rgba(12, 9, 7, 0.28) 42%, rgba(12, 9, 7, 0.12) 100%),
+    linear-gradient(180deg, rgba(12, 9, 7, 0.15) 0%, transparent 35%, rgba(12, 9, 7, 0.55) 100%);
+}
+
+.hero__overlay {
+  position: absolute;
+  z-index: 3;
+  left: clamp(1.25rem, 5.5vw, 4.5rem);
+  bottom: clamp(3.5rem, 10%, 5.5rem);
+  max-width: min(34rem, calc(100% - 3rem));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.hero__eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+  opacity: 0.88;
+}
+
+.hero__headline {
+  margin: 0;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: clamp(2rem, 4.8vw, 3.4rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0;
 }
 
 .hero__cta {
-  position: absolute;
-  z-index: 2;
-  left: clamp(1rem, 4.5vw, 3.5rem);
-  bottom: clamp(2.5rem, 7%, 4rem);
+  margin-top: 0.65rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.85rem;
-  padding: 0.8rem 1.35rem;
+  min-height: 3rem;
+  padding: 0.85rem 1.6rem;
   text-decoration: none;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-family: var(--font-body), Outfit, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: #f7f1e8;
-  color: #1f1712;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-  animation: hero-rise 0.7s var(--ease-out) 0.15s both;
-  transition: transform 0.25s var(--ease-out), filter 0.2s;
+  background: var(--accent);
+  color: #ffffff;
+  transition: transform 0.25s var(--ease-out), background 0.2s;
 }
 
 .hero__cta:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
+  transform: translateY(-1px);
+  background: var(--gold-dark);
 }
 
-@keyframes hero-rise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.hero__dots {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  bottom: 1.15rem;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(12, 7, 5, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.hero__dots button {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(250, 246, 240, 0.4);
+  cursor: pointer;
+  transition: width 0.25s var(--ease-out), background 0.2s;
+}
+
+.hero__dots button.is-active {
+  width: 1.4rem;
+  background: #ffffff;
 }
 
 @media (max-width: 860px) {
   .hero__stage {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;
+    min-height: 520px;
     max-height: none;
   }
 
-  .hero__cta {
+  .hero__stage::after {
+    background:
+      linear-gradient(180deg, rgba(12, 9, 7, 0.2) 0%, rgba(12, 9, 7, 0.15) 40%, rgba(12, 9, 7, 0.72) 100%);
+  }
+
+  .hero__overlay {
     left: 50%;
-    bottom: 2.75rem;
+    bottom: 3.5rem;
     transform: translateX(-50%);
-    width: calc(100% - 2.5rem);
-    max-width: 280px;
+    align-items: center;
+    text-align: center;
+    width: calc(100% - 2rem);
   }
 
   .hero__cta:hover {
-    transform: translateX(-50%) translateY(-2px);
+    transform: translateY(-2px);
   }
 }

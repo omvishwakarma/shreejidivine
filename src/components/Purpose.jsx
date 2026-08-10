@@ -5,21 +5,19 @@ export default function Purpose() {
   return (
     <section className="purpose" id="purpose" aria-labelledby="purpose-heading">
       <div className="container purpose__inner">
-        <p className="section-label reveal">Our Purpose</p>
         <h2 id="purpose-heading" className="section-title reveal">
-          {SITE_NAME}
+          Buy Premium Aroma Stones &amp; Fragrance Oils | {SITE_NAME}
         </h2>
         <p className="purpose__tag reveal">{SITE_TAGLINE}</p>
         <div className="purpose__copy reveal reveal-delay-1">
           <p>
-            At {SITE_NAME}, we bring stillness, warmth, and spiritual connection into modern living.
-            Every aroma stone and fragrance oil is crafted to turn ordinary moments into meaningful
-            rituals — inspired by Bharat&apos;s timeless traditions of purity and devotion.
+            Aroma stones · fragrance oils · ritual kits — crafted for smoke-free sacred ambience at
+            home, pooja room, office, and gifting. Handmade in India with devotion.
           </p>
           <p>
-            Spirituality is not only found in temples. It lives in lighting fragrance after a long day,
-            sitting in silence, or creating a peaceful corner at home. We exist to bring that feeling
-            home — through scent, ritual, and mindful design.
+            At {SITE_NAME}, we bring stillness and spiritual connection into modern living. Every
+            creation is designed to transform ordinary moments into meaningful rituals — inspired by
+            Bharat&apos;s timeless traditions of purity and intention.
           </p>
         </div>
       </div>

@@ -1,33 +1,36 @@
 .purpose {
   padding: var(--section-pad) 0;
-  background:
-    linear-gradient(180deg, #f3ece2 0%, #ebe3d6 100%);
+  background: var(--surface-muted);
+  border-block: 1px solid var(--line);
 }
 
 .purpose__inner {
-  max-width: 42rem;
+  max-width: 44rem;
   text-align: center;
 }
 
 .purpose .section-title {
-  font-size: clamp(2.4rem, 6vw, 3.75rem);
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  max-width: 28ch;
+  margin-inline: auto;
 }
 
 .purpose__tag {
-  margin-top: 0.75rem;
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  font-weight: 300;
+  margin-top: 0.85rem;
+  font-size: 1.05rem;
+  color: var(--brown);
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 .purpose__copy {
-  margin-top: 1.75rem;
+  margin-top: 1.5rem;
   display: grid;
   gap: 1rem;
   color: var(--text-muted);
   font-size: 1.02rem;
   line-height: 1.75;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .purpose__copy p {

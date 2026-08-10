@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import ShopClient from './ShopClient'
 
 export const metadata = {
@@ -7,5 +8,9 @@ export const metadata = {
 }
 
 export default function ShopPage() {
-  return <ShopClient />
+  return (
+    <Suspense fallback={<div className="ecom-page"><div className="ecom-wrap empty-state">Loading shop…</div></div>}>
+      <ShopClient />
+    </Suspense>
+  )
 }

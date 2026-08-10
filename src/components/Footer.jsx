@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SITE_URL } from '../lib/site'
+import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SITE_URL, SOCIAL } from '../lib/site'
 import { APP_VERSION } from '../lib/appVersion'
 import './Footer.css'
 
@@ -63,6 +63,16 @@ export default function Footer() {
           <a href={`mailto:${CONTACT_EMAIL}`} className="footer__email">
             {CONTACT_EMAIL}
           </a>
+          {SOCIAL.instagram ? (
+            <a
+              href={SOCIAL.instagram}
+              className="footer__social"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Instagram {SOCIAL.instagramHandle}
+            </a>
+          ) : null}
           <Link href="/shop" className="btn btn-ink footer__btn">
             Shop Now
           </Link>

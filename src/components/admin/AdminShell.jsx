@@ -8,6 +8,7 @@ import { APP_VERSION } from '../../lib/appVersion'
 const links = [
   { href: '/admin', label: 'Dashboard', end: true },
   { href: '/admin/products', label: 'Products' },
+  { href: '/admin/categories', label: 'Categories' },
   { href: '/admin/orders', label: 'Orders' },
   { href: '/admin/coupons', label: 'Coupons' },
   { href: '/admin/users', label: 'Customers' },
