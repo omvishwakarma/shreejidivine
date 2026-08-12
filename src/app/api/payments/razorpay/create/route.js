@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
-import { getRazorpayClient, getRazorpayKeyId } from '@/lib/razorpay'
+import { getRazorpayClient, getRazorpayKeyId, razorpayErrorMessage } from '@/lib/razorpay'
 import { validateCoupon, redeemCoupon } from '@/lib/coupons'
 import { sendOrderEmail } from '@/lib/mail'
 import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
@@ -167,10 +167,10 @@ export async function POST(request) {
         { status: 400 }
       )
     }
-    console.error(err)
+    console.error('Razorpay create payment failed:', err)
     return NextResponse.json(
-      { error: err.message || 'Could not start Razorpay payment' },
-      { status: 500 }
+      { error: razorpayErrorMessage(err) },
+      { status: err?.statusCode === 401 ? 502 : 500 }
     )
   }
 }
