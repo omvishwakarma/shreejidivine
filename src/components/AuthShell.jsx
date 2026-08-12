@@ -56,10 +56,10 @@ export default function AuthShell({ mode = 'signup', next = '/profile', children
 
         <div className="auth-panel__body">
           <Image
-            src="/images/logo.png"
+            src="/images/logo-transparent.png"
             alt={SITE_NAME}
-            width={52}
-            height={52}
+            width={958}
+            height={605}
             className="auth-logo"
             priority
           />

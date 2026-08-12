@@ -24,7 +24,8 @@ export default function AdminShell({ children }) {
     <div className="admin-shell">
       <aside className="admin-side">
         <div className="admin-brand">
-          SHREEJI
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo.png" alt="Shreeji Divine" className="admin-brand__logo" />
           <small>Admin Panel</small>
         </div>
         {links.map((l) => {

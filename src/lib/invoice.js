@@ -99,10 +99,11 @@ export function buildInvoiceHtml(order, customer = {}, { logoSrc } = {}) {
       gap: 14px;
     }
     .logo {
-      width: 72px;
-      height: 72px;
+      width: 120px;
+      height: 78px;
       object-fit: contain;
       flex-shrink: 0;
+      background: #000;
     }
     .brand { font-size: 28px; letter-spacing: 0.08em; }
     .brand small { display: block; margin-top: 6px; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-family: system-ui, sans-serif; }

@@ -34,7 +34,7 @@ function emailShell({ title, preheader, bodyHtml }) {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid rgba(43,30,22,0.08);">
           <tr>
             <td style="padding:28px 28px 18px;text-align:center;border-bottom:2px solid #c9a84c;background:linear-gradient(180deg,#fdf8f1,#ffffff);">
-              <img src="${esc(logo)}" alt="${esc(SITE_NAME)}" width="88" height="88" style="display:block;margin:0 auto 14px;width:88px;height:88px;object-fit:contain;border:0;" />
+              <img src="${esc(logo)}" alt="${esc(SITE_NAME)}" width="160" height="104" style="display:block;margin:0 auto 14px;width:160px;height:104px;object-fit:contain;border:0;background:#000;" />
               <div style="font-size:22px;letter-spacing:0.08em;font-weight:600;color:#2b1e16;">${esc(SITE_NAME)}</div>
               <div style="margin-top:6px;font-family:system-ui,-apple-system,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6b5648;">${esc(SITE_TAGLINE)}</div>
             </td>
@@ -79,7 +79,7 @@ export function buildWelcomeEmail({ name, email }) {
         </a>
       </p>
       <p style="margin:22px 0 0;color:#6b5648;font-size:13px;">
-        Ghar Par Mandir Ki Feeling — thank you for joining us.
+        A FRAGRANCE OF DIVINITY — thank you for joining us.
       </p>
     `,
   })

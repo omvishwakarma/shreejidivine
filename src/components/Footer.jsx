@@ -26,10 +26,10 @@ export default function Footer() {
           <Image
             src="/images/logo.png"
             alt={SITE_NAME}
-            width={516}
-            height={358}
+            width={1024}
+            height={660}
             className="footer__logo"
-            sizes="180px"
+            sizes="200px"
           />
           <p>{SITE_TAGLINE}</p>
           <p className="footer__url">

@@ -13,7 +13,7 @@ export default function manifest() {
     icons: [
       {
         src: '/images/logo.png',
-        sizes: '516x358',
+        sizes: '1024x660',
         type: 'image/png',
         purpose: 'any',
       },

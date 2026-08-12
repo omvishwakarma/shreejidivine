@@ -1,70 +1,221 @@
 .howto {
+  position: relative;
   padding: var(--section-pad) 0;
-  background: var(--surface);
+  background: #fdfbf7;
+  overflow: hidden;
+}
+
+.howto::before,
+.howto::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.howto::before {
+  width: 220px;
+  height: 280px;
+  left: -40px;
+  bottom: -20px;
+  background:
+    radial-gradient(ellipse at 40% 40%, rgba(90, 130, 70, 0.18), transparent 68%),
+    radial-gradient(ellipse at 70% 70%, rgba(90, 130, 70, 0.1), transparent 60%);
+  filter: blur(2px);
+}
+
+.howto::after {
+  width: 180px;
+  height: 160px;
+  right: -20px;
+  bottom: 12%;
+  background: radial-gradient(ellipse at center, rgba(180, 160, 130, 0.28), transparent 70%);
+}
+
+.howto .container {
+  position: relative;
+  z-index: 1;
 }
 
 .howto__head {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 3.25rem;
+}
+
+.howto__head .section-title {
+  font-size: clamp(2.1rem, 4.4vw, 3.15rem);
+  font-weight: 500;
+  color: #3a2a1c;
+}
+
+.howto__ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin: 0.85rem auto 0.35rem;
+}
+
+.howto__ornament-line {
+  width: 3.4rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c4a574, transparent);
+}
+
+.howto__lotus {
+  width: 1.55rem;
+  height: 1.35rem;
+  color: #c4a574;
+  flex-shrink: 0;
 }
 
 .howto__head .section-lead {
   margin-inline: auto;
+  color: #6b5648;
+  font-size: 1rem;
 }
 
 .howto__steps {
+  list-style: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
+  gap: 0;
+  align-items: start;
 }
 
 .howto__steps li {
   text-align: center;
-  padding: 1.5rem 1rem;
-  background: var(--surface-muted);
-  border: 1px solid var(--line);
   position: relative;
+  padding: 0 1.1rem;
+}
+
+.howto__steps li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 5.35rem;
+  left: calc(50% + 5.1rem);
+  width: calc(100% - 10.2rem);
+  height: 0;
+  border-top: 1.5px dotted #c4a574;
+  pointer-events: none;
+}
+
+.howto__steps li:not(:last-child)::before {
+  content: '›';
+  position: absolute;
+  top: 4.7rem;
+  right: -0.55rem;
+  z-index: 2;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #c4a574;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.howto__card {
+  position: relative;
+  width: 10.25rem;
+  height: 10.25rem;
+  margin: 0 auto 1.15rem;
 }
 
 .howto__num {
+  position: absolute;
+  top: -0.15rem;
+  left: -0.15rem;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.6rem;
-  height: 2.6rem;
-  margin-bottom: 1rem;
-  border: 1px solid rgba(23, 18, 15, 0.18);
+  min-width: 1.85rem;
+  height: 1.85rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #5c4030;
+  color: #f7efe4;
+  font-family: var(--font-body), Outfit, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 10px rgba(61, 42, 31, 0.18);
+}
+
+.howto__circle {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  color: var(--brown);
-  background: #fff;
+  overflow: hidden;
+  background: #f3ebe0;
+  box-shadow: 0 10px 28px rgba(61, 42, 31, 0.1);
+  border: 6px solid #fff;
+}
+
+.howto__circle img {
+  object-fit: cover;
+  object-position: center;
 }
 
 .howto__steps h3 {
-  font-family: var(--font-display), Cabin, sans-serif;
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: var(--brown);
-  margin-bottom: 0.5rem;
+  font-family: var(--font-body), Outfit, sans-serif;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #3a2a1c;
+  margin-bottom: 0.4rem;
 }
 
 .howto__steps p {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 400;
-  color: var(--text-muted);
+  color: #6b5648;
   line-height: 1.55;
+  max-width: 16rem;
+  margin-inline: auto;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .howto__steps {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    row-gap: 2.5rem;
+  }
+
+  .howto__steps li:nth-child(2)::before,
+  .howto__steps li:nth-child(2)::after,
+  .howto__steps li:nth-child(4)::before,
+  .howto__steps li:nth-child(4)::after {
+    display: none;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 560px) {
   .howto__steps {
     grid-template-columns: 1fr;
+    row-gap: 2.25rem;
+  }
+
+  .howto__steps li:not(:last-child)::after {
+    display: none;
+  }
+
+  .howto__steps li:not(:last-child)::before {
+    top: auto;
+    bottom: -1.7rem;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+  }
+
+  .howto__card {
+    width: 9.5rem;
+    height: 9.5rem;
   }
 }

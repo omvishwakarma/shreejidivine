@@ -19,9 +19,10 @@
 }
 
 .footer__logo {
-  width: min(220px, 100%);
+  width: min(200px, 100%);
   height: auto;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
 .footer__brand strong {

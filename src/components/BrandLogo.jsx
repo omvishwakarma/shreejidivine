@@ -1,21 +1,24 @@
 import Image from 'next/image'
 import './BrandLogo.css'
 
-/** Transparent logo — visible on light sticky header with no logo background. */
+const LOGO_W = 958
+const LOGO_H = 605
+
+/** Gold logo on transparent — visible on the light sticky header. */
 export default function BrandLogo({
   className = '',
-  height = 48,
+  height = 56,
   priority = false,
 }) {
-  const width = Math.round((height * 516) / 358)
+  const width = Math.round((height * LOGO_W) / LOGO_H)
 
   return (
     <span className={`brand-logo ${className}`.trim()} style={{ height, width }}>
       <Image
         src="/images/logo-transparent.png"
         alt="Shreeji Divine"
-        width={516}
-        height={358}
+        width={LOGO_W}
+        height={LOGO_H}
         priority={priority}
         className="brand-logo__img"
         sizes={`${width}px`}

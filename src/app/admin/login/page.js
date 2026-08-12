@@ -41,6 +41,8 @@ export default function AdminLoginPage() {
   return (
     <div className="admin-login-page">
       <form className="admin-login-card" onSubmit={onSubmit}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/logo-transparent.png" alt="Shreeji Divine" className="admin-login-logo" />
         <h1>Admin Login</h1>
         <p className="admin-page-sub">Shreeji Divine — manage store &amp; orders</p>
         <div className="admin-form-grid">
