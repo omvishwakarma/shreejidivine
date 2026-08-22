@@ -5,9 +5,8 @@ import { SITE_NAME, SOCIAL } from '../lib/site'
 import './InstagramStrip.css'
 
 export default function InstagramStrip() {
-  const igUrl = SOCIAL.instagram || 'https://www.instagram.com/'
+  const igUrl = SOCIAL.instagram || 'https://www.instagram.com/shreeji.divine/'
   const [posts, setPosts] = useState([])
-  const [configured, setConfigured] = useState(true)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -17,7 +16,6 @@ export default function InstagramStrip() {
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return
-        setConfigured(data.configured !== false)
         setPosts(Array.isArray(data.posts) ? data.posts : [])
         if (data.error && !(data.posts || []).length) setError(data.error)
       })
@@ -39,7 +37,7 @@ export default function InstagramStrip() {
           <p className="section-label">Follow us on Instagram</p>
           <h2 id="ig-strip-heading" className="section-title">
             <a href={igUrl} target="_blank" rel="noopener noreferrer">
-              {SOCIAL.instagramHandle || `@${SITE_NAME.replace(/\s+/g, '').toLowerCase()}`}
+              {SOCIAL.instagramHandle || '@shreeji.divine'}
             </a>
           </h2>
           <a
@@ -110,11 +108,7 @@ export default function InstagramStrip() {
         </ul>
       ) : (
         <div className="ig-strip__empty">
-          <p>
-            {!configured
-              ? 'Connect Instagram to show your latest posts here.'
-              : error || 'No Instagram posts found yet.'}
-          </p>
+          <p>{error || 'Instagram posts will appear here shortly.'}</p>
           <a href={igUrl} target="_blank" rel="noopener noreferrer">
             Open Instagram profile
           </a>

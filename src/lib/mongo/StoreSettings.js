@@ -3,6 +3,10 @@ import {
   DEFAULT_INSTAGRAM_SHOP_LOOKS,
   normalizeInstagramShopLooks,
 } from '@/lib/instagramShop'
+import {
+  DEFAULT_TESTIMONIALS,
+  normalizeTestimonials,
+} from '@/lib/testimonials'
 
 const DEFAULTS = {
   shippingFee: 0,
@@ -15,6 +19,8 @@ const DEFAULTS = {
   heroCtaHref: '/shop',
   instagramShopEnabled: true,
   instagramShopLooks: DEFAULT_INSTAGRAM_SHOP_LOOKS,
+  testimonialsEnabled: true,
+  testimonials: DEFAULT_TESTIMONIALS,
 }
 
 const instagramShopLookSchema = new mongoose.Schema(
@@ -31,12 +37,25 @@ const instagramShopLookSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const testimonialSchema = new mongoose.Schema(
+  {
+    id: { type: String, default: '' },
+    title: { type: String, default: '' },
+    quote: { type: String, required: true },
+    name: { type: String, required: true },
+    handle: { type: String, default: '' },
+    photo: { type: String, default: '' },
+    instagram: { type: String, default: '' },
+    active: { type: Boolean, default: true },
+    sortOrder: { type: Number, default: 0 },
+  },
+  { _id: false }
+)
+
 const storeSettingsSchema = new mongoose.Schema(
   {
     key: { type: String, unique: true, default: 'default' },
-    /** Flat shipping charge when free-shipping threshold is not met */
     shippingFee: { type: Number, default: DEFAULTS.shippingFee, min: 0 },
-    /** Subtotal at/above this amount gets free shipping. 0 = threshold disabled */
     freeShippingMinOrder: {
       type: Number,
       default: DEFAULTS.freeShippingMinOrder,
@@ -53,6 +72,11 @@ const storeSettingsSchema = new mongoose.Schema(
       type: [instagramShopLookSchema],
       default: () => DEFAULT_INSTAGRAM_SHOP_LOOKS.map((l) => ({ ...l })),
     },
+    testimonialsEnabled: { type: Boolean, default: DEFAULTS.testimonialsEnabled },
+    testimonials: {
+      type: [testimonialSchema],
+      default: () => DEFAULT_TESTIMONIALS.map((t) => ({ ...t })),
+    },
   },
   { timestamps: true }
 )
@@ -62,6 +86,11 @@ storeSettingsSchema.methods.toJSONSafe = function () {
   const looks = looksRaw.length
     ? normalizeInstagramShopLooks(looksRaw)
     : normalizeInstagramShopLooks(DEFAULT_INSTAGRAM_SHOP_LOOKS)
+
+  const reviewsRaw = Array.isArray(this.testimonials) ? this.testimonials : []
+  const testimonials = reviewsRaw.length
+    ? normalizeTestimonials(reviewsRaw)
+    : normalizeTestimonials(DEFAULT_TESTIMONIALS)
 
   return {
     shippingFee: this.shippingFee ?? DEFAULTS.shippingFee,
@@ -74,6 +103,8 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     heroCtaHref: this.heroCtaHref || DEFAULTS.heroCtaHref,
     instagramShopEnabled: this.instagramShopEnabled !== false,
     instagramShopLooks: looks,
+    testimonialsEnabled: this.testimonialsEnabled !== false,
+    testimonials,
     updatedAt: this.updatedAt,
   }
 }

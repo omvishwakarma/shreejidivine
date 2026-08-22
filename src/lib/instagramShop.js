@@ -50,7 +50,9 @@ export const DEFAULT_INSTAGRAM_SHOP_LOOKS = [
 export const INSTAGRAM_SHOP_LOOKS = DEFAULT_INSTAGRAM_SHOP_LOOKS
 
 export function instagramShortcode(permalink) {
-  const m = String(permalink || '').match(/instagram\.com\/(?:p|reel|tv)\/([^/?#]+)/i)
+  const m = String(permalink || '').match(
+    /instagram\.com\/(?:[\w.-]+\/)?(?:p|reel|tv)\/([^/?#]+)/i
+  )
   return m?.[1] || ''
 }
 

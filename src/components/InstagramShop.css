@@ -245,6 +245,10 @@
   margin-top: 1.5rem;
 }
 
+.ig-shop__foot .btn {
+  border-radius: 999px;
+}
+
 @media (max-width: 700px) {
   .ig-shop__nav {
     display: none;

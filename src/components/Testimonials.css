@@ -27,6 +27,27 @@
   max-width: 42rem;
 }
 
+.testimonials__nav-spacer {
+  width: 2.5rem;
+  flex-shrink: 0;
+}
+
+.testimonials__skel {
+  height: 22rem;
+  max-width: 36rem;
+  margin: 0 auto;
+  border-radius: 1rem;
+  background: linear-gradient(110deg, #ececec 20%, #f7f7f7 40%, #ececec 60%);
+  background-size: 200% 100%;
+  animation: testimonials-shimmer 1.2s linear infinite;
+}
+
+@keyframes testimonials-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
 .testimonials__nav {
   flex-shrink: 0;
   width: 2.5rem;
