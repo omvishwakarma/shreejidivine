@@ -1,35 +1,11 @@
 .howto {
+  --howto-gold: #8f6f45;
+  --howto-ink: #3a2a1c;
+  --howto-muted: #6b5648;
   position: relative;
-  padding: var(--section-pad) 0;
-  background: #fdfbf7;
+  padding: clamp(2.25rem, 5vw, 3.5rem) 0;
+  background: linear-gradient(180deg, #fdfbf7 0%, #f7f1e8 100%);
   overflow: hidden;
-}
-
-.howto::before,
-.howto::after {
-  content: '';
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.howto::before {
-  width: 220px;
-  height: 280px;
-  left: -40px;
-  bottom: -20px;
-  background:
-    radial-gradient(ellipse at 40% 40%, rgba(90, 130, 70, 0.18), transparent 68%),
-    radial-gradient(ellipse at 70% 70%, rgba(90, 130, 70, 0.1), transparent 60%);
-  filter: blur(2px);
-}
-
-.howto::after {
-  width: 180px;
-  height: 160px;
-  right: -20px;
-  bottom: 12%;
-  background: radial-gradient(ellipse at center, rgba(180, 160, 130, 0.28), transparent 70%);
 }
 
 .howto .container {
@@ -39,40 +15,41 @@
 
 .howto__head {
   text-align: center;
-  margin-bottom: 3.25rem;
+  margin-bottom: 2rem;
 }
 
 .howto__head .section-title {
-  font-size: clamp(2.1rem, 4.4vw, 3.15rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.4rem);
   font-weight: 500;
-  color: #3a2a1c;
+  color: var(--howto-ink);
 }
 
 .howto__ornament {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.7rem;
-  margin: 0.85rem auto 0.35rem;
+  gap: 0.55rem;
+  margin: 0.55rem auto 0.25rem;
 }
 
 .howto__ornament-line {
-  width: 3.4rem;
+  width: 2.6rem;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #c4a574, transparent);
+  background: linear-gradient(90deg, transparent, var(--howto-gold), transparent);
 }
 
 .howto__lotus {
-  width: 1.55rem;
-  height: 1.35rem;
-  color: #c4a574;
+  width: 1.25rem;
+  height: 1.1rem;
+  color: var(--howto-gold);
   flex-shrink: 0;
 }
 
 .howto__head .section-lead {
   margin-inline: auto;
-  color: #6b5648;
-  font-size: 1rem;
+  color: var(--howto-muted);
+  font-size: 0.92rem;
+  max-width: 28rem;
 }
 
 .howto__steps {
@@ -86,136 +63,142 @@
 .howto__steps li {
   text-align: center;
   position: relative;
-  padding: 0 1.1rem;
+  padding: 0 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
 }
 
+/* Dotted connector line between icons */
 .howto__steps li:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: 5.35rem;
-  left: calc(50% + 5.1rem);
-  width: calc(100% - 10.2rem);
+  top: 2.55rem;
+  left: calc(50% + 2.85rem);
+  width: calc(100% - 5.7rem);
   height: 0;
-  border-top: 1.5px dotted #c4a574;
+  border-top: 1.5px dotted var(--howto-gold);
   pointer-events: none;
+  opacity: 0.65;
 }
 
-.howto__steps li:not(:last-child)::before {
-  content: '›';
-  position: absolute;
-  top: 4.7rem;
-  right: -0.55rem;
-  z-index: 2;
-  width: 1.35rem;
-  height: 1.35rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #c4a574;
-  color: #fff;
-  font-size: 1.05rem;
-  font-weight: 500;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.howto__card {
+.howto__icon {
+  display: grid;
+  place-items: center;
+  width: clamp(5rem, 9vw, 6.25rem);
+  height: clamp(5rem, 9vw, 6.25rem);
+  margin-bottom: 0.2rem;
   position: relative;
-  width: 10.25rem;
-  height: 10.25rem;
-  margin: 0 auto 1.15rem;
+  z-index: 1;
 }
 
-.howto__num {
-  position: absolute;
-  top: -0.15rem;
-  left: -0.15rem;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.85rem;
-  height: 1.85rem;
-  padding: 0 0.35rem;
-  border-radius: 999px;
-  background: #5c4030;
-  color: #f7efe4;
-  font-family: var(--font-body), Outfit, sans-serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  box-shadow: 0 4px 10px rgba(61, 42, 31, 0.18);
-}
-
-.howto__circle {
-  position: relative;
-  display: block;
+.howto__icon img {
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.howto__arrow {
+  position: absolute;
+  top: 1.9rem;
+  right: -0.7rem;
+  z-index: 3;
+  width: 1.4rem;
+  height: 1.4rem;
+  color: var(--howto-gold);
+  background: #faf6ef;
   border-radius: 50%;
-  overflow: hidden;
-  background: #f3ebe0;
-  box-shadow: 0 10px 28px rgba(61, 42, 31, 0.1);
-  border: 6px solid #fff;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
 }
 
-.howto__circle img {
-  object-fit: cover;
-  object-position: center;
+.howto__arrow svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.howto__steps h3 {
-  font-family: var(--font-body), Outfit, sans-serif;
-  font-size: 1.02rem;
-  font-weight: 600;
-  color: #3a2a1c;
-  margin-bottom: 0.4rem;
+.howto__title {
+  margin: 0;
+  font-family: var(--font-display), Cabin, Georgia, serif;
+  font-size: clamp(0.82rem, 1.4vw, 0.98rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--howto-ink);
+  line-height: 1.25;
 }
 
-.howto__steps p {
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #6b5648;
-  line-height: 1.55;
-  max-width: 16rem;
-  margin-inline: auto;
+.howto__rule {
+  display: block;
+  width: 2.4rem;
+  height: 1px;
+  background: var(--howto-gold);
+  position: relative;
+  opacity: 0.85;
+}
+
+.howto__rule::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--howto-gold);
+  transform: translate(-50%, -50%);
+}
+
+.howto__text {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--howto-muted);
+  line-height: 1.45;
+  max-width: 13.5rem;
 }
 
 @media (max-width: 900px) {
   .howto__steps {
     grid-template-columns: repeat(2, 1fr);
-    row-gap: 2.5rem;
+    row-gap: 1.75rem;
   }
 
-  .howto__steps li:nth-child(2)::before,
   .howto__steps li:nth-child(2)::after,
-  .howto__steps li:nth-child(4)::before,
-  .howto__steps li:nth-child(4)::after {
+  .howto__steps li:nth-child(2) .howto__arrow,
+  .howto__steps li:nth-child(4)::after,
+  .howto__steps li:nth-child(4) .howto__arrow {
     display: none;
   }
 }
 
 @media (max-width: 560px) {
+  .howto {
+    padding: 1.75rem 0;
+  }
+
+  .howto__head {
+    margin-bottom: 1.5rem;
+  }
+
   .howto__steps {
     grid-template-columns: 1fr;
-    row-gap: 2.25rem;
+    row-gap: 1.75rem;
   }
 
   .howto__steps li:not(:last-child)::after {
     display: none;
   }
 
-  .howto__steps li:not(:last-child)::before {
+  .howto__steps li .howto__arrow {
+    display: grid;
     top: auto;
-    bottom: -1.7rem;
+    bottom: -1.35rem;
     right: auto;
     left: 50%;
     transform: translateX(-50%) rotate(90deg);
-  }
-
-  .howto__card {
-    width: 9.5rem;
-    height: 9.5rem;
   }
 }

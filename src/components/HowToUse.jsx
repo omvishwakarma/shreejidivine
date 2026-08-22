@@ -1,30 +1,32 @@
+'use client'
+
 import Image from 'next/image'
 import './HowToUse.css'
 
 const steps = [
   {
-    num: '01',
+    id: 'choose',
     title: 'Choose Your Stone',
     text: 'Place the aroma stone on a clean, dry surface.',
-    image: '/images/howto/01-choose-stone.jpg',
+    icon: '/images/howto/icons/step-1.png',
   },
   {
-    num: '02',
+    id: 'oil',
     title: 'Add The Oil',
     text: 'Add 3–5 drops of Shreeji Divine fragrance oil.',
-    image: '/images/howto/02-add-oil.jpg',
+    icon: '/images/howto/icons/step-2.png',
   },
   {
-    num: '03',
+    id: 'enjoy',
     title: 'Place & Enjoy',
     text: 'Set it in your space — aroma spreads in minutes.',
-    image: '/images/howto/03-place-enjoy.jpg',
+    icon: '/images/howto/icons/step-3.png',
   },
   {
-    num: '04',
+    id: 'refill',
     title: 'Refill When Fades',
     text: 'Add 2–3 drops again when the fragrance softens.',
-    image: '/images/howto/04-refill.jpg',
+    icon: '/images/howto/icons/step-4.png',
   },
 ]
 
@@ -61,6 +63,23 @@ function LotusMark() {
   )
 }
 
+function StepArrow() {
+  return (
+    <span className="howto__arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10.5" stroke="currentColor" strokeWidth="1.4" />
+        <path
+          d="M10.2 7.5L14.7 12l-4.5 4.5"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  )
+}
+
 export default function HowToUse() {
   return (
     <section className="howto" id="how-to-use" aria-labelledby="howto-heading">
@@ -77,20 +96,20 @@ export default function HowToUse() {
 
         <ol className="howto__steps">
           {steps.map((s, i) => (
-            <li key={s.num} className={`reveal reveal-delay-${(i % 4) + 1}`}>
-              <div className="howto__card">
-                <span className="howto__num">{s.num}</span>
-                <span className="howto__circle">
-                  <Image
-                    src={s.image}
-                    alt={s.title}
-                    fill
-                    sizes="(max-width: 800px) 42vw, 180px"
-                  />
-                </span>
-              </div>
-              <h3>{s.title}</h3>
-              <p>{s.text}</p>
+            <li key={s.id} className={`reveal reveal-delay-${(i % 4) + 1}`}>
+              <span className="howto__icon">
+                <Image
+                  src={s.icon}
+                  alt=""
+                  width={160}
+                  height={160}
+                  sizes="(max-width: 900px) 22vw, 110px"
+                />
+              </span>
+              {i < steps.length - 1 ? <StepArrow /> : null}
+              <h3 className="howto__title">{s.title}</h3>
+              <span className="howto__rule" aria-hidden="true" />
+              <p className="howto__text">{s.text}</p>
             </li>
           ))}
         </ol>
