@@ -29,6 +29,6 @@ export const SITE_KEYWORDS = [
 export const CONTACT_EMAIL = 'hello@shreejidivinearoma.com'
 
 export const SOCIAL = {
-  instagram: 'https://www.instagram.com/shreejidivinearoma',
-  instagramHandle: '@shreejidivinearoma',
+  instagram: 'https://www.instagram.com/shreeji.divine',
+  instagramHandle: '@shreeji.divine',
 }

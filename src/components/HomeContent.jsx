@@ -6,7 +6,6 @@ import Hero from './Hero'
 import TrustBar from './TrustBar'
 import Collections from './Collections'
 import BestSellers from './BestSellers'
-import Purpose from './Purpose'
 import Testimonials from './Testimonials'
 import HowToUse from './HowToUse'
 import InstagramShop from './InstagramShop'
@@ -63,7 +62,6 @@ export default function HomeContent() {
         <Collections />
         <InstagramShop />
         <BestSellers />
-        <Purpose />
         <Testimonials />
         <HowToUse />
         <InstagramStrip />

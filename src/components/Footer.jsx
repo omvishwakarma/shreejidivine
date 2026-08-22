@@ -42,7 +42,7 @@ export default function Footer() {
             Quick links
           </h2>
           <Link href="/shop">Shop</Link>
-          <Link href="/#purpose">Our Story</Link>
+          <Link href="/#testimonials">Our Story</Link>
           <Link href="/#how-to-use">How to Use</Link>
           <Link href="/cart">Cart</Link>
           <Link href="/profile">My Account</Link>

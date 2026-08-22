@@ -149,7 +149,7 @@ export default function StoreHeader({ promo = true }) {
               </div>
             ))}
             <Link href="/#products">Best Sellers</Link>
-            <Link href="/#purpose">About us</Link>
+            <Link href="/#testimonials">About us</Link>
           </nav>
 
           <Link href="/" className="store-header__brand" aria-label="Shreeji Divine home">
@@ -239,7 +239,7 @@ export default function StoreHeader({ promo = true }) {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/#purpose" className="menu-drawer__item" onClick={closeDrawer}>
+                  <Link href="/#testimonials" className="menu-drawer__item" onClick={closeDrawer}>
                     About us
                   </Link>
                 </li>
