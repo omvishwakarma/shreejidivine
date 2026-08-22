@@ -5,11 +5,11 @@ import StoreHeader from './StoreHeader'
 import Hero from './Hero'
 import TrustBar from './TrustBar'
 import Collections from './Collections'
-import BrandBanner from './BrandBanner'
 import BestSellers from './BestSellers'
 import Purpose from './Purpose'
 import Testimonials from './Testimonials'
 import HowToUse from './HowToUse'
+import InstagramShop from './InstagramShop'
 import InstagramStrip from './InstagramStrip'
 import Footer from './Footer'
 
@@ -61,7 +61,7 @@ export default function HomeContent() {
         <Hero />
         <TrustBar />
         <Collections />
-        <BrandBanner />
+        <InstagramShop />
         <BestSellers />
         <Purpose />
         <Testimonials />

@@ -11,6 +11,7 @@ const links = [
   { href: '/admin/categories', label: 'Categories' },
   { href: '/admin/orders', label: 'Orders' },
   { href: '/admin/coupons', label: 'Coupons' },
+  { href: '/admin/instagram-shop', label: 'Instagram Shop' },
   { href: '/admin/users', label: 'Customers' },
   { href: '/admin/settings', label: 'Settings' },
 ]

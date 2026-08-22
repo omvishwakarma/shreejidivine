@@ -1,0 +1,256 @@
+.ig-shop {
+  --ig-banner: #6b3a22;
+  --ig-cream: #f7efe4;
+  background: #f3ebe0;
+  padding-bottom: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.ig-shop__banner {
+  background: linear-gradient(180deg, #7a4328 0%, #5c301c 100%);
+  color: var(--ig-cream);
+  text-align: center;
+  padding: 1.75rem 1rem 1.9rem;
+}
+
+.ig-shop__values {
+  margin: 0 0 0.65rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.82;
+  font-weight: 400;
+}
+
+.ig-shop__title {
+  margin: 0;
+  font-family: var(--font-display), Cabin, Georgia, serif;
+  font-size: clamp(1.85rem, 4vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: #f7efe4;
+}
+
+.ig-shop__subtitle {
+  margin: 0.85rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(247, 239, 228, 0.92);
+}
+
+.ig-shop__flourish {
+  width: 3.5rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(247, 239, 228, 0.55), transparent);
+  position: relative;
+}
+
+.ig-shop__flourish::before {
+  content: '✦';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.55rem;
+  color: rgba(247, 239, 228, 0.7);
+  background: #5c301c;
+  padding: 0 0.2rem;
+}
+
+.ig-shop__stage {
+  position: relative;
+  margin-top: -1.15rem;
+  padding: 0 clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.ig-shop__rail {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 1.5rem max(1rem, calc((100% - 1180px) / 2)) 0.5rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ig-shop__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.ig-shop__card {
+  flex: 0 0 min(72vw, 260px);
+  scroll-snap-align: center;
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #1a120e;
+  aspect-ratio: 9 / 16;
+  box-shadow: 0 16px 40px rgba(43, 30, 22, 0.18);
+}
+
+.ig-shop__card--skel {
+  background: linear-gradient(110deg, #e8ddd0 20%, #f4ebe0 40%, #e8ddd0 60%);
+  background-size: 200% 100%;
+  animation: ig-shop-shimmer 1.2s linear infinite;
+}
+
+@keyframes ig-shop-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.ig-shop__media {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: #1a120e;
+  display: block;
+}
+
+.ig-shop__media img,
+.ig-shop__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.ig-shop__badge {
+  position: absolute;
+  z-index: 2;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.ig-shop__product {
+  position: absolute;
+  z-index: 3;
+  left: 0.65rem;
+  right: 0.65rem;
+  bottom: 0.65rem;
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.55rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s var(--ease-out, ease);
+}
+
+.ig-shop__product:hover {
+  transform: translateY(-2px);
+}
+
+.ig-shop__product-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 0.45rem;
+  object-fit: cover;
+  background: #ebe0d0;
+}
+
+.ig-shop__product-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.ig-shop__product-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #212326;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ig-shop__product-brand {
+  font-size: 0.68rem;
+  color: #5c5f66;
+  font-weight: 500;
+}
+
+.ig-shop__product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+}
+
+.ig-shop__product-price s {
+  font-size: 0.68rem;
+  color: #8a8580;
+}
+
+.ig-shop__product-price strong {
+  font-size: 0.82rem;
+  color: #1a1b18;
+  font-weight: 700;
+}
+
+.ig-shop__nav {
+  position: absolute;
+  top: 42%;
+  z-index: 5;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: none;
+  border-radius: 50%;
+  background: #111;
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.ig-shop__nav--prev {
+  left: max(0.35rem, calc((100% - 1180px) / 2 - 0.25rem));
+}
+
+.ig-shop__nav--next {
+  right: max(0.35rem, calc((100% - 1180px) / 2 - 0.25rem));
+}
+
+.ig-shop__foot {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .ig-shop__nav {
+    display: none;
+  }
+
+  .ig-shop__card {
+    flex-basis: min(78vw, 280px);
+  }
+}

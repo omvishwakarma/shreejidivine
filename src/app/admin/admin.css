@@ -365,7 +365,16 @@
   background: #1a120e;
 }
 
-.admin-media-card.is-portrait .admin-media-card__preview video {
+.admin-media-card__preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #ebe0d0;
+}
+
+.admin-media-card.is-portrait .admin-media-card__preview video,
+.admin-media-card.is-portrait .admin-media-card__preview img {
   aspect-ratio: 3 / 4;
   max-width: 240px;
   margin-inline: auto;
@@ -462,6 +471,117 @@
   margin: 0;
   color: var(--admin-muted);
   font-size: 0.88rem;
+}
+
+.admin-empty-preview {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 160px;
+  padding: 1rem;
+  text-align: center;
+  color: var(--admin-muted);
+  font-size: 0.85rem;
+  background: #f6f1ea;
+}
+
+.admin-card__head .admin-toggle {
+  padding: 0.45rem 0.7rem;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.admin-card__head .admin-row-actions {
+  align-items: center;
+}
+
+.admin-field-hint {
+  display: flex;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.admin-ig-look-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.admin-ig-look-cell__thumb {
+  width: 44px;
+  height: 58px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a120e;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.admin-ig-look-cell__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-ig-look-cell__product {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #ebe0d0;
+}
+
+.admin-ig-look-cell__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.admin-ig-look-cell__meta strong {
+  font-size: 0.9rem;
+}
+
+.admin-ig-look-cell__link {
+  font-size: 0.78rem;
+  color: var(--admin-accent, #b5502e);
+  text-decoration: none;
+}
+
+.admin-ig-look-cell__link:hover {
+  text-decoration: underline;
+}
+
+.admin-muted {
+  color: var(--admin-muted);
+}
+
+.admin-status {
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-status.is-on {
+  background: rgba(46, 125, 50, 0.1);
+  border-color: rgba(46, 125, 50, 0.28);
+  color: #2e7d32;
+}
+
+.admin-status.is-off {
+  background: rgba(120, 120, 120, 0.08);
+  color: var(--admin-muted);
 }
 
 .admin-settings__form {
