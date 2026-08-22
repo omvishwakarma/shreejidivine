@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
 
@@ -22,6 +22,14 @@ const empty = {
   active: true,
 }
 
+function slugify(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([])
   const [form, setForm] = useState(empty)
@@ -30,12 +38,16 @@ export default function AdminProductsPage() {
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [activeFilter, setActiveFilter] = useState('all')
   const [catTree, setCatTree] = useState([])
+  const [loading, setLoading] = useState(true)
   const fileRef = useRef(null)
   const formRef = useRef(null)
+  const fileInputId = useId()
+  const slugTouched = useRef(false)
 
   async function load() {
     const [data, cats] = await Promise.all([
@@ -50,7 +62,9 @@ export default function AdminProductsPage() {
   }
 
   useEffect(() => {
-    load().catch((err) => setError(err.message))
+    load()
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
   }, [])
 
   const filtered = useMemo(() => {
@@ -66,7 +80,15 @@ export default function AdminProductsPage() {
       if (activeFilter === 'active' && p.active === false) return false
       if (activeFilter === 'inactive' && p.active !== false) return false
       if (!q) return true
-      const hay = [p.name, p.slug, p.tagline, p.badge, p.description, p.categorySlug, p.subcategorySlug]
+      const hay = [
+        p.name,
+        p.slug,
+        p.tagline,
+        p.badge,
+        p.description,
+        p.categorySlug,
+        p.subcategorySlug,
+      ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase()
@@ -79,9 +101,21 @@ export default function AdminProductsPage() {
     [catTree, form.categorySlug]
   )
 
+  const stats = useMemo(() => {
+    const active = products.filter((p) => p.active !== false).length
+    const lowStock = products.filter((p) => Number(p.stock) <= 5).length
+    return {
+      total: products.length,
+      active,
+      inactive: products.length - active,
+      lowStock,
+    }
+  }, [products])
+
   function openAdd() {
     setEditingId(null)
     setForm(empty)
+    slugTouched.current = false
     setError('')
     setMsg('')
     setFormOpen(true)
@@ -90,6 +124,7 @@ export default function AdminProductsPage() {
 
   function openEdit(p) {
     setEditingId(p.id)
+    slugTouched.current = true
     setForm({
       slug: p.slug,
       name: p.name,
@@ -117,6 +152,7 @@ export default function AdminProductsPage() {
     setFormOpen(false)
     setEditingId(null)
     setForm(empty)
+    slugTouched.current = false
     setError('')
     setMsg('')
   }
@@ -145,6 +181,7 @@ export default function AdminProductsPage() {
     e.preventDefault()
     setError('')
     setMsg('')
+    setSaving(true)
     const payload = {
       ...form,
       price: Number(form.price),
@@ -163,30 +200,50 @@ export default function AdminProductsPage() {
           method: 'PATCH',
           body: JSON.stringify(payload),
         })
+        setMsg('Product updated')
       } else {
         await adminApi('/api/products', { method: 'POST', body: JSON.stringify(payload) })
+        setMsg('Product created')
       }
       closeForm()
       await load()
     } catch (err) {
       setError(err.message)
+    } finally {
+      setSaving(false)
     }
   }
 
   async function remove(id) {
     if (!confirm('Delete this product?')) return
-    await adminApi(`/api/products/${id}`, { method: 'DELETE' })
-    if (editingId === id) closeForm()
-    await load()
+    try {
+      await adminApi(`/api/products/${id}`, { method: 'DELETE' })
+      if (editingId === id) closeForm()
+      await load()
+      setMsg('Product deleted')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  function categoryLabel(p) {
+    return (
+      [p.categorySlug, p.subcategorySlug].filter(Boolean).join(' / ') || p.category || 'Uncategorized'
+    )
+  }
+
+  if (loading) {
+    return <p className="admin-page-sub">Loading products…</p>
   }
 
   return (
-    <div>
+    <div className="admin-products">
       <div className="admin-page-head">
         <div>
+          <p className="admin-kicker">Catalog</p>
           <h1 className="admin-page-title">Products</h1>
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            Create and manage catalog items
+            Create, edit, and organize your aroma stone catalog
           </p>
         </div>
         {!formOpen ? (
@@ -196,163 +253,287 @@ export default function AdminProductsPage() {
         ) : null}
       </div>
 
+      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
+      {msg && !formOpen ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
+
+      <div className="admin-stats admin-stats--products">
+        <div className="admin-stat-card">
+          <span>Total</span>
+          <strong>{stats.total}</strong>
+        </div>
+        <div className="admin-stat-card">
+          <span>Active</span>
+          <strong>{stats.active}</strong>
+        </div>
+        <div className="admin-stat-card">
+          <span>Inactive</span>
+          <strong>{stats.inactive}</strong>
+        </div>
+        <div className="admin-stat-card">
+          <span>Low stock</span>
+          <strong>{stats.lowStock}</strong>
+        </div>
+      </div>
+
       {formOpen ? (
-        <div className="admin-card" ref={formRef}>
-          <h2>{editingId ? 'Edit Product' : 'Add Product'}</h2>
-          <form className="admin-form-grid" onSubmit={onSubmit}>
-            <div className="admin-form-grid two">
-              <div className="admin-field">
-                <label>Name</label>
-                <input
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                />
-              </div>
-              <div className="admin-field">
-                <label>Slug</label>
-                <input
-                  required
-                  value={form.slug}
-                  onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                />
-              </div>
+        <section className="admin-card admin-card--lg admin-product-form" ref={formRef}>
+          <div className="admin-card__head">
+            <div>
+              <h2>{editingId ? 'Edit product' : 'Add product'}</h2>
+              <p>
+                {editingId
+                  ? 'Update pricing, media, and category details.'
+                  : 'Fill in the essentials to publish a new catalog item.'}
+              </p>
             </div>
-            <div className="admin-form-grid two">
-              <div className="admin-field">
-                <label>Price (INR)</label>
-                <input
-                  type="number"
-                  required
-                  value={form.price}
-                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                />
-              </div>
-              <div className="admin-field">
-                <label>Compare at</label>
-                <input
-                  type="number"
-                  value={form.compareAt}
-                  onChange={(e) => setForm((f) => ({ ...f, compareAt: e.target.value }))}
-                />
-              </div>
-            </div>
+            <button type="button" className="admin-btn admin-btn-ghost" onClick={closeForm}>
+              Close
+            </button>
+          </div>
 
-            <div className="admin-field">
-              <label>Product image</label>
-              <div className="admin-image-upload">
-                <div className="admin-image-upload__preview">
-                  {form.image ? (
-                    <Image
-                      src={form.image}
-                      alt="Product preview"
-                      width={160}
-                      height={160}
-                      unoptimized
+          <form onSubmit={onSubmit}>
+            <div className="admin-product-form__layout">
+              <div className="admin-product-form__main">
+                <div className="admin-form-section">
+                  <h3>Basics</h3>
+                  <div className="admin-form-grid two">
+                    <label className="admin-field">
+                      <span>Name</span>
+                      <input
+                        required
+                        value={form.name}
+                        onChange={(e) => {
+                          const name = e.target.value
+                          setForm((f) => ({
+                            ...f,
+                            name,
+                            slug: slugTouched.current ? f.slug : slugify(name),
+                          }))
+                        }}
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Slug</span>
+                      <input
+                        required
+                        value={form.slug}
+                        onChange={(e) => {
+                          slugTouched.current = true
+                          setForm((f) => ({ ...f, slug: e.target.value }))
+                        }}
+                      />
+                    </label>
+                    <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
+                      <span>Tagline</span>
+                      <input
+                        value={form.tagline}
+                        onChange={(e) => setForm((f) => ({ ...f, tagline: e.target.value }))}
+                        placeholder="Short line under the product name"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="admin-form-section">
+                  <h3>Pricing & stock</h3>
+                  <div className="admin-form-grid two">
+                    <label className="admin-field">
+                      <span>Price (₹)</span>
+                      <input
+                        type="number"
+                        required
+                        min="0"
+                        value={form.price}
+                        onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Compare at (₹)</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={form.compareAt}
+                        onChange={(e) => setForm((f) => ({ ...f, compareAt: e.target.value }))}
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Stock</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={form.stock}
+                        onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Badge</span>
+                      <input
+                        value={form.badge}
+                        onChange={(e) => setForm((f) => ({ ...f, badge: e.target.value }))}
+                        placeholder="Best seller, New…"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="admin-form-section">
+                  <h3>Organization</h3>
+                  <div className="admin-form-grid two">
+                    <label className="admin-field">
+                      <span>Category</span>
+                      <select
+                        value={form.categorySlug}
+                        onChange={(e) =>
+                          setForm((f) => ({
+                            ...f,
+                            categorySlug: e.target.value,
+                            subcategorySlug: '',
+                            category: e.target.value === 'divine' ? 'kits' : 'singles',
+                          }))
+                        }
+                      >
+                        <option value="">— Select —</option>
+                        {catTree.map((c) => (
+                          <option key={c.id} value={c.slug}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="admin-field">
+                      <span>Subcategory</span>
+                      <select
+                        value={form.subcategorySlug}
+                        onChange={(e) =>
+                          setForm((f) => ({ ...f, subcategorySlug: e.target.value }))
+                        }
+                        disabled={!selectedParent}
+                      >
+                        <option value="">— Optional —</option>
+                        {(selectedParent?.children || []).map((c) => (
+                          <option key={c.id} value={c.slug}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="admin-form-section">
+                  <h3>Details</h3>
+                  <div className="admin-form-grid">
+                    <label className="admin-field">
+                      <span>Description</span>
+                      <textarea
+                        rows={4}
+                        value={form.description}
+                        onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Highlights</span>
+                      <input
+                        value={form.highlights}
+                        onChange={(e) => setForm((f) => ({ ...f, highlights: e.target.value }))}
+                        placeholder="Comma separated, e.g. Smoke-free, Gift ready"
+                      />
+                      <small>Shown as short bullets on the product page</small>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <aside className="admin-product-form__side">
+                <div className="admin-form-section">
+                  <h3>Media</h3>
+                  <div className="admin-product-media">
+                    <div className="admin-product-media__preview">
+                      {form.image ? (
+                        <Image
+                          src={form.image}
+                          alt="Product preview"
+                          width={320}
+                          height={320}
+                          unoptimized
+                        />
+                      ) : (
+                        <span>No image</span>
+                      )}
+                    </div>
+                    <label
+                      htmlFor={fileInputId}
+                      className={`admin-dropzone ${uploading ? 'is-busy' : ''}`}
+                    >
+                      <input
+                        id={fileInputId}
+                        ref={fileRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={onUpload}
+                        disabled={uploading}
+                      />
+                      <span className="admin-dropzone__title">
+                        {uploading ? 'Uploading…' : 'Click to upload image'}
+                      </span>
+                      <span className="admin-dropzone__hint">JPG, PNG, WEBP, GIF · max 5MB</span>
+                    </label>
+                    <label className="admin-field">
+                      <span>Image path</span>
+                      <input
+                        required
+                        value={form.image}
+                        onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
+                        placeholder="/images/..."
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="admin-form-section">
+                  <h3>Visibility</h3>
+                  <label className="admin-toggle">
+                    <input
+                      type="checkbox"
+                      checked={form.active}
+                      onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
                     />
-                  ) : (
-                    <span>No image</span>
-                  )}
+                    <span>
+                      <strong>{form.active ? 'Active' : 'Inactive'}</strong>
+                      <small>
+                        {form.active
+                          ? 'Visible in shop and homepage'
+                          : 'Hidden from the storefront'}
+                      </small>
+                    </span>
+                  </label>
                 </div>
-                <div className="admin-image-upload__controls">
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={onUpload}
-                    disabled={uploading}
-                  />
-                  <p className="admin-image-upload__hint">
-                    {uploading ? 'Uploading…' : 'Browse JPG, PNG, WEBP, or GIF (max 5MB)'}
-                  </p>
-                  <label className="admin-image-upload__path-label">Or image path</label>
-                  <input
-                    required
-                    value={form.image}
-                    onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-                    placeholder="/images/..."
-                  />
-                </div>
-              </div>
+              </aside>
             </div>
 
-            <div className="admin-form-grid two">
-              <div className="admin-field">
-                <label>Category</label>
-                <select
-                  value={form.categorySlug}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      categorySlug: e.target.value,
-                      subcategorySlug: '',
-                      category: e.target.value === 'divine' ? 'kits' : 'singles',
-                    }))
-                  }
-                >
-                  <option value="">— Select —</option>
-                  {catTree.map((c) => (
-                    <option key={c.id} value={c.slug}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="admin-field">
-                <label>Subcategory</label>
-                <select
-                  value={form.subcategorySlug}
-                  onChange={(e) => setForm((f) => ({ ...f, subcategorySlug: e.target.value }))}
-                  disabled={!selectedParent}
-                >
-                  <option value="">— Optional —</option>
-                  {(selectedParent?.children || []).map((c) => (
-                    <option key={c.id} value={c.slug}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
+            {msg ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
-            <div className="admin-field">
-              <label>Stock</label>
-              <input
-                type="number"
-                value={form.stock}
-                onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
-              />
-            </div>
-            <div className="admin-field">
-              <label>Description</label>
-              <textarea
-                rows={3}
-                value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              />
-            </div>
-            <div className="admin-field">
-              <label>Highlights (comma separated)</label>
-              <input
-                value={form.highlights}
-                onChange={(e) => setForm((f) => ({ ...f, highlights: e.target.value }))}
-              />
-            </div>
-            {error ? <p className="admin-error">{error}</p> : null}
-            {msg ? <p className="admin-success">{msg}</p> : null}
-            <div className="admin-row-actions">
-              <button className="admin-btn admin-btn-primary" type="submit" disabled={uploading}>
-                {editingId ? 'Update' : 'Create'}
-              </button>
-              <button type="button" className="admin-btn admin-btn-ghost" onClick={closeForm}>
-                Cancel
-              </button>
+            <div className="admin-sticky-actions">
+              <p>{editingId ? 'Saving updates this product live.' : 'Create to add it to the catalog.'}</p>
+              <div className="admin-row-actions">
+                <button type="button" className="admin-btn admin-btn-ghost" onClick={closeForm}>
+                  Cancel
+                </button>
+                <button
+                  className="admin-btn admin-btn-primary"
+                  type="submit"
+                  disabled={uploading || saving}
+                >
+                  {saving ? 'Saving…' : editingId ? 'Update product' : 'Create product'}
+                </button>
+              </div>
             </div>
           </form>
-        </div>
+        </section>
       ) : null}
 
-      <div className="admin-toolbar">
+      <div className="admin-toolbar admin-toolbar--card">
         <input
           className="admin-search"
           type="search"
@@ -376,69 +557,125 @@ export default function AdminProductsPage() {
           <option value="inactive">Inactive</option>
         </select>
         <span className="admin-toolbar__count">
-          {filtered.length} / {products.length}
+          {filtered.length} shown
         </span>
       </div>
 
-      <div className="admin-card">
-        <h2>Catalog ({filtered.length})</h2>
+      <section className="admin-card admin-card--lg">
+        <div className="admin-card__head">
+          <div>
+            <h2>Catalog</h2>
+            <p>
+              {filtered.length} of {products.length} products
+            </p>
+          </div>
+        </div>
+
         {products.length === 0 ? (
-          <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            No products yet. Click Add product to create one.
-          </p>
+          <div className="admin-empty">
+            <strong>No products yet</strong>
+            <p>Create your first aroma stone or fragrance kit.</p>
+            <button type="button" className="admin-btn admin-btn-primary" onClick={openAdd}>
+              Add product
+            </button>
+          </div>
         ) : filtered.length === 0 ? (
-          <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            No products match your search
-          </p>
+          <div className="admin-empty">
+            <strong>No matches</strong>
+            <p>Try a different search or clear the filters.</p>
+          </div>
         ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Active</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p) => (
-                <tr key={p.id}>
-                  <td>
-                    <strong>{p.name}</strong>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--admin-muted)' }}>{p.slug}</div>
-                  </td>
-                  <td style={{ fontSize: '0.85rem' }}>
-                    {[p.categorySlug, p.subcategorySlug].filter(Boolean).join(' / ') || p.category || '—'}
-                  </td>
-                  <td>{formatINR(p.price)}</td>
-                  <td>{p.stock}</td>
-                  <td>{p.active ? 'Yes' : 'No'}</td>
-                  <td>
-                    <div className="admin-row-actions">
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-ghost"
-                        onClick={() => openEdit(p)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-btn admin-btn-danger"
-                        onClick={() => remove(p.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+          <div className="admin-table-wrap">
+            <table className="admin-table admin-table--products">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <div className="admin-product-cell">
+                        <div className="admin-product-cell__thumb">
+                          {p.image ? (
+                            <Image
+                              src={p.image}
+                              alt=""
+                              width={56}
+                              height={56}
+                              unoptimized
+                            />
+                          ) : null}
+                        </div>
+                        <div>
+                          <strong>{p.name}</strong>
+                          <div className="admin-product-cell__meta">{p.slug}</div>
+                          {p.badge ? <span className="admin-chip">{p.badge}</span> : null}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="admin-cat-pill">{categoryLabel(p)}</span>
+                    </td>
+                    <td>
+                      <div className="admin-price-cell">
+                        <strong>{formatINR(p.price)}</strong>
+                        {p.compareAt ? (
+                          <span className="admin-price-cell__compare">
+                            {formatINR(p.compareAt)}
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td>
+                      <span
+                        className={`admin-stock ${
+                          Number(p.stock) <= 5 ? 'is-low' : ''
+                        }`}
+                      >
+                        {p.stock}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`admin-status ${
+                          p.active !== false ? 'is-active' : 'is-inactive'
+                        }`}
+                      >
+                        {p.active !== false ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="admin-row-actions">
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-ghost"
+                          onClick={() => openEdit(p)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-danger"
+                          onClick={() => remove(p.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }

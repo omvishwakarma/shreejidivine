@@ -25,40 +25,43 @@ export default function AdminShell({ children }) {
       <aside className="admin-side">
         <div className="admin-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo.png" alt="Shreeji Divine" className="admin-brand__logo" />
+          <img
+            src="/images/logo-transparent.png"
+            alt="Shreeji Divine"
+            className="admin-brand__logo"
+          />
           <small>Admin Panel</small>
         </div>
-        {links.map((l) => {
-          const active = l.end ? pathname === l.href : pathname.startsWith(l.href)
-          return (
-            <Link key={l.href} href={l.href} className={active ? 'active' : ''}>
-              {l.label}
-            </Link>
-          )
-        })}
-        <div
-          style={{
-            marginTop: 'auto',
-            padding: '1rem 0.75rem 0',
-            fontSize: '0.8rem',
-            opacity: 0.6,
-          }}
-        >
-          {user?.email}
+
+        <nav className="admin-side__nav" aria-label="Admin">
+          {links.map((l) => {
+            const active = l.end ? pathname === l.href : pathname.startsWith(l.href)
+            return (
+              <Link key={l.href} href={l.href} className={active ? 'active' : ''}>
+                {l.label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className="admin-side__foot">
+          <div className="admin-side__user" title={user?.email || ''}>
+            {user?.email || 'Admin'}
+          </div>
+          <div className="admin-version" title="Deploy version">
+            v{APP_VERSION}
+          </div>
+          <button
+            type="button"
+            className="nav-btn"
+            onClick={() => {
+              clearAdminAuth()
+              router.replace('/admin/login')
+            }}
+          >
+            Logout
+          </button>
         </div>
-        <div className="admin-version" title="Deploy version">
-          v{APP_VERSION}
-        </div>
-        <button
-          type="button"
-          className="nav-btn"
-          onClick={() => {
-            clearAdminAuth()
-            router.replace('/admin/login')
-          }}
-        >
-          Logout
-        </button>
       </aside>
       <main className="admin-main">{children}</main>
     </div>

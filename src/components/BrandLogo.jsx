@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import './BrandLogo.css'
 
-const LOGO_W = 958
-const LOGO_H = 605
+const LOGO_W = 969
+const LOGO_H = 747
 
 /** Gold logo on transparent — visible on the light sticky header. */
 export default function BrandLogo({

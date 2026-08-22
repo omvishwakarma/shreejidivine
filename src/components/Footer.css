@@ -19,10 +19,11 @@
 }
 
 .footer__logo {
-  width: min(200px, 100%);
+  width: min(180px, 100%);
   height: auto;
   margin-bottom: 0.5rem;
   display: block;
+  background: transparent;
 }
 
 .footer__brand strong {

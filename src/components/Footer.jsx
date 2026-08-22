@@ -24,10 +24,10 @@ export default function Footer() {
       <div className="container footer__grid">
         <div className="footer__brand">
           <Image
-            src="/images/logo.png"
+            src="/images/logo-transparent.png"
             alt={SITE_NAME}
-            width={1024}
-            height={660}
+            width={969}
+            height={747}
             className="footer__logo"
             sizes="200px"
           />

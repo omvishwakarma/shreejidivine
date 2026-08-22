@@ -153,7 +153,7 @@ export default function StoreHeader({ promo = true }) {
           </nav>
 
           <Link href="/" className="store-header__brand" aria-label="Shreeji Divine home">
-            <BrandLogo height={scrolled ? 52 : 64} priority />
+            <BrandLogo height={scrolled ? 48 : 58} priority />
           </Link>
 
           <div className="store-header__actions">

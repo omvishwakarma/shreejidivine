@@ -12,7 +12,7 @@ export default function JsonLd() {
       '@type': 'ImageObject',
       url: `${SITE_URL}/images/logo.png`,
       width: 1024,
-      height: 660,
+      height: 1024,
     },
     description: SITE_DESCRIPTION,
     email: CONTACT_EMAIL,
