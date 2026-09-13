@@ -1,7 +1,7 @@
-import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/mongo/auth'
+import { storeUpload } from '@/lib/storage'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -62,21 +62,26 @@ export async function POST(request) {
     }
 
     const filename = safeName(file.name, isVideo ? 'hero' : 'image')
-    const dir = isVideo
-      ? path.join(process.cwd(), 'public', 'videos', 'uploads')
-      : path.join(process.cwd(), 'public', 'images', 'uploads')
-    await mkdir(dir, { recursive: true })
-
     const buffer = Buffer.from(await file.arrayBuffer())
-    await writeFile(path.join(dir, filename), buffer)
+    const stored = await storeUpload({
+      buffer,
+      filename,
+      contentType: file.type,
+      kind: isVideo ? 'video' : 'image',
+    })
 
-    const url = isVideo ? `/videos/uploads/${filename}` : `/images/uploads/${filename}`
-    return NextResponse.json({ url, filename, kind: isVideo ? 'video' : 'image' })
+    return NextResponse.json({
+      url: stored.url,
+      filename,
+      kind: isVideo ? 'video' : 'image',
+      provider: stored.provider,
+    })
   } catch (err) {
     console.error('[upload]', err)
+    const status = err?.code === 'NO_CLOUD_STORAGE' ? 503 : 500
     return NextResponse.json(
       { error: err.message || 'Upload failed' },
-      { status: 500 }
+      { status }
     )
   }
 }
