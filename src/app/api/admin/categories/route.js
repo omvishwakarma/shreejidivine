@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Category, slugifyCategory } from '@/lib/mongo/Category'
 import { ensureDefaultCategories, getCategoryTree } from '@/lib/categories'
+import { isSafePublicImage, safePublicImage } from '@/lib/media'
 
 export async function GET(request) {
   const gate = await requireAdmin(request)
@@ -59,12 +60,23 @@ export async function POST(request) {
       parent = parentDoc._id
     }
 
+    const image = String(data.image || '').trim()
+    if (image && !isSafePublicImage(image)) {
+      return NextResponse.json(
+        {
+          error:
+            'Invalid image path. Upload via admin or use a path like /images/uploads/... — desktop file paths are not allowed.',
+        },
+        { status: 400 }
+      )
+    }
+
     const category = await Category.create({
       name: data.name,
       slug,
       parent,
       description: data.description || '',
-      image: data.image || '',
+      image: safePublicImage(image, ''),
       sortOrder: data.sortOrder ?? 0,
       active: data.active !== false,
       showInNav: data.showInNav !== false,

@@ -7,6 +7,7 @@ import AddToCartButton from './AddToCartButton'
 import { api } from '../lib/api'
 import { formatINR } from '../lib/products'
 import { SITE_NAME } from '../lib/site'
+import { safePublicImage } from '../lib/media'
 import './BestSellers.css'
 
 function discountPct(price, compareAt) {
@@ -63,7 +64,7 @@ export default function BestSellers() {
                           ) : null}
                           <span className="ss-card__img-wrap">
                             <Image
-                              src={p.image}
+                              src={safePublicImage(p.image, '/images/aroma-variants.png')}
                               alt={p.name}
                               width={700}
                               height={700}

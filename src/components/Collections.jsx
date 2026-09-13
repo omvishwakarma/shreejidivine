@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { safePublicImage } from '../lib/media'
 import './Collections.css'
+
+const FALLBACK_IMAGE = '/images/aroma-collection.png'
 
 export default function Collections() {
   const [categories, setCategories] = useState([])
@@ -19,14 +22,17 @@ export default function Collections() {
             id: parent.id,
             name: parent.name,
             href: `/shop?category=${parent.slug}`,
-            image: parent.image || '/images/aroma-collection.png',
+            image: safePublicImage(parent.image, FALLBACK_IMAGE),
           })
           ;(parent.children || []).forEach((child) => {
             tiles.push({
               id: child.id,
               name: child.name,
               href: `/shop?category=${parent.slug}&subcategory=${child.slug}`,
-              image: child.image || parent.image || '/images/campaign/mogra-product.jpg',
+              image: safePublicImage(
+                child.image || parent.image,
+                '/images/campaign/mogra-product.jpg'
+              ),
             })
           })
         })

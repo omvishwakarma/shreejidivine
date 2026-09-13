@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Category, slugifyCategory } from '@/lib/mongo/Category'
 import { Product } from '@/lib/mongo/Product'
+import { isSafePublicImage, safePublicImage } from '@/lib/media'
 
 export async function PATCH(request, { params }) {
   const gate = await requireAdmin(request)
@@ -59,7 +60,19 @@ export async function PATCH(request, { params }) {
       }
     }
     if (data.description !== undefined) category.description = data.description
-    if (data.image !== undefined) category.image = data.image
+    if (data.image !== undefined) {
+      const image = String(data.image || '').trim()
+      if (image && !isSafePublicImage(image)) {
+        return NextResponse.json(
+          {
+            error:
+              'Invalid image path. Upload via admin or use a path like /images/uploads/... — desktop file paths are not allowed.',
+          },
+          { status: 400 }
+        )
+      }
+      category.image = safePublicImage(image, '')
+    }
     if (data.sortOrder !== undefined) category.sortOrder = data.sortOrder
     if (data.active !== undefined) category.active = data.active
     if (data.showInNav !== undefined) category.showInNav = data.showInNav

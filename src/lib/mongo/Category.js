@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { safePublicImage } from '@/lib/media'
 
 const categorySchema = new mongoose.Schema(
   {
@@ -25,7 +26,7 @@ categorySchema.methods.toJSONSafe = function () {
     slug: this.slug,
     parent: this.parent ? this.parent.toString() : null,
     description: this.description || '',
-    image: this.image || '',
+    image: safePublicImage(this.image, ''),
     sortOrder: this.sortOrder ?? 0,
     active: this.active !== false,
     showInNav: this.showInNav !== false,

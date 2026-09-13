@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { safePublicImage } from '@/lib/media'
 
 const productSchema = new mongoose.Schema(
   {
@@ -33,8 +34,10 @@ productSchema.methods.toPublicJSON = function () {
     tagline: this.tagline,
     price: this.price,
     compareAt: this.compareAt,
-    image: this.image,
-    gallery: this.gallery,
+    image: safePublicImage(this.image, '/images/aroma-variants.png'),
+    gallery: (this.gallery || [])
+      .map((g) => safePublicImage(g, ''))
+      .filter(Boolean),
     badge: this.badge,
     category: this.category,
     categorySlug: this.categorySlug || '',
