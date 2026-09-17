@@ -10,6 +10,11 @@ import AddToCartButton from '../../../components/AddToCartButton'
 import { api } from '../../../lib/api'
 import { formatINR } from '../../../lib/products'
 import { safePublicImage, safePublicMedia } from '../../../lib/media'
+import {
+  looksLikeHtml,
+  plainTextToHtml,
+  sanitizeProductHtml,
+} from '../../../lib/productHtml'
 import '../../ecom.css'
 import './product.css'
 
@@ -146,9 +151,17 @@ export default function ProductClient() {
                 <strong>{formatINR(product.price)}</strong>
                 {product.compareAt ? <s>{formatINR(product.compareAt)}</s> : null}
               </div>
-              <p className="ecom-lead" style={{ marginTop: '1rem' }}>
-                {product.description}
-              </p>
+              <div
+                className="ecom-lead product-detail__description"
+                style={{ marginTop: '1rem' }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeProductHtml(
+                    looksLikeHtml(product.description)
+                      ? product.description
+                      : plainTextToHtml(product.description)
+                  ),
+                }}
+              />
               <ul className="product-detail__highlights">
                 {(product.highlights || []).map((h) => (
                   <li key={h}>{h}</li>

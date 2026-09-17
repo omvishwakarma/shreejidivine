@@ -1012,6 +1012,114 @@
   text-transform: none;
 }
 
+.admin-field--full {
+  grid-column: 1 / -1;
+}
+
+.admin-rte {
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.admin-rte--loading {
+  padding: 1rem 0.9rem;
+  color: var(--admin-muted);
+  font-size: 0.9rem;
+}
+
+.admin-rte__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--admin-border);
+  background: #faf7f2;
+}
+
+.admin-rte__btn {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-ink);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.admin-rte__btn:hover:not(:disabled) {
+  background: #fff;
+  border-color: var(--admin-border);
+}
+
+.admin-rte__btn.is-active {
+  background: #fff;
+  border-color: rgba(181, 80, 46, 0.4);
+  color: var(--accent, #b5502e);
+}
+
+.admin-rte__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.admin-rte__sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 0.2rem 0.25rem;
+  background: var(--admin-border);
+}
+
+.admin-rte .ProseMirror {
+  min-height: 160px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.85rem 0.95rem;
+  outline: none;
+  font: inherit;
+  color: var(--admin-ink);
+  line-height: 1.55;
+}
+
+.admin-rte .ProseMirror p {
+  margin: 0 0 0.65em;
+}
+
+.admin-rte .ProseMirror h2,
+.admin-rte .ProseMirror h3 {
+  margin: 0.4em 0 0.5em;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.admin-rte .ProseMirror ul,
+.admin-rte .ProseMirror ol {
+  margin: 0 0 0.65em;
+  padding-left: 1.25rem;
+}
+
+.admin-rte .ProseMirror li {
+  margin: 0.2em 0;
+}
+
+.admin-rte .ProseMirror p.is-editor-empty:first-child::before,
+.admin-rte .ProseMirror p.is-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--admin-muted);
+  pointer-events: none;
+}
+
+.admin-rte:focus-within {
+  border-color: rgba(181, 80, 46, 0.45);
+  box-shadow: 0 0 0 3px rgba(181, 80, 46, 0.1);
+}
+
 .admin-image-upload {
   display: grid;
   grid-template-columns: 140px minmax(0, 1fr);

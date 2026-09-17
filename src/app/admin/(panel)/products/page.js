@@ -1,8 +1,15 @@
 'use client'
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
+import { plainTextToHtml } from '../../../../lib/productHtml'
+
+const AdminRichTextEditor = dynamic(() => import('../../../../components/AdminRichTextEditor'), {
+  ssr: false,
+  loading: () => <div className="admin-rte admin-rte--loading">Loading editor…</div>,
+})
 
 const empty = {
   slug: '',
@@ -149,7 +156,7 @@ export default function AdminProductsPage() {
       subcategorySlug: p.subcategorySlug || '',
       stock: p.stock,
       stone: p.stone || '',
-      description: p.description || '',
+      description: plainTextToHtml(p.description || ''),
       highlights: (p.highlights || []).join(', '),
       active: p.active !== false,
     })
@@ -493,14 +500,15 @@ export default function AdminProductsPage() {
                 <div className="admin-form-section">
                   <h3>Details</h3>
                   <div className="admin-form-grid">
-                    <label className="admin-field">
+                    <div className="admin-field admin-field--full">
                       <span>Description</span>
-                      <textarea
-                        rows={4}
+                      <AdminRichTextEditor
                         value={form.description}
-                        onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                        onChange={(html) => setForm((f) => ({ ...f, description: html }))}
+                        placeholder="Write product description…"
                       />
-                    </label>
+                      <small>Use the toolbar for bold, headings, and lists</small>
+                    </div>
                     <label className="admin-field">
                       <span>Highlights</span>
                       <input

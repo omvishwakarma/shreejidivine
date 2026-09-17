@@ -91,6 +91,37 @@
   padding-top: 0.25rem;
 }
 
+.product-detail__description p {
+  margin: 0 0 0.75em;
+}
+
+.product-detail__description p:last-child {
+  margin-bottom: 0;
+}
+
+.product-detail__description h2,
+.product-detail__description h3 {
+  margin: 1em 0 0.45em;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.product-detail__description ul,
+.product-detail__description ol {
+  margin: 0.5em 0 0.85em;
+  padding-left: 1.2rem;
+}
+
+.product-detail__description li {
+  margin: 0.25em 0;
+}
+
+.product-detail__description strong {
+  font-weight: 600;
+  color: var(--brown);
+}
+
 .product-detail__price {
   margin-top: 1rem;
   display: flex;
