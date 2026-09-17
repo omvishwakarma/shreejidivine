@@ -78,10 +78,12 @@ export async function POST(request) {
     })
   } catch (err) {
     console.error('[upload]', err)
+    let message = err.message || 'Upload failed'
+    if (/private store|public access on a private/i.test(message)) {
+      message =
+        'Vercel Blob store is private. Redeploy with the latest upload fix, or set BLOB_ACCESS=private. For product photos, a Public Blob store is recommended (Vercel → Storage → Blob).'
+    }
     const status = err?.code === 'NO_CLOUD_STORAGE' ? 503 : 500
-    return NextResponse.json(
-      { error: err.message || 'Upload failed' },
-      { status }
-    )
+    return NextResponse.json({ error: message }, { status })
   }
 }

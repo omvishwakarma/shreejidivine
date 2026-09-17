@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
-import { put } from '@vercel/blob'
+import { get, put } from '@vercel/blob'
 import { v2 as cloudinary } from 'cloudinary'
 
 function hasVercelBlob() {
@@ -23,6 +23,22 @@ export function isEphemeralFilesystem() {
   return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
 }
 
+/** `public` | `private` | `` (auto: try public, fall back to private) */
+function configuredBlobAccess() {
+  const value = String(process.env.BLOB_ACCESS || '').toLowerCase()
+  if (value === 'public' || value === 'private') return value
+  return ''
+}
+
+function isPrivateStoreError(err) {
+  const msg = String(err?.message || err || '')
+  return /private store|public access on a private/i.test(msg)
+}
+
+function proxyUrlForPathname(pathname) {
+  return `/api/blob?pathname=${encodeURIComponent(pathname)}`
+}
+
 function configureCloudinary() {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -32,9 +48,21 @@ function configureCloudinary() {
   })
 }
 
+async function putToVercelBlob(pathname, buffer, contentType, access) {
+  return put(pathname, buffer, {
+    access,
+    contentType,
+    addRandomSuffix: false,
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  })
+}
+
 /**
  * Persist an uploaded file and return a public URL.
  * Prefers Vercel Blob, then Cloudinary, then local public/ (dev only).
+ *
+ * Product images need browser-readable URLs. If the Blob store is private,
+ * we upload with access:private and return a same-origin `/api/blob` proxy URL.
  */
 export async function storeUpload({
   buffer,
@@ -43,15 +71,38 @@ export async function storeUpload({
   kind = 'image',
 }) {
   const folder = kind === 'video' ? 'videos' : 'images'
+  const pathname = `${folder}/${filename}`
 
   if (hasVercelBlob()) {
-    const blob = await put(`${folder}/${filename}`, buffer, {
-      access: 'public',
-      contentType,
-      addRandomSuffix: false,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-    })
-    return { url: blob.url, provider: 'vercel-blob' }
+    const preferred = configuredBlobAccess()
+    const order =
+      preferred === 'private'
+        ? ['private']
+        : preferred === 'public'
+          ? ['public']
+          : ['public', 'private']
+
+    let lastError
+    for (const access of order) {
+      try {
+        const blob = await putToVercelBlob(pathname, buffer, contentType, access)
+        if (access === 'private') {
+          return {
+            url: proxyUrlForPathname(blob.pathname || pathname),
+            pathname: blob.pathname || pathname,
+            provider: 'vercel-blob-private',
+          }
+        }
+        return { url: blob.url, provider: 'vercel-blob' }
+      } catch (err) {
+        lastError = err
+        if (access === 'public' && isPrivateStoreError(err) && order.includes('private')) {
+          continue
+        }
+        throw err
+      }
+    }
+    throw lastError
   }
 
   if (hasCloudinary()) {
@@ -92,4 +143,25 @@ export async function storeUpload({
   const url =
     kind === 'video' ? `/videos/uploads/${filename}` : `/images/uploads/${filename}`
   return { url, provider: 'local' }
+}
+
+/**
+ * Stream a private Vercel Blob by pathname (used by /api/blob).
+ */
+export async function readPrivateBlob(pathname) {
+  if (!pathname || pathname.includes('..') || pathname.startsWith('/')) {
+    const err = new Error('Invalid pathname')
+    err.code = 'INVALID_PATH'
+    throw err
+  }
+  const result = await get(pathname, {
+    access: 'private',
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  })
+  if (!result?.stream) {
+    const err = new Error('Blob not found')
+    err.code = 'NOT_FOUND'
+    throw err
+  }
+  return result
 }
