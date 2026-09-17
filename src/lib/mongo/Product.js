@@ -1,5 +1,24 @@
 import mongoose from 'mongoose'
 import { safePublicImage, safePublicMedia } from '@/lib/media'
+import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
+
+const colourOptionSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    hex: { type: String, default: '' },
+    image: { type: String, default: '' },
+  },
+  { _id: false }
+)
+
+const fragranceOptionSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+    image: { type: String, default: '' },
+  },
+  { _id: false }
+)
 
 const productSchema = new mongoose.Schema(
   {
@@ -8,23 +27,19 @@ const productSchema = new mongoose.Schema(
     tagline: { type: String, default: '' },
     price: { type: Number, required: true, min: 0 },
     compareAt: { type: Number, default: null },
-    /** Primary / cover image */
     image: { type: String, required: true },
-    /** Extra product images (may include primary) */
     gallery: [{ type: String }],
-    /** Optional product video (one) */
     video: { type: String, default: '' },
     badge: { type: String, default: null },
-    /** Legacy free-string (kits/singles) — kept for older products */
     category: { type: String, default: 'singles' },
-    /** Parent category slug (e.g. divine, lifestyle) */
     categorySlug: { type: String, default: '', index: true },
-    /** Child category slug (e.g. fragrance-oils) */
     subcategorySlug: { type: String, default: '', index: true },
     stock: { type: Number, default: 0 },
     stone: { type: String, default: '' },
     description: { type: String, default: '' },
     highlights: [{ type: String }],
+    colours: { type: [colourOptionSchema], default: [] },
+    fragrances: { type: [fragranceOptionSchema], default: [] },
     active: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -55,11 +70,17 @@ productSchema.methods.toPublicJSON = function () {
     stone: this.stone,
     description: this.description,
     highlights: this.highlights,
+    colours: normalizeColours(this.colours),
+    fragrances: normalizeFragrances(this.fragrances),
     active: this.active,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   }
 }
 
-export const Product =
-  mongoose.models.Product || mongoose.model('Product', productSchema)
+// Recompile when schema changes (avoids stale model without colours/fragrances)
+if (mongoose.models.Product) {
+  delete mongoose.models.Product
+}
+
+export const Product = mongoose.model('Product', productSchema)

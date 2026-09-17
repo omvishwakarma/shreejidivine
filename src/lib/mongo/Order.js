@@ -7,6 +7,8 @@ const orderItemSchema = new mongoose.Schema({
   price: Number,
   quantity: Number,
   image: String,
+  colour: { type: String, default: '' },
+  fragrance: { type: String, default: '' },
 })
 
 const orderSchema = new mongoose.Schema(
@@ -83,6 +85,8 @@ orderSchema.methods.toJSONSafe = function () {
       price: i.price,
       quantity: i.quantity,
       image: i.image,
+      colour: i.colour || '',
+      fragrance: i.fragrance || '',
     })),
     user: this.user?.name
       ? { id: this.user._id?.toString(), name: this.user.name, email: this.user.email }

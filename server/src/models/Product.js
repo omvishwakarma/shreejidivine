@@ -1,5 +1,23 @@
 import mongoose from 'mongoose'
 
+const colourOptionSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    hex: { type: String, default: '' },
+    image: { type: String, default: '' },
+  },
+  { _id: false }
+)
+
+const fragranceOptionSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    price: { type: Number, required: true, min: 0 },
+    image: { type: String, default: '' },
+  },
+  { _id: false }
+)
+
 const productSchema = new mongoose.Schema(
   {
     slug: { type: String, required: true, unique: true, trim: true },
@@ -16,6 +34,8 @@ const productSchema = new mongoose.Schema(
     stone: { type: String, default: '' },
     description: { type: String, default: '' },
     highlights: [{ type: String }],
+    colours: { type: [colourOptionSchema], default: [] },
+    fragrances: { type: [fragranceOptionSchema], default: [] },
     active: { type: Boolean, default: true },
   },
   { timestamps: true }
@@ -38,8 +58,14 @@ productSchema.methods.toPublicJSON = function () {
     stone: this.stone,
     description: this.description,
     highlights: this.highlights,
+    colours: this.colours || [],
+    fragrances: this.fragrances || [],
     active: this.active,
   }
+}
+
+if (mongoose.models.Product) {
+  delete mongoose.models.Product
 }
 
 export const Product = mongoose.model('Product', productSchema)

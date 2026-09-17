@@ -38,6 +38,24 @@ router.post('/', adminRequired, async (req, res) => {
       stone: z.string().optional(),
       description: z.string().optional(),
       highlights: z.array(z.string()).optional(),
+      colours: z
+        .array(
+          z.object({
+            name: z.string().min(1),
+            hex: z.string().optional(),
+            image: z.string().optional(),
+          })
+        )
+        .optional(),
+      fragrances: z
+        .array(
+          z.object({
+            name: z.string().min(1),
+            price: z.number().min(0),
+            image: z.string().optional(),
+          })
+        )
+        .optional(),
       active: z.boolean().optional(),
     })
     const data = schema.parse(req.body)

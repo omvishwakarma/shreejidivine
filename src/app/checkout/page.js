@@ -129,7 +129,12 @@ export default function CheckoutPage() {
     const data = await api('/api/orders', {
       method: 'POST',
       body: JSON.stringify({
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          colour: i.colour || '',
+          fragrance: i.fragrance || '',
+        })),
         shipping,
         paymentMethod: 'COD',
         notes,
@@ -146,7 +151,12 @@ export default function CheckoutPage() {
     const payload = await api('/api/payments/razorpay/create', {
       method: 'POST',
       body: JSON.stringify({
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        items: items.map((i) => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          colour: i.colour || '',
+          fragrance: i.fragrance || '',
+        })),
         shipping,
         notes,
         saveAddress,
@@ -518,7 +528,10 @@ export default function CheckoutPage() {
                       </button>
                       <div className="ck-dots" aria-hidden="true">
                         {items.map((item, idx) => (
-                          <span key={item.productId} className={idx === activeItem ? 'is-on' : ''} />
+                          <span
+                            key={item.lineKey || item.productId}
+                            className={idx === activeItem ? 'is-on' : ''}
+                          />
                         ))}
                       </div>
                     </>
@@ -527,6 +540,16 @@ export default function CheckoutPage() {
 
                 <div className="ck-product__body">
                   <h3>{current.name}</h3>
+                  {current.colour || current.fragrance ? (
+                    <p>
+                      {[
+                        current.colour && `Colour: ${current.colour}`,
+                        current.fragrance && `Fragrance: ${current.fragrance}`,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  ) : null}
                   <p>
                     Qty {current.quantity}
                     {items.length > 1 ? ` · Item ${activeItem + 1} of ${items.length}` : ''}

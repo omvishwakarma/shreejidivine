@@ -1,9 +1,10 @@
 'use client'
 
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
+import { cartLineKey, resolveVariantImage, resolveVariantPrice } from '../lib/productVariants'
 
 const CartContext = createContext(null)
-const STORAGE_KEY = 'shreeji_cart_v2'
+const STORAGE_KEY = 'shreeji_cart_v3'
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([])
@@ -11,8 +12,18 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) setItems(JSON.parse(raw))
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('shreeji_cart_v2')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        setItems(
+          (parsed || []).map((i) => ({
+            ...i,
+            colour: i.colour || '',
+            fragrance: i.fragrance || '',
+            lineKey: i.lineKey || cartLineKey(i.productId, i.colour, i.fragrance),
+          }))
+        )
+      }
     } catch {
       /* ignore */
     }
@@ -24,35 +35,44 @@ export function CartProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items, ready])
 
-  const addItem = useCallback((product, qty = 1) => {
+  const addItem = useCallback((product, qty = 1, options = {}) => {
+    const colour = String(options.colour || '').trim()
+    const fragrance = String(options.fragrance || '').trim()
+    const lineKey = cartLineKey(product.id, colour, fragrance)
+    const price = resolveVariantPrice(product, fragrance)
+    const image = resolveVariantImage(product, colour, fragrance) || product.image
+
     setItems((prev) => {
-      const existing = prev.find((i) => i.productId === product.id)
+      const existing = prev.find((i) => i.lineKey === lineKey)
       if (existing) {
         return prev.map((i) =>
-          i.productId === product.id
-            ? { ...i, quantity: Math.min(20, i.quantity + qty) }
+          i.lineKey === lineKey
+            ? { ...i, quantity: Math.min(20, i.quantity + qty), price, image }
             : i
         )
       }
       return [
         ...prev,
         {
+          lineKey,
           productId: product.id,
           slug: product.slug,
           name: product.name,
-          price: product.price,
-          image: product.image,
+          price,
+          image,
           quantity: qty,
+          colour,
+          fragrance,
         },
       ]
     })
   }, [])
 
-  const updateQty = useCallback((productId, quantity) => {
+  const updateQty = useCallback((lineKey, quantity) => {
     setItems((prev) =>
       prev
         .map((i) =>
-          i.productId === productId
+          (i.lineKey || i.productId) === lineKey
             ? { ...i, quantity: Math.max(0, Math.min(20, quantity)) }
             : i
         )
@@ -60,8 +80,8 @@ export function CartProvider({ children }) {
     )
   }, [])
 
-  const removeItem = useCallback((productId) => {
-    setItems((prev) => prev.filter((i) => i.productId !== productId))
+  const removeItem = useCallback((lineKey) => {
+    setItems((prev) => prev.filter((i) => (i.lineKey || i.productId) !== lineKey))
   }, [])
 
   const clearCart = useCallback(() => setItems([]), [])

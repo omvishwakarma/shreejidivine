@@ -75,7 +75,7 @@ export default function CartPage() {
             <div className="cart-board">
               <div className="cart-list">
                 {items.map((item) => (
-                  <article key={item.productId} className="cart-line">
+                  <article key={item.lineKey || item.productId} className="cart-line">
                     <Link href={`/shop/${item.slug}`} className="cart-line__media">
                       <Image
                         src={item.image}
@@ -90,13 +90,22 @@ export default function CartPage() {
                       <h2>
                         <Link href={`/shop/${item.slug}`}>{item.name}</Link>
                       </h2>
+                      {item.colour || item.fragrance ? (
+                        <p className="cart-line__variant">
+                          {[item.colour && `Colour: ${item.colour}`, item.fragrance && `Fragrance: ${item.fragrance}`]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      ) : null}
                       <p className="cart-line__unit">{formatINR(item.price)} each</p>
                       <div className="cart-line__controls">
                         <div className="cart-qty">
                           <button
                             type="button"
                             aria-label="Decrease quantity"
-                            onClick={() => updateQty(item.productId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQty(item.lineKey || item.productId, item.quantity - 1)
+                            }
                           >
                             −
                           </button>
@@ -104,7 +113,9 @@ export default function CartPage() {
                           <button
                             type="button"
                             aria-label="Increase quantity"
-                            onClick={() => updateQty(item.productId, item.quantity + 1)}
+                            onClick={() =>
+                              updateQty(item.lineKey || item.productId, item.quantity + 1)
+                            }
                           >
                             +
                           </button>
@@ -112,7 +123,7 @@ export default function CartPage() {
                         <button
                           type="button"
                           className="cart-remove"
-                          onClick={() => removeItem(item.productId)}
+                          onClick={() => removeItem(item.lineKey || item.productId)}
                         >
                           Remove
                         </button>

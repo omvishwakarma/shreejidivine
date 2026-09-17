@@ -1,6 +1,7 @@
 import { Product } from '@/lib/mongo/Product'
 import { Address } from '@/lib/mongo/Address'
 import { generateOrderNumber } from '@/lib/mongo/auth'
+import { resolveVariantPrice } from '@/lib/productVariants'
 
 export async function buildOrderLineItems(items) {
   const lineItems = []
@@ -10,14 +11,51 @@ export async function buildOrderLineItems(items) {
     if (!product || !product.active) {
       throw new Error(`Product not found: ${item.productId}`)
     }
-    subtotal += product.price * item.quantity
+
+    const colours = product.colours || []
+    const fragrances = product.fragrances || []
+    const colour = String(item.colour || '').trim()
+    const fragrance = String(item.fragrance || '').trim()
+
+    if (colours.length) {
+      const ok = colours.some(
+        (c) => String(c.name || c).toLowerCase() === colour.toLowerCase()
+      )
+      if (!colour || !ok) {
+        throw new Error(`Please choose a colour for ${product.name}`)
+      }
+    }
+
+    if (fragrances.length) {
+      const ok = fragrances.some(
+        (f) => String(f.name).toLowerCase() === fragrance.toLowerCase()
+      )
+      if (!fragrance || !ok) {
+        throw new Error(`Please choose a fragrance for ${product.name}`)
+      }
+    }
+
+    const unitPrice = resolveVariantPrice(
+      {
+        price: product.price,
+        fragrances: fragrances.map((f) => ({
+          name: f.name,
+          price: f.price,
+        })),
+      },
+      fragrance
+    )
+
+    subtotal += unitPrice * item.quantity
     lineItems.push({
       product: product._id,
       productName: product.name,
       productSlug: product.slug,
-      price: product.price,
+      price: unitPrice,
       quantity: item.quantity,
       image: product.image,
+      colour: colour || '',
+      fragrance: fragrance || '',
     })
   }
   return { lineItems, subtotal }

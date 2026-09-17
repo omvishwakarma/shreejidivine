@@ -148,6 +148,12 @@
   color: var(--text-muted);
 }
 
+.cart-line__variant {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  color: var(--brown-soft, #5c4638);
+}
+
 .cart-line__controls {
   display: flex;
   flex-wrap: wrap;

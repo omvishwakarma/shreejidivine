@@ -2,6 +2,19 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Product } from '@/lib/mongo/Product'
+import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
+
+const colourSchema = z.object({
+  name: z.string().min(1),
+  hex: z.string().optional().default(''),
+  image: z.string().optional().default(''),
+})
+
+const fragranceSchema = z.object({
+  name: z.string().min(1),
+  price: z.number().min(0),
+  image: z.string().optional().default(''),
+})
 
 export async function GET(request) {
   try {
@@ -48,9 +61,13 @@ export async function POST(request) {
       stone: z.string().optional(),
       description: z.string().optional(),
       highlights: z.array(z.string()).optional(),
+      colours: z.array(colourSchema).max(20).optional(),
+      fragrances: z.array(fragranceSchema).max(30).optional(),
       active: z.boolean().optional(),
     })
     const data = schema.parse(await request.json())
+    data.colours = normalizeColours(data.colours)
+    data.fragrances = normalizeFragrances(data.fragrances)
     const exists = await Product.findOne({ slug: data.slug })
     if (exists) {
       return NextResponse.json({ error: 'Slug already exists' }, { status: 409 })

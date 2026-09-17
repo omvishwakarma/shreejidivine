@@ -34,6 +34,8 @@ export async function POST(request) {
           z.object({
             productId: z.string(),
             quantity: z.number().int().min(1).max(20),
+            colour: z.string().optional().default(''),
+            fragrance: z.string().optional().default(''),
           })
         )
         .min(1),

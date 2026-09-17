@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Product } from '@/lib/mongo/Product'
+import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
 
 export async function GET(_request, { params }) {
   try {
@@ -41,6 +42,8 @@ export async function PATCH(request, { params }) {
       'stone',
       'description',
       'highlights',
+      'colours',
+      'fragrances',
       'active',
     ]
     const update = {}
@@ -53,6 +56,12 @@ export async function PATCH(request, { params }) {
     }
     if (typeof update.video === 'string') {
       update.video = update.video.trim()
+    }
+    if (update.colours !== undefined) {
+      update.colours = normalizeColours(update.colours)
+    }
+    if (update.fragrances !== undefined) {
+      update.fragrances = normalizeFragrances(update.fragrances)
     }
     const product = await Product.findByIdAndUpdate(id, update, {
       new: true,

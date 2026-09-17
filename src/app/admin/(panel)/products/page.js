@@ -28,6 +28,8 @@ const empty = {
   stone: '',
   description: '',
   highlights: '',
+  colours: [],
+  fragrances: [],
   active: true,
 }
 
@@ -158,6 +160,20 @@ export default function AdminProductsPage() {
       stone: p.stone || '',
       description: plainTextToHtml(p.description || ''),
       highlights: (p.highlights || []).join(', '),
+      colours: Array.isArray(p.colours)
+        ? p.colours.map((c) => ({
+            name: c.name || '',
+            hex: c.hex || '',
+            image: c.image || '',
+          }))
+        : [],
+      fragrances: Array.isArray(p.fragrances)
+        ? p.fragrances.map((f) => ({
+            name: f.name || '',
+            price: f.price ?? '',
+            image: f.image || '',
+          }))
+        : [],
       active: p.active !== false,
     })
     setError('')
@@ -211,6 +227,35 @@ export default function AdminProductsPage() {
       setUploading('')
       if (imageRef.current) imageRef.current.value = ''
       if (videoRef.current) videoRef.current.value = ''
+    }
+  }
+
+  async function uploadVariantImage(type, index, file) {
+    if (!file) return
+    const key = `${type}-${index}`
+    setError('')
+    setMsg('')
+    setUploading(key)
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('kind', 'image')
+      const data = await adminApi('/api/admin/upload', { method: 'POST', body })
+      setForm((f) => {
+        if (type === 'colour') {
+          const colours = [...(f.colours || [])]
+          colours[index] = { ...colours[index], image: data.url }
+          return { ...f, colours }
+        }
+        const fragrances = [...(f.fragrances || [])]
+        fragrances[index] = { ...fragrances[index], image: data.url }
+        return { ...f, fragrances }
+      })
+      setMsg('Variation image uploaded')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading('')
     }
   }
 
@@ -270,6 +315,20 @@ export default function AdminProductsPage() {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
+      colours: (form.colours || [])
+        .map((c) => ({
+          name: String(c.name || '').trim(),
+          hex: String(c.hex || '').trim(),
+          image: String(c.image || '').trim(),
+        }))
+        .filter((c) => c.name),
+      fragrances: (form.fragrances || [])
+        .map((f) => ({
+          name: String(f.name || '').trim(),
+          price: Number(f.price),
+          image: String(f.image || '').trim(),
+        }))
+        .filter((f) => f.name && Number.isFinite(f.price) && f.price >= 0),
     }
     try {
       if (editingId) {
@@ -518,6 +577,237 @@ export default function AdminProductsPage() {
                       />
                       <small>Shown as short bullets on the product page</small>
                     </label>
+                  </div>
+                </div>
+
+                <div className="admin-form-section">
+                  <h3>Variations <span className="admin-optional">(optional)</span></h3>
+                  <p className="admin-page-sub" style={{ marginTop: 0 }}>
+                    Add colours and/or fragrances. Each fragrance can have its own price.
+                  </p>
+
+                  <div className="admin-variant-block">
+                    <div className="admin-variant-block__head">
+                      <strong>Colours</strong>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-ghost"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            colours: [...(f.colours || []), { name: '', hex: '', image: '' }],
+                          }))
+                        }
+                      >
+                        + Add colour
+                      </button>
+                    </div>
+                    {(form.colours || []).length === 0 ? (
+                      <p className="admin-page-sub" style={{ margin: 0 }}>
+                        No colours — product sells without colour choice.
+                      </p>
+                    ) : (
+                      <div className="admin-variant-rows">
+                        {(form.colours || []).map((c, index) => (
+                          <div key={`colour-${index}`} className="admin-variant-card">
+                            <div className="admin-variant-card__media">
+                              {c.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={c.image} alt="" />
+                              ) : (
+                                <span>No image</span>
+                              )}
+                              <label className="admin-variant-card__upload">
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp,image/gif"
+                                  disabled={!!uploading}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) uploadVariantImage('colour', index, file)
+                                    e.target.value = ''
+                                  }}
+                                />
+                                {uploading === `colour-${index}` ? 'Uploading…' : c.image ? 'Change' : 'Upload'}
+                              </label>
+                              {c.image ? (
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-ghost"
+                                  onClick={() =>
+                                    setForm((f) => {
+                                      const colours = [...(f.colours || [])]
+                                      colours[index] = { ...colours[index], image: '' }
+                                      return { ...f, colours }
+                                    })
+                                  }
+                                >
+                                  Clear
+                                </button>
+                              ) : null}
+                            </div>
+                            <div className="admin-variant-card__fields">
+                              <input
+                                placeholder="Colour name"
+                                value={c.name}
+                                onChange={(e) =>
+                                  setForm((f) => {
+                                    const colours = [...(f.colours || [])]
+                                    colours[index] = { ...colours[index], name: e.target.value }
+                                    return { ...f, colours }
+                                  })
+                                }
+                              />
+                              <div className="admin-variant-card__row">
+                                <input
+                                  type="color"
+                                  title="Swatch"
+                                  value={c.hex && /^#/.test(c.hex) ? c.hex : '#8b5a2b'}
+                                  onChange={(e) =>
+                                    setForm((f) => {
+                                      const colours = [...(f.colours || [])]
+                                      colours[index] = { ...colours[index], hex: e.target.value }
+                                      return { ...f, colours }
+                                    })
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-danger"
+                                  onClick={() =>
+                                    setForm((f) => ({
+                                      ...f,
+                                      colours: (f.colours || []).filter((_, i) => i !== index),
+                                    }))
+                                  }
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-variant-block" style={{ marginTop: '1rem' }}>
+                    <div className="admin-variant-block__head">
+                      <strong>Fragrances</strong>
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-ghost"
+                        onClick={() =>
+                          setForm((f) => ({
+                            ...f,
+                            fragrances: [
+                              ...(f.fragrances || []),
+                              { name: '', price: f.price || '', image: '' },
+                            ],
+                          }))
+                        }
+                      >
+                        + Add fragrance
+                      </button>
+                    </div>
+                    {(form.fragrances || []).length === 0 ? (
+                      <p className="admin-page-sub" style={{ margin: 0 }}>
+                        No fragrances — base price above is used.
+                      </p>
+                    ) : (
+                      <div className="admin-variant-rows">
+                        {(form.fragrances || []).map((fr, index) => (
+                          <div key={`frag-${index}`} className="admin-variant-card">
+                            <div className="admin-variant-card__media">
+                              {fr.image ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={fr.image} alt="" />
+                              ) : (
+                                <span>No image</span>
+                              )}
+                              <label className="admin-variant-card__upload">
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp,image/gif"
+                                  disabled={!!uploading}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) uploadVariantImage('fragrance', index, file)
+                                    e.target.value = ''
+                                  }}
+                                />
+                                {uploading === `fragrance-${index}`
+                                  ? 'Uploading…'
+                                  : fr.image
+                                    ? 'Change'
+                                    : 'Upload'}
+                              </label>
+                              {fr.image ? (
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-ghost"
+                                  onClick={() =>
+                                    setForm((f) => {
+                                      const fragrances = [...(f.fragrances || [])]
+                                      fragrances[index] = { ...fragrances[index], image: '' }
+                                      return { ...f, fragrances }
+                                    })
+                                  }
+                                >
+                                  Clear
+                                </button>
+                              ) : null}
+                            </div>
+                            <div className="admin-variant-card__fields">
+                              <input
+                                placeholder="Fragrance name"
+                                value={fr.name}
+                                onChange={(e) =>
+                                  setForm((f) => {
+                                    const fragrances = [...(f.fragrances || [])]
+                                    fragrances[index] = {
+                                      ...fragrances[index],
+                                      name: e.target.value,
+                                    }
+                                    return { ...f, fragrances }
+                                  })
+                                }
+                              />
+                              <div className="admin-variant-card__row">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="Price ₹"
+                                  value={fr.price}
+                                  onChange={(e) =>
+                                    setForm((f) => {
+                                      const fragrances = [...(f.fragrances || [])]
+                                      fragrances[index] = {
+                                        ...fragrances[index],
+                                        price: e.target.value,
+                                      }
+                                      return { ...f, fragrances }
+                                    })
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-danger"
+                                  onClick={() =>
+                                    setForm((f) => ({
+                                      ...f,
+                                      fragrances: (f.fragrances || []).filter((_, i) => i !== index),
+                                    }))
+                                  }
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

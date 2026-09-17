@@ -15,6 +15,7 @@ import {
   plainTextToHtml,
   sanitizeProductHtml,
 } from '../../../lib/productHtml'
+import { resolveVariantImage, resolveVariantPrice } from '../../../lib/productVariants'
 import '../../ecom.css'
 import './product.css'
 
@@ -23,6 +24,8 @@ export default function ProductClient() {
   const [product, setProduct] = useState(null)
   const [error, setError] = useState('')
   const [activeKey, setActiveKey] = useState('img-0')
+  const [colour, setColour] = useState('')
+  const [fragrance, setFragrance] = useState('')
 
   useEffect(() => {
     if (!slug) return
@@ -30,6 +33,10 @@ export default function ProductClient() {
       .then((d) => {
         setProduct(d.product)
         setActiveKey('img-0')
+        const colours = d.product?.colours || []
+        const fragrances = d.product?.fragrances || []
+        setColour(colours[0]?.name || '')
+        setFragrance(fragrances[0]?.name || '')
       })
       .catch((err) => setError(err.message))
   }, [slug])
@@ -68,6 +75,19 @@ export default function ProductClient() {
   const active =
     mediaItems.find((item) => item.key === activeKey) || mediaItems[0] || null
 
+  const colours = product?.colours || []
+  const fragrances = product?.fragrances || []
+  const unitPrice = product ? resolveVariantPrice(product, fragrance) : 0
+  const variantImage = product
+    ? resolveVariantImage(product, colour, fragrance)
+    : ''
+  const mainImage = variantImage || active?.src || product?.image || ''
+  const canAdd =
+    (!colours.length || Boolean(colour)) && (!fragrances.length || Boolean(fragrance))
+  const showingVariantImage = Boolean(
+    variantImage && variantImage !== (gallery[0] || product?.image)
+  )
+
   return (
     <div className="ecom-page">
       <ShopNav />
@@ -87,7 +107,7 @@ export default function ProductClient() {
               <div className="product-detail__stage">
                 <div className="product-detail__media">
                   {product.badge ? <span className="product-card__badge">{product.badge}</span> : null}
-                  {active?.type === 'video' ? (
+                  {active?.type === 'video' && !showingVariantImage ? (
                     <video
                       key={active.src}
                       className="product-detail__video"
@@ -99,7 +119,8 @@ export default function ProductClient() {
                     />
                   ) : (
                     <Image
-                      src={active?.src || product.image}
+                      key={mainImage}
+                      src={mainImage}
                       alt={product.name}
                       width={900}
                       height={900}
@@ -148,9 +169,88 @@ export default function ProductClient() {
               <p className="product-card__tag">{product.tagline}</p>
               <h1 className="ecom-title">{product.name}</h1>
               <div className="product-detail__price">
-                <strong>{formatINR(product.price)}</strong>
-                {product.compareAt ? <s>{formatINR(product.compareAt)}</s> : null}
+                <strong>{formatINR(unitPrice)}</strong>
+                {product.compareAt && !fragrances.length ? (
+                  <s>{formatINR(product.compareAt)}</s>
+                ) : null}
               </div>
+
+              {colours.length || fragrances.length ? (
+                <div className="product-detail__variants">
+                  {colours.length ? (
+                    <div className="product-detail__options">
+                      <p className="product-detail__options-label">
+                        Choose colour
+                        {colour ? <span> — {colour}</span> : null}
+                      </p>
+                      <div className="product-detail__swatches" role="list">
+                        {colours.map((c) => (
+                          <button
+                            key={c.name}
+                            type="button"
+                            role="listitem"
+                            className={`product-detail__swatch ${
+                              colour === c.name ? 'is-active' : ''
+                            } ${c.image ? 'has-image' : ''}`}
+                            onClick={() => {
+                              setColour(c.name)
+                              setActiveKey('img-0')
+                            }}
+                            title={c.name}
+                          >
+                            {c.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={c.image} alt="" className="product-detail__swatch-img" />
+                            ) : c.hex ? (
+                              <span
+                                className="product-detail__swatch-dot"
+                                style={{ background: c.hex }}
+                                aria-hidden="true"
+                              />
+                            ) : null}
+                            <span>{c.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {fragrances.length ? (
+                    <div className="product-detail__options">
+                      <p className="product-detail__options-label">
+                        Choose fragrance
+                        {fragrance ? <span> — {fragrance}</span> : null}
+                      </p>
+                      <div className="product-detail__fragrances" role="list">
+                        {fragrances.map((f) => (
+                          <button
+                            key={f.name}
+                            type="button"
+                            role="listitem"
+                            className={`product-detail__fragrance ${
+                              fragrance === f.name ? 'is-active' : ''
+                            }`}
+                            onClick={() => {
+                              setFragrance(f.name)
+                              setActiveKey('img-0')
+                            }}
+                          >
+                            {f.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={f.image} alt="" className="product-detail__fragrance-img" />
+                            ) : null}
+                            <span className="product-detail__fragrance-meta">
+                              <span>{f.name}</span>
+                              <strong>{formatINR(f.price)}</strong>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
               <div
                 className="ecom-lead product-detail__description"
                 style={{ marginTop: '1rem' }}
@@ -168,7 +268,15 @@ export default function ProductClient() {
                 ))}
               </ul>
               <div className="product-detail__cta">
-                <AddToCartButton product={product} label="Add to Cart" className="btn-full" />
+                <AddToCartButton
+                  product={product}
+                  label="Add to Cart"
+                  className="btn-full"
+                  colour={colour}
+                  fragrance={fragrance}
+                  requireVariants={false}
+                  disabled={!canAdd}
+                />
                 <Link href="/cart" className="btn-sm btn-ghost btn-full">
                   Go to Cart
                 </Link>

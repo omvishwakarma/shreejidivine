@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useRouter } from 'next/navigation'
 import { useCart } from '../context/CartContext'
 
 export default function AddToCartButton({
@@ -9,8 +10,13 @@ export default function AddToCartButton({
   qty = 1,
   label = 'Add to Cart',
   className = '',
+  colour = '',
+  fragrance = '',
+  requireVariants = true,
+  disabled = false,
 }) {
   const { addItem } = useCart()
+  const router = useRouter()
   const [toast, setToast] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -27,8 +33,15 @@ export default function AddToCartButton({
       <button
         type="button"
         className={`btn-sm btn-primary ${className}`.trim()}
+        disabled={disabled}
         onClick={() => {
-          addItem(product, qty)
+          const needsColour = (product.colours || []).length > 0 && !colour
+          const needsFragrance = (product.fragrances || []).length > 0 && !fragrance
+          if (requireVariants && (needsColour || needsFragrance)) {
+            router.push(`/shop/${product.slug}`)
+            return
+          }
+          addItem(product, qty, { colour, fragrance })
           setToast(true)
         }}
       >

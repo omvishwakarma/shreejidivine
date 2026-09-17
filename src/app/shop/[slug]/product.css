@@ -129,6 +129,104 @@
   gap: 0.75rem;
 }
 
+.product-detail__variants {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(43, 30, 22, 0.08);
+  border-bottom: 1px solid rgba(43, 30, 22, 0.08);
+}
+
+.product-detail__options {
+  margin-top: 0;
+}
+
+.product-detail__options-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.product-detail__options-label span {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--brown);
+  font-weight: 500;
+}
+
+.product-detail__swatches,
+.product-detail__fragrances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.product-detail__swatch,
+.product-detail__fragrance {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(43, 30, 22, 0.14);
+  background: #fff;
+  color: var(--brown);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.product-detail__swatch.has-image {
+  padding: 0.35rem 0.65rem 0.35rem 0.35rem;
+}
+
+.product-detail__swatch.is-active,
+.product-detail__fragrance.is-active {
+  border-color: var(--accent, #b5502e);
+  box-shadow: 0 0 0 1px var(--accent, #b5502e);
+}
+
+.product-detail__swatch-dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.product-detail__swatch-img,
+.product-detail__fragrance-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: #f3ebe0;
+}
+
+.product-detail__fragrance {
+  min-width: min(100%, 12.5rem);
+  padding: 0.35rem 0.7rem 0.35rem 0.35rem;
+}
+
+.product-detail__fragrance-meta {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.product-detail__fragrance strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
 .product-detail__price strong {
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: 1.5rem;

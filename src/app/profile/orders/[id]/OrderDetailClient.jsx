@@ -166,6 +166,16 @@ export default function OrderDetailClient() {
                       </div>
                       <div className="od-item__info">
                         <h3>{item.productName}</h3>
+                        {item.colour || item.fragrance ? (
+                          <p className="od-item__variant">
+                            {[
+                              item.colour && `Colour: ${item.colour}`,
+                              item.fragrance && `Fragrance: ${item.fragrance}`,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </p>
+                        ) : null}
                         {item.productSlug ? (
                           <Link href={`/shop/${item.productSlug}`}>View product</Link>
                         ) : null}
