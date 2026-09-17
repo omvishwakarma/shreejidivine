@@ -10,7 +10,9 @@ const empty = {
   tagline: '',
   price: 699,
   compareAt: '',
-  image: '/images/aroma-variants.png',
+  image: '',
+  gallery: [],
+  video: '',
   badge: '',
   category: 'singles',
   categorySlug: '',
@@ -37,16 +39,18 @@ export default function AdminProductsPage() {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState('')
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [activeFilter, setActiveFilter] = useState('all')
   const [catTree, setCatTree] = useState([])
   const [loading, setLoading] = useState(true)
-  const fileRef = useRef(null)
+  const imageRef = useRef(null)
+  const videoRef = useRef(null)
   const formRef = useRef(null)
-  const fileInputId = useId()
+  const imageInputId = useId()
+  const videoInputId = useId()
   const slugTouched = useRef(false)
 
   async function load() {
@@ -125,13 +129,20 @@ export default function AdminProductsPage() {
   function openEdit(p) {
     setEditingId(p.id)
     slugTouched.current = true
+    const gallery = Array.isArray(p.gallery) && p.gallery.length
+      ? p.gallery
+      : p.image
+        ? [p.image]
+        : []
     setForm({
       slug: p.slug,
       name: p.name,
       tagline: p.tagline || '',
       price: p.price,
       compareAt: p.compareAt ?? '',
-      image: p.image,
+      image: p.image || gallery[0] || '',
+      gallery,
+      video: p.video || '',
       badge: p.badge || '',
       category: p.category || 'singles',
       categorySlug: p.categorySlug || '',
@@ -157,24 +168,74 @@ export default function AdminProductsPage() {
     setMsg('')
   }
 
-  async function onUpload(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function uploadFiles(files, kind) {
+    const list = Array.from(files || []).filter(Boolean)
+    if (!list.length) return
     setError('')
     setMsg('')
-    setUploading(true)
+    setUploading(kind)
     try {
-      const body = new FormData()
-      body.append('file', file)
-      const data = await adminApi('/api/admin/upload', { method: 'POST', body })
-      setForm((f) => ({ ...f, image: data.url }))
-      setMsg('Image uploaded')
+      const urls = []
+      for (const file of list) {
+        const body = new FormData()
+        body.append('file', file)
+        body.append('kind', kind === 'video' ? 'video' : 'image')
+        const data = await adminApi('/api/admin/upload', { method: 'POST', body })
+        urls.push(data.url)
+      }
+
+      if (kind === 'video') {
+        setForm((f) => ({ ...f, video: urls[0] || '' }))
+        setMsg('Video uploaded')
+      } else {
+        setForm((f) => {
+          const gallery = [...(f.gallery || []), ...urls].slice(0, 12)
+          return {
+            ...f,
+            gallery,
+            image: f.image || gallery[0] || '',
+          }
+        })
+        setMsg(urls.length > 1 ? `${urls.length} images uploaded` : 'Image uploaded')
+      }
     } catch (err) {
       setError(err.message)
     } finally {
-      setUploading(false)
-      if (fileRef.current) fileRef.current.value = ''
+      setUploading('')
+      if (imageRef.current) imageRef.current.value = ''
+      if (videoRef.current) videoRef.current.value = ''
     }
+  }
+
+  function removeGalleryImage(index) {
+    setForm((f) => {
+      const gallery = (f.gallery || []).filter((_, i) => i !== index)
+      return {
+        ...f,
+        gallery,
+        image: gallery[0] || '',
+      }
+    })
+  }
+
+  function setPrimaryImage(index) {
+    setForm((f) => {
+      const gallery = [...(f.gallery || [])]
+      if (index < 0 || index >= gallery.length) return f
+      const [picked] = gallery.splice(index, 1)
+      gallery.unshift(picked)
+      return { ...f, gallery, image: picked }
+    })
+  }
+
+  function moveGalleryImage(index, dir) {
+    setForm((f) => {
+      const gallery = [...(f.gallery || [])]
+      const j = index + dir
+      if (j < 0 || j >= gallery.length) return f
+      ;[gallery[index], gallery[j]] = [gallery[j], gallery[index]]
+      return { ...f, gallery, image: gallery[0] || '' }
+    })
   }
 
   async function onSubmit(e) {
@@ -182,8 +243,18 @@ export default function AdminProductsPage() {
     setError('')
     setMsg('')
     setSaving(true)
+    const gallery = (form.gallery || []).filter(Boolean)
+    if (!gallery.length && !form.image) {
+      setError('Add at least one product image')
+      setSaving(false)
+      return
+    }
+    const image = form.image || gallery[0]
     const payload = {
       ...form,
+      image,
+      gallery: [...new Set([image, ...gallery].filter(Boolean))],
+      video: form.video || '',
       price: Number(form.price),
       compareAt: form.compareAt === '' ? null : Number(form.compareAt),
       badge: form.badge || null,
@@ -192,7 +263,6 @@ export default function AdminProductsPage() {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
-      gallery: [form.image],
     }
     try {
       if (editingId) {
@@ -446,48 +516,120 @@ export default function AdminProductsPage() {
 
               <aside className="admin-product-form__side">
                 <div className="admin-form-section">
-                  <h3>Media</h3>
-                  <div className="admin-product-media">
-                    <div className="admin-product-media__preview">
-                      {form.image ? (
-                        <Image
-                          src={form.image}
-                          alt="Product preview"
-                          width={320}
-                          height={320}
-                          unoptimized
-                        />
-                      ) : (
-                        <span>No image</span>
-                      )}
-                    </div>
-                    <label
-                      htmlFor={fileInputId}
-                      className={`admin-dropzone ${uploading ? 'is-busy' : ''}`}
-                    >
-                      <input
-                        id={fileInputId}
-                        ref={fileRef}
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif"
-                        onChange={onUpload}
-                        disabled={uploading}
-                      />
-                      <span className="admin-dropzone__title">
-                        {uploading ? 'Uploading…' : 'Click to upload image'}
-                      </span>
-                      <span className="admin-dropzone__hint">JPG, PNG, WEBP, GIF · max 5MB</span>
-                    </label>
-                    <label className="admin-field">
-                      <span>Image path</span>
-                      <input
-                        required
-                        value={form.image}
-                        onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-                        placeholder="/images/..."
-                      />
-                    </label>
+                  <h3>Images</h3>
+                  <p className="admin-page-sub" style={{ marginTop: 0 }}>
+                    Upload multiple photos. First image is the cover.
+                  </p>
+                  <div className="admin-gallery">
+                    {(form.gallery || []).map((url, index) => (
+                      <div key={`${url}-${index}`} className="admin-gallery__item">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" />
+                        {index === 0 ? <span className="admin-gallery__badge">Cover</span> : null}
+                        <div className="admin-gallery__actions">
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-ghost"
+                            disabled={index === 0}
+                            onClick={() => moveGalleryImage(index, -1)}
+                            aria-label="Move left"
+                          >
+                            ‹
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-ghost"
+                            disabled={index >= (form.gallery || []).length - 1}
+                            onClick={() => moveGalleryImage(index, 1)}
+                            aria-label="Move right"
+                          >
+                            ›
+                          </button>
+                          {index !== 0 ? (
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-ghost"
+                              onClick={() => setPrimaryImage(index)}
+                            >
+                              Cover
+                            </button>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-danger"
+                            onClick={() => removeGalleryImage(index)}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                  <label
+                    htmlFor={imageInputId}
+                    className={`admin-dropzone ${uploading === 'image' ? 'is-busy' : ''}`}
+                  >
+                    <input
+                      id={imageInputId}
+                      ref={imageRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      multiple
+                      onChange={(e) => {
+                        uploadFiles(e.target.files, 'image')
+                      }}
+                      disabled={!!uploading}
+                    />
+                    <span className="admin-dropzone__title">
+                      {uploading === 'image' ? 'Uploading images…' : 'Click to upload images'}
+                    </span>
+                    <span className="admin-dropzone__hint">
+                      Multiple JPG / PNG / WEBP / GIF · max 5MB each · up to 12
+                    </span>
+                  </label>
+                </div>
+
+                <div className="admin-form-section">
+                  <h3>Video</h3>
+                  <p className="admin-page-sub" style={{ marginTop: 0 }}>
+                    Optional — one product video.
+                  </p>
+                  {form.video ? (
+                    <div className="admin-product-video">
+                      <video src={form.video} controls playsInline muted preload="metadata" />
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-danger"
+                        onClick={() => setForm((f) => ({ ...f, video: '' }))}
+                      >
+                        Remove video
+                      </button>
+                    </div>
+                  ) : null}
+                  <label
+                    htmlFor={videoInputId}
+                    className={`admin-dropzone ${uploading === 'video' ? 'is-busy' : ''}`}
+                  >
+                    <input
+                      id={videoInputId}
+                      ref={videoRef}
+                      type="file"
+                      accept="video/mp4,video/webm,video/quicktime"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) uploadFiles([file], 'video')
+                      }}
+                      disabled={!!uploading}
+                    />
+                    <span className="admin-dropzone__title">
+                      {uploading === 'video'
+                        ? 'Uploading video…'
+                        : form.video
+                          ? 'Replace video'
+                          : 'Click to upload video'}
+                    </span>
+                    <span className="admin-dropzone__hint">MP4 / WEBM / MOV · max 80MB</span>
+                  </label>
                 </div>
 
                 <div className="admin-form-section">
@@ -523,7 +665,7 @@ export default function AdminProductsPage() {
                 <button
                   className="admin-btn admin-btn-primary"
                   type="submit"
-                  disabled={uploading || saving}
+                  disabled={!!uploading || saving}
                 >
                   {saving ? 'Saving…' : editingId ? 'Update product' : 'Create product'}
                 </button>

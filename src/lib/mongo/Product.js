@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { safePublicImage } from '@/lib/media'
+import { safePublicImage, safePublicMedia } from '@/lib/media'
 
 const productSchema = new mongoose.Schema(
   {
@@ -8,8 +8,12 @@ const productSchema = new mongoose.Schema(
     tagline: { type: String, default: '' },
     price: { type: Number, required: true, min: 0 },
     compareAt: { type: Number, default: null },
+    /** Primary / cover image */
     image: { type: String, required: true },
+    /** Extra product images (may include primary) */
     gallery: [{ type: String }],
+    /** Optional product video (one) */
+    video: { type: String, default: '' },
     badge: { type: String, default: null },
     /** Legacy free-string (kits/singles) — kept for older products */
     category: { type: String, default: 'singles' },
@@ -27,6 +31,12 @@ const productSchema = new mongoose.Schema(
 )
 
 productSchema.methods.toPublicJSON = function () {
+  const image = safePublicImage(this.image, '/images/aroma-variants.png')
+  const gallery = (this.gallery || [])
+    .map((g) => safePublicImage(g, ''))
+    .filter(Boolean)
+  const uniqueGallery = [...new Set([image, ...gallery].filter(Boolean))]
+
   return {
     id: this._id.toString(),
     slug: this.slug,
@@ -34,10 +44,9 @@ productSchema.methods.toPublicJSON = function () {
     tagline: this.tagline,
     price: this.price,
     compareAt: this.compareAt,
-    image: safePublicImage(this.image, '/images/aroma-variants.png'),
-    gallery: (this.gallery || [])
-      .map((g) => safePublicImage(g, ''))
-      .filter(Boolean),
+    image,
+    gallery: uniqueGallery,
+    video: safePublicMedia(this.video, ''),
     badge: this.badge,
     category: this.category,
     categorySlug: this.categorySlug || '',
