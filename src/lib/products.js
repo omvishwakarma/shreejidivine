@@ -6,6 +6,14 @@ export function formatINR(n) {
   }).format(n || 0)
 }
 
+/** Display product names in Title Case (e.g. "lava stone" → "Lava Stone"). */
+export function toTitleCase(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\b([a-z0-9])/g, (ch) => ch.toUpperCase())
+}
+
 /** @deprecated Prefer /api/shipping — kept for fallbacks */
 export const SHIPPING_FEE = 0
 /** @deprecated Prefer /api/shipping note */

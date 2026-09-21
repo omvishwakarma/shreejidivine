@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import AddToCartButton from './AddToCartButton'
 import { api } from '../lib/api'
-import { formatINR } from '../lib/products'
+import { formatINR, toTitleCase } from '../lib/products'
 import { SITE_NAME } from '../lib/site'
 import { safePublicImage } from '../lib/media'
 import './BestSellers.css'
@@ -77,7 +77,7 @@ export default function BestSellers() {
                         <div className="ss-card__body">
                           <p className="ss-card__vendor">{SITE_NAME}</p>
                           <Link href={`/shop/${p.slug}`} className="ss-card__title-link">
-                            <h3 className="ss-card__name">{p.name}</h3>
+                            <h3 className="ss-card__name">{toTitleCase(p.name)}</h3>
                           </Link>
                           {p.tagline ? <p className="ss-card__tag">{p.tagline}</p> : null}
 

@@ -8,7 +8,7 @@ import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
 import AddToCartButton from '../../components/AddToCartButton'
 import { api } from '../../lib/api'
-import { formatINR } from '../../lib/products'
+import { formatINR, toTitleCase } from '../../lib/products'
 import '../ecom.css'
 
 export default function ShopClient() {
@@ -127,9 +127,8 @@ export default function ShopClient() {
                   </Link>
                   <div className="product-card__body">
                     <Link href={`/shop/${p.slug}`}>
-                      <h2 className="product-card__name">{p.name}</h2>
+                      <h2 className="product-card__name">{toTitleCase(p.name)}</h2>
                     </Link>
-                    <p className="product-card__tag">{p.tagline}</p>
                     <div className="product-card__price">
                       <strong>{formatINR(p.price)}</strong>
                       {p.compareAt ? <s>{formatINR(p.compareAt)}</s> : null}

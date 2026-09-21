@@ -7,8 +7,9 @@ import { useParams } from 'next/navigation'
 import ShopNav from '../../../components/ShopNav'
 import Footer from '../../../components/Footer'
 import AddToCartButton from '../../../components/AddToCartButton'
+import BuyNowButton from '../../../components/BuyNowButton'
 import { api } from '../../../lib/api'
-import { formatINR } from '../../../lib/products'
+import { formatINR, toTitleCase } from '../../../lib/products'
 import { safePublicImage, safePublicMedia } from '../../../lib/media'
 import {
   looksLikeHtml,
@@ -146,7 +147,7 @@ export default function ProductClient() {
         <p className="breadcrumb">
           <Link href="/shop">Shop</Link>
           <span aria-hidden="true"> / </span>
-          {product?.name || 'Product'}
+          {product?.name ? toTitleCase(product.name) : 'Product'}
         </p>
 
         {error ? <div className="empty-state">{error}</div> : null}
@@ -247,7 +248,7 @@ export default function ProductClient() {
 
             <div className="product-detail__info">
               <p className="product-card__tag">{product.tagline}</p>
-              <h1 className="ecom-title">{product.name}</h1>
+              <h1 className="ecom-title">{toTitleCase(product.name)}</h1>
               <div className="product-detail__price">
                 <strong>{formatINR(unitPrice)}</strong>
                 {product.compareAt && !fragrances.length ? (
@@ -341,20 +342,6 @@ export default function ProductClient() {
                   <li key={h}>{h}</li>
                 ))}
               </ul>
-              <div className="product-detail__cta">
-                <AddToCartButton
-                  product={product}
-                  label="Add to Cart"
-                  className="btn-full"
-                  colour={colour}
-                  fragrance={fragrance}
-                  requireVariants={false}
-                  disabled={!canAdd}
-                />
-                <Link href="/cart" className="btn-sm btn-ghost btn-full">
-                  Go to Cart
-                </Link>
-              </div>
               <p className="product-detail__note">
                 Free pan-India shipping · Cash on delivery available
               </p>
@@ -362,6 +349,33 @@ export default function ProductClient() {
           </div>
         ) : null}
       </div>
+
+      {product ? (
+        <div className="product-detail__bar">
+          <div className="product-detail__bar-info">
+            <span className="product-detail__bar-name">{toTitleCase(product.name)}</span>
+            <strong className="product-detail__bar-price">{formatINR(unitPrice)}</strong>
+          </div>
+          <div className="product-detail__bar-actions">
+            <AddToCartButton
+              product={product}
+              label="Add to Cart"
+              className="product-detail__bar-cart-btn"
+              colour={colour}
+              fragrance={fragrance}
+              requireVariants={false}
+              disabled={!canAdd}
+            />
+            <BuyNowButton
+              product={product}
+              colour={colour}
+              fragrance={fragrance}
+              disabled={!canAdd}
+            />
+          </div>
+        </div>
+      ) : null}
+
       <Footer />
     </div>
   )
