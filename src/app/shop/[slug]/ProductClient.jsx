@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -26,6 +26,9 @@ export default function ProductClient() {
   const [activeKey, setActiveKey] = useState('img-0')
   const [colour, setColour] = useState('')
   const [fragrance, setFragrance] = useState('')
+  /** When true, gallery thumb wins over variant image */
+  const [galleryFocus, setGalleryFocus] = useState(true)
+  const touchStartX = useRef(null)
 
   useEffect(() => {
     if (!slug) return
@@ -33,6 +36,7 @@ export default function ProductClient() {
       .then((d) => {
         setProduct(d.product)
         setActiveKey('img-0')
+        setGalleryFocus(true)
         const colours = d.product?.colours || []
         const fragrances = d.product?.fragrances || []
         setColour(colours[0]?.name || '')
@@ -72,21 +76,68 @@ export default function ProductClient() {
   }, [gallery, video, product])
 
   const showThumbs = mediaItems.length > 1
-  const active =
-    mediaItems.find((item) => item.key === activeKey) || mediaItems[0] || null
+  const activeIndex = Math.max(
+    0,
+    mediaItems.findIndex((item) => item.key === activeKey)
+  )
+  const active = mediaItems[activeIndex] || mediaItems[0] || null
 
   const colours = product?.colours || []
   const fragrances = product?.fragrances || []
   const unitPrice = product ? resolveVariantPrice(product, fragrance) : 0
-  const variantImage = product
-    ? resolveVariantImage(product, colour, fragrance)
-    : ''
-  const mainImage = variantImage || active?.src || product?.image || ''
+  const variantImage = product ? resolveVariantImage(product, colour, fragrance) : ''
   const canAdd =
     (!colours.length || Boolean(colour)) && (!fragrances.length || Boolean(fragrance))
-  const showingVariantImage = Boolean(
-    variantImage && variantImage !== (gallery[0] || product?.image)
-  )
+
+  const showVideo = active?.type === 'video' && galleryFocus
+  const mainImage = showVideo
+    ? ''
+    : galleryFocus && active?.type === 'image' && active?.src
+      ? active.src
+      : variantImage || active?.src || product?.image || ''
+
+  function selectGalleryItem(key) {
+    setActiveKey(key)
+    setGalleryFocus(true)
+  }
+
+  function slideBy(delta) {
+    if (mediaItems.length < 2) return
+    const next = (activeIndex + delta + mediaItems.length) % mediaItems.length
+    selectGalleryItem(mediaItems[next].key)
+  }
+
+  function onMediaTouchStart(e) {
+    touchStartX.current = e.changedTouches?.[0]?.clientX ?? null
+  }
+
+  function onMediaTouchEnd(e) {
+    if (touchStartX.current == null || mediaItems.length < 2) return
+    const endX = e.changedTouches?.[0]?.clientX
+    if (endX == null) return
+    const diff = endX - touchStartX.current
+    touchStartX.current = null
+    if (Math.abs(diff) < 40) return
+    slideBy(diff < 0 ? 1 : -1)
+  }
+
+  function selectColour(name) {
+    setColour(name)
+    const next = colours.find((c) => c.name === name)
+    if (next?.image) {
+      setGalleryFocus(false)
+      setActiveKey('img-0')
+    }
+  }
+
+  function selectFragrance(name) {
+    setFragrance(name)
+    const next = fragrances.find((f) => f.name === name)
+    if (next?.image) {
+      setGalleryFocus(false)
+      setActiveKey('img-0')
+    }
+  }
 
   return (
     <div className="ecom-page">
@@ -105,9 +156,13 @@ export default function ProductClient() {
           <div className="product-detail__grid">
             <div className="product-detail__gallery">
               <div className="product-detail__stage">
-                <div className="product-detail__media">
+                <div
+                  className="product-detail__media"
+                  onTouchStart={onMediaTouchStart}
+                  onTouchEnd={onMediaTouchEnd}
+                >
                   {product.badge ? <span className="product-card__badge">{product.badge}</span> : null}
-                  {active?.type === 'video' && !showingVariantImage ? (
+                  {showVideo ? (
                     <video
                       key={active.src}
                       className="product-detail__video"
@@ -128,6 +183,29 @@ export default function ProductClient() {
                       sizes="(max-width:860px) 100vw, 540px"
                     />
                   )}
+
+                  {showThumbs ? (
+                    <>
+                      <div className="product-detail__dots" role="tablist" aria-label="Gallery slides">
+                        {mediaItems.map((item, index) => (
+                          <button
+                            key={item.key}
+                            type="button"
+                            role="tab"
+                            aria-selected={galleryFocus && activeIndex === index}
+                            className={`product-detail__dot ${
+                              galleryFocus && activeIndex === index ? 'is-active' : ''
+                            }`}
+                            onClick={() => selectGalleryItem(item.key)}
+                            aria-label={`Go to media ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                      <p className="product-detail__counter">
+                        {activeIndex + 1} / {mediaItems.length}
+                      </p>
+                    </>
+                  ) : null}
                 </div>
 
                 {showThumbs ? (
@@ -138,15 +216,17 @@ export default function ProductClient() {
                         type="button"
                         role="listitem"
                         className={`product-detail__thumb ${
-                          active?.key === item.key ? 'is-active' : ''
+                          galleryFocus && active?.key === item.key ? 'is-active' : ''
                         } ${item.type === 'video' ? 'product-detail__thumb--video' : ''}`}
-                        onClick={() => setActiveKey(item.key)}
+                        onClick={() => selectGalleryItem(item.key)}
                         aria-label={
                           item.type === 'video'
                             ? 'Play product video'
                             : `View image ${(item.index ?? 0) + 1}`
                         }
-                        aria-current={active?.key === item.key ? 'true' : undefined}
+                        aria-current={
+                          galleryFocus && active?.key === item.key ? 'true' : undefined
+                        }
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -192,10 +272,7 @@ export default function ProductClient() {
                             className={`product-detail__swatch ${
                               colour === c.name ? 'is-active' : ''
                             } ${c.image ? 'has-image' : ''}`}
-                            onClick={() => {
-                              setColour(c.name)
-                              setActiveKey('img-0')
-                            }}
+                            onClick={() => selectColour(c.name)}
                             title={c.name}
                           >
                             {c.image ? (
@@ -230,10 +307,7 @@ export default function ProductClient() {
                             className={`product-detail__fragrance ${
                               fragrance === f.name ? 'is-active' : ''
                             }`}
-                            onClick={() => {
-                              setFragrance(f.name)
-                              setActiveKey('img-0')
-                            }}
+                            onClick={() => selectFragrance(f.name)}
                           >
                             {f.image ? (
                               // eslint-disable-next-line @next/next/no-img-element

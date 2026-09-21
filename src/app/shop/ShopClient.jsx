@@ -122,7 +122,7 @@ export default function ShopClient() {
                       alt={p.name}
                       width={700}
                       height={600}
-                      sizes="(max-width:700px) 100vw, 360px"
+                      sizes="(max-width:560px) 50vw, (max-width:960px) 45vw, 360px"
                     />
                   </Link>
                   <div className="product-card__body">

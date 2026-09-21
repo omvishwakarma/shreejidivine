@@ -56,7 +56,7 @@ export function resolveVariantPrice(product, fragranceName = '') {
   return Number(product?.price) || 0
 }
 
-/** Prefer fragrance image, then colour image, then product cover. */
+/** Prefer fragrance image, then colour image. Empty if none. */
 export function resolveVariantImage(product, colourName = '', fragranceName = '') {
   const fragrances = product?.fragrances || []
   const colours = product?.colours || []
@@ -72,7 +72,7 @@ export function resolveVariantImage(product, colourName = '', fragranceName = ''
     )
     if (c?.image) return safePublicImage(c.image, '')
   }
-  return safePublicImage(product?.image || '', '/images/aroma-variants.png')
+  return ''
 }
 
 export function productNeedsVariants(product) {

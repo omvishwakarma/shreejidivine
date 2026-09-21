@@ -40,7 +40,8 @@ export function CartProvider({ children }) {
     const fragrance = String(options.fragrance || '').trim()
     const lineKey = cartLineKey(product.id, colour, fragrance)
     const price = resolveVariantPrice(product, fragrance)
-    const image = resolveVariantImage(product, colour, fragrance) || product.image
+    const image =
+      resolveVariantImage(product, colour, fragrance) || product.image
 
     setItems((prev) => {
       const existing = prev.find((i) => i.lineKey === lineKey)
