@@ -101,9 +101,8 @@
   position: relative;
 }
 
-/* Categories + Know your Bracelet: mobile menu only */
-.store-header__nav--desk .store-header__cat,
-.store-header__nav--desk .store-header__kyb {
+/* Categories: mobile menu only */
+.store-header__nav--desk .store-header__cat {
   display: none;
 }
 
