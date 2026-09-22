@@ -47,54 +47,57 @@ export default function ShopClient() {
     return parent?.name || 'Shop'
   }, [categories, category, subcategory])
 
-  const activeParent = categories.find((c) => c.slug === category)
+  const filterLinks = useMemo(() => {
+    const links = [{ href: '/shop', label: 'All', active: !category && !subcategory }]
+    categories.forEach((c) => {
+      links.push({
+        href: `/shop?category=${c.slug}`,
+        label: c.name,
+        active: category === c.slug && !subcategory,
+      })
+      if (category === c.slug && c.children?.length) {
+        c.children.forEach((child) => {
+          links.push({
+            href: `/shop?category=${c.slug}&subcategory=${child.slug}`,
+            label: child.name,
+            active: subcategory === child.slug,
+            sub: true,
+          })
+        })
+      }
+    })
+    return links
+  }, [categories, category, subcategory])
 
   return (
     <div className="ecom-page">
       <ShopNav />
-      <div className="ecom-wrap">
-        <header className="ecom-hero">
-          <p className="section-label">Shop</p>
-          <h1 className="ecom-title">{title}</h1>
-          <p className="ecom-lead">
-            Premium aroma stones &amp; fragrance oils — smoke-free ritual for home.
-          </p>
-        </header>
+      <div className="ecom-wrap ecom-wrap--shop">
+        <p className="breadcrumb">
+          <Link href="/">Home</Link>
+          <span aria-hidden="true"> / </span>
+          {category || subcategory ? (
+            <>
+              <Link href="/shop">Shop</Link>
+              <span aria-hidden="true"> / </span>
+              <span>{title}</span>
+            </>
+          ) : (
+            <span>Shop</span>
+          )}
+        </p>
 
-        <div className="shop-filters">
-          <Link href="/shop" className={!category ? 'is-active' : undefined}>
-            All
-          </Link>
-          {categories.map((c) => (
+        <div className="shop-filters" role="navigation" aria-label="Shop categories">
+          {filterLinks.map((link) => (
             <Link
-              key={c.id}
-              href={`/shop?category=${c.slug}`}
-              className={category === c.slug && !subcategory ? 'is-active' : undefined}
+              key={link.href + link.label}
+              href={link.href}
+              className={`${link.active ? 'is-active' : ''} ${link.sub ? 'is-sub' : ''}`.trim()}
             >
-              {c.name}
+              {link.label}
             </Link>
           ))}
         </div>
-
-        {activeParent?.children?.length ? (
-          <div className="shop-filters shop-filters--sub">
-            <Link
-              href={`/shop?category=${activeParent.slug}`}
-              className={!subcategory ? 'is-active' : undefined}
-            >
-              All {activeParent.name}
-            </Link>
-            {activeParent.children.map((c) => (
-              <Link
-                key={c.id}
-                href={`/shop?category=${activeParent.slug}&subcategory=${c.slug}`}
-                className={subcategory === c.slug ? 'is-active' : undefined}
-              >
-                {c.name}
-              </Link>
-            ))}
-          </div>
-        ) : null}
 
         {loading ? <div className="empty-state">Loading products…</div> : null}
         {error ? (

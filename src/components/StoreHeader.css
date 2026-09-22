@@ -446,6 +446,17 @@ body.menu-mobile--open {
 @media (max-width: 900px) {
   .store-header__inner {
     grid-template-columns: auto 1fr auto;
+    min-height: 4.25rem;
+  }
+
+  .store-header__brand .brand-logo {
+    height: 44px !important;
+    width: auto !important;
+  }
+
+  .store-header__brand .brand-logo__img {
+    width: auto;
+    height: 44px;
   }
 
   .store-header__toggle {
