@@ -21,6 +21,83 @@ const ArrowIcon = () => (
   </svg>
 )
 
+function MenuIcon({ name }) {
+  if (name === 'home') {
+    return (
+      <svg className="menu-drawer__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#E8A04A" d="M12 3.2 3.5 10.2h2.3V20h5.2v-5.2h2v5.2h5.2V10.2h2.3L12 3.2Z" />
+        <path fill="#C9792A" d="M12 3.2 20.5 10.2H18.2V20h-2.6v-5.2h-2V9.4H12.6L12 3.2Z" opacity=".35" />
+      </svg>
+    )
+  }
+  if (name === 'shop') {
+    return (
+      <svg className="menu-drawer__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#B5502E" d="M6.2 8.2h11.6l-1 10.1a1.8 1.8 0 0 1-1.8 1.6H9a1.8 1.8 0 0 1-1.8-1.6l-1-10.1Z" />
+        <path fill="#E8C07A" d="M8.2 8.2a3.8 3.8 0 0 1 7.6 0" stroke="#8B3A1E" strokeWidth="1.4" fill="none" />
+        <circle cx="9.5" cy="8.2" r="1.1" fill="#8B3A1E" />
+        <circle cx="14.5" cy="8.2" r="1.1" fill="#8B3A1E" />
+      </svg>
+    )
+  }
+  if (name === 'best') {
+    return (
+      <svg className="menu-drawer__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          fill="#E2A83A"
+          d="m12 3.2 2.1 5.2 5.6.5-4.2 3.8 1.3 5.5L12 15.4l-4.8 2.8 1.3-5.5-4.2-3.8 5.6-.5L12 3.2Z"
+        />
+        <path fill="#F6D878" d="m12 5.4 1.3 3.3 3.5.3-2.6 2.4.8 3.4L12 13.2V5.4Z" />
+      </svg>
+    )
+  }
+  if (name === 'about') {
+    return (
+      <svg className="menu-drawer__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="8" r="3.4" fill="#5B7C99" />
+        <path fill="#7FA0BD" d="M5.2 19.2c1.3-3.4 3.6-5.1 6.8-5.1s5.5 1.7 6.8 5.1c-2 1.3-4.3 2-6.8 2s-4.8-.7-6.8-2Z" />
+        <circle cx="12" cy="8" r="1.5" fill="#DCE8F2" />
+      </svg>
+    )
+  }
+  if (name === 'bracelet') {
+    return (
+      <svg className="menu-drawer__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="7.2" fill="none" stroke="#B5502E" strokeWidth="1.6" />
+        <circle cx="12" cy="4.9" r="1.55" fill="#C9A84C" />
+        <circle cx="17.1" cy="7.1" r="1.35" fill="#E8A04A" />
+        <circle cx="19.1" cy="12" r="1.55" fill="#8B3A1E" />
+        <circle cx="17.1" cy="16.9" r="1.35" fill="#C9A84C" />
+        <circle cx="12" cy="19.1" r="1.55" fill="#E8A04A" />
+        <circle cx="6.9" cy="16.9" r="1.35" fill="#8B3A1E" />
+        <circle cx="4.9" cy="12" r="1.55" fill="#C9A84C" />
+        <circle cx="6.9" cy="7.1" r="1.35" fill="#E8A04A" />
+      </svg>
+    )
+  }
+  return (
+    <svg className="menu-drawer__icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" fill="#C9A84C" />
+    </svg>
+  )
+}
+
+function MenuMedia({ image, icon }) {
+  if (image) {
+    return (
+      <span className="menu-drawer__media">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={image} alt="" />
+      </span>
+    )
+  }
+  return (
+    <span className="menu-drawer__media menu-drawer__media--icon">
+      <MenuIcon name={icon} />
+    </span>
+  )
+}
+
 export default function StoreHeader({ promo = true }) {
   const pathname = usePathname()
   const { count } = useCart()
@@ -148,6 +225,12 @@ export default function StoreHeader({ promo = true }) {
                 ) : null}
               </div>
             ))}
+            <Link
+              href="/know-your-bracelet"
+              className={pathname.startsWith('/know-your-bracelet') ? 'is-active' : undefined}
+            >
+              Know your Bracelet
+            </Link>
             <Link href="/#products">Best Sellers</Link>
             <Link href="/#testimonials">About us</Link>
           </nav>
@@ -203,12 +286,14 @@ export default function StoreHeader({ promo = true }) {
               <ul className="menu-drawer__list">
                 <li>
                   <Link href="/" className="menu-drawer__item" onClick={closeDrawer}>
-                    Home
+                    <MenuMedia icon="home" />
+                    <span className="menu-drawer__label">Home</span>
                   </Link>
                 </li>
                 <li>
                   <Link href="/shop" className="menu-drawer__item" onClick={closeDrawer}>
-                    Shop All
+                    <MenuMedia icon="shop" />
+                    <span className="menu-drawer__label">Shop All</span>
                   </Link>
                 </li>
                 {categories.map((cat) => (
@@ -219,7 +304,8 @@ export default function StoreHeader({ promo = true }) {
                         className="menu-drawer__item menu-drawer__item--parent"
                         onClick={() => setSubmenu(cat)}
                       >
-                        <span>{cat.name}</span>
+                        <MenuMedia image={cat.image} icon="shop" />
+                        <span className="menu-drawer__label">{cat.name}</span>
                         <ArrowIcon />
                       </button>
                     ) : (
@@ -228,19 +314,32 @@ export default function StoreHeader({ promo = true }) {
                         className="menu-drawer__item"
                         onClick={closeDrawer}
                       >
-                        {cat.name}
+                        <MenuMedia image={cat.image} icon="shop" />
+                        <span className="menu-drawer__label">{cat.name}</span>
                       </Link>
                     )}
                   </li>
                 ))}
                 <li>
+                  <Link
+                    href="/know-your-bracelet"
+                    className="menu-drawer__item"
+                    onClick={closeDrawer}
+                  >
+                    <MenuMedia icon="bracelet" />
+                    <span className="menu-drawer__label">Know your Bracelet</span>
+                  </Link>
+                </li>
+                <li>
                   <Link href="/#products" className="menu-drawer__item" onClick={closeDrawer}>
-                    Best Sellers
+                    <MenuMedia icon="best" />
+                    <span className="menu-drawer__label">Best Sellers</span>
                   </Link>
                 </li>
                 <li>
                   <Link href="/#testimonials" className="menu-drawer__item" onClick={closeDrawer}>
-                    About us
+                    <MenuMedia icon="about" />
+                    <span className="menu-drawer__label">About us</span>
                   </Link>
                 </li>
               </ul>
@@ -295,7 +394,8 @@ export default function StoreHeader({ promo = true }) {
                       className="menu-drawer__item"
                       onClick={closeDrawer}
                     >
-                      All {submenu.name}
+                      <MenuMedia image={submenu.image} icon="shop" />
+                      <span className="menu-drawer__label">All {submenu.name}</span>
                     </Link>
                   </li>
                   {(submenu.children || []).map((child) => (
@@ -305,7 +405,8 @@ export default function StoreHeader({ promo = true }) {
                         className="menu-drawer__item"
                         onClick={closeDrawer}
                       >
-                        {child.name}
+                        <MenuMedia image={child.image} icon="shop" />
+                        <span className="menu-drawer__label">{child.name}</span>
                       </Link>
                     </li>
                   ))}

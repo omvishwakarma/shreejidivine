@@ -1,0 +1,137 @@
+.kyb__head {
+  max-width: 36rem;
+  margin: 0 0 1.75rem;
+}
+
+.kyb__head .ecom-lead {
+  margin-top: 0.55rem;
+}
+
+.kyb-form {
+  max-width: 28rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fff;
+  border: 1px solid var(--line, #d2d5d9);
+}
+
+.kyb-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.kyb-field span {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.kyb-field input {
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line, #d2d5d9);
+  background: #fff;
+  font: inherit;
+  color: var(--brown);
+  border-radius: 4px;
+}
+
+.kyb-field input:focus {
+  outline: none;
+  border-color: rgba(181, 80, 46, 0.45);
+  box-shadow: 0 0 0 3px rgba(181, 80, 46, 0.1);
+}
+
+.kyb-error {
+  margin: 0;
+  color: #9b2d3f;
+  font-size: 0.9rem;
+}
+
+.kyb-result {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.kyb-result__card {
+  padding: 1.35rem 1.25rem;
+  background:
+    linear-gradient(145deg, #fff8f0 0%, #f7efe3 100%);
+  border: 1px solid rgba(43, 30, 22, 0.08);
+}
+
+.kyb-result__hello {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--brown);
+}
+
+.kyb-result__meta {
+  margin: 0.35rem 0 1.1rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.kyb-result__rashi {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.kyb-result__symbol {
+  flex: 0 0 3rem;
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(181, 80, 46, 0.2);
+  font-size: 1.4rem;
+}
+
+.kyb-result__rashi h2 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--brown);
+}
+
+.kyb-result__rashi h2 span {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.kyb-result__rashi p {
+  margin: 0;
+  color: var(--brown-soft);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.kyb-result__products-title {
+  margin: 0 0 0.85rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.kyb-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.kyb-again {
+  justify-self: start;
+}
+
+@media (max-width: 560px) {
+  .kyb-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
