@@ -8,6 +8,7 @@ import ShopNav from '../../../components/ShopNav'
 import Footer from '../../../components/Footer'
 import AddToCartButton from '../../../components/AddToCartButton'
 import BuyNowButton from '../../../components/BuyNowButton'
+import InstagramShop from '../../../components/InstagramShop'
 import { api } from '../../../lib/api'
 import { formatINR, toTitleCase } from '../../../lib/products'
 import { safePublicImage, safePublicMedia } from '../../../lib/media'
@@ -23,6 +24,7 @@ import './product.css'
 export default function ProductClient() {
   const { slug } = useParams()
   const [product, setProduct] = useState(null)
+  const [related, setRelated] = useState([])
   const [error, setError] = useState('')
   const [activeKey, setActiveKey] = useState('img-0')
   const [colour, setColour] = useState('')
@@ -30,9 +32,11 @@ export default function ProductClient() {
   /** When true, gallery thumb wins over variant image */
   const [galleryFocus, setGalleryFocus] = useState(true)
   const touchStartX = useRef(null)
+  const relatedRailRef = useRef(null)
 
   useEffect(() => {
     if (!slug) return
+    setRelated([])
     api(`/api/products/${slug}`)
       .then((d) => {
         setProduct(d.product)
@@ -45,6 +49,39 @@ export default function ProductClient() {
       })
       .catch((err) => setError(err.message))
   }, [slug])
+
+  useEffect(() => {
+    if (!product?.id) return
+    const category = product.categorySlug || product.subcategorySlug || ''
+    if (!category) {
+      setRelated([])
+      return
+    }
+
+    let cancelled = false
+    api(`/api/products?category=${encodeURIComponent(category)}`)
+      .then((d) => {
+        if (cancelled) return
+        const list = (d.products || [])
+          .filter((p) => p.id !== product.id && p.slug !== product.slug)
+          .slice(0, 12)
+        setRelated(list)
+      })
+      .catch(() => {
+        if (!cancelled) setRelated([])
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [product])
+
+  function scrollRelated(dir) {
+    const el = relatedRailRef.current
+    if (!el) return
+    const step = Math.min(320, el.clientWidth * 0.75)
+    el.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
 
   const gallery = useMemo(() => {
     if (!product) return []
@@ -348,6 +385,73 @@ export default function ProductClient() {
             </div>
           </div>
         ) : null}
+
+        {related.length > 0 ? (
+          <section className="related-products" aria-labelledby="related-products-heading">
+            <div className="related-products__head">
+              <h2 id="related-products-heading" className="related-products__title">
+                Related products
+              </h2>
+              {related.length > 2 ? (
+                <div className="related-products__nav">
+                  <button
+                    type="button"
+                    className="related-products__arrow"
+                    onClick={() => scrollRelated(-1)}
+                    aria-label="Previous related products"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="related-products__arrow"
+                    onClick={() => scrollRelated(1)}
+                    aria-label="Next related products"
+                  >
+                    ›
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <div
+              className="related-products__rail"
+              ref={relatedRailRef}
+              role="region"
+              aria-label="Related products"
+            >
+              <div className="related-products__track">
+                {related.map((p) => (
+                  <article key={p.id} className="product-card related-products__card">
+                    <Link href={`/shop/${p.slug}`} className="product-card__media">
+                      {p.badge ? <span className="product-card__badge">{p.badge}</span> : null}
+                      <Image
+                        src={p.image}
+                        alt={p.name}
+                        width={700}
+                        height={875}
+                        sizes="(max-width:560px) 42vw, 220px"
+                      />
+                    </Link>
+                    <div className="product-card__body">
+                      <Link href={`/shop/${p.slug}`}>
+                        <h3 className="product-card__name">{toTitleCase(p.name)}</h3>
+                      </Link>
+                      <div className="product-card__price">
+                        <strong>{formatINR(p.price)}</strong>
+                        {p.compareAt ? <s>{formatINR(p.compareAt)}</s> : null}
+                      </div>
+                      <div className="product-card__actions">
+                        <AddToCartButton product={p} />
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {product ? <InstagramShop compact /> : null}
       </div>
 
       {product ? (

@@ -59,20 +59,6 @@
   margin-bottom: 0.5rem;
 }
 
-.footer__url {
-  margin-top: 0.75rem !important;
-}
-
-.footer__url a {
-  color: #ffffff;
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-}
-
-.footer__url a:hover {
-  text-decoration: underline;
-}
-
 .footer__links a {
   font-size: 0.92rem;
   font-weight: 300;
@@ -158,8 +144,87 @@
 }
 
 @media (max-width: 600px) {
+  .footer {
+    padding-top: 1.1rem;
+  }
+
   .footer__grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
+    padding-bottom: 0.85rem;
+  }
+
+  .footer__brand {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.65rem;
+  }
+
+  .footer__logo {
+    width: 72px;
+    margin-bottom: 0;
+  }
+
+  .footer__brand-tag {
+    display: none;
+  }
+
+  .footer__products {
+    display: none;
+  }
+
+  .footer__links,
+  .footer__contact {
+    gap: 0.25rem;
+  }
+
+  .footer__nav-title {
+    font-size: 0.62rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .footer__links a,
+  .footer__contact p,
+  .footer__social {
+    font-size: 0.78rem;
+  }
+
+  .footer__contact p {
+    display: none;
+  }
+
+  .footer__email {
+    font-size: 0.75rem;
+    margin: 0 0 0.2rem;
+    word-break: break-all;
+  }
+
+  .footer__social {
+    margin-bottom: 0;
+  }
+
+  .footer__btn {
+    display: none;
+  }
+
+  .footer__bottom {
+    padding: 0.55rem 0;
+  }
+
+  .footer__bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    font-size: 0.68rem;
+  }
+
+  .footer__tag {
+    display: none;
+  }
+
+  .footer__version {
+    font-size: 0.6rem;
   }
 }

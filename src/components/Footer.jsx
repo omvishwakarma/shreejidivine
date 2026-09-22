@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SITE_URL, SOCIAL } from '../lib/site'
+import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SOCIAL } from '../lib/site'
 import { APP_VERSION } from '../lib/appVersion'
 import './Footer.css'
 
@@ -31,10 +31,7 @@ export default function Footer() {
             className="footer__logo"
             sizes="200px"
           />
-          <p>{SITE_TAGLINE}</p>
-          <p className="footer__url">
-            <a href={SITE_URL}>shreejidivinearoma.com</a>
-          </p>
+          <p className="footer__brand-tag">{SITE_TAGLINE}</p>
         </div>
 
         <nav className="footer__links" aria-label="Quick links">
@@ -48,7 +45,7 @@ export default function Footer() {
           <Link href="/profile">My Account</Link>
         </nav>
 
-        <nav className="footer__links" aria-label="Policies">
+        <nav className="footer__links footer__products" aria-label="Policies">
           <h2 className="footer__nav-title">Shop</h2>
           <Link href="/shop/divine-ritual-kit">Divine Ritual Kit</Link>
           <Link href="/shop/mogra-royale">Mogra Royale</Link>

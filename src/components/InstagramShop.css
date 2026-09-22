@@ -258,3 +258,89 @@
     flex-basis: min(78vw, 280px);
   }
 }
+
+/* Compact (product detail): title only, like Related products */
+.ig-shop--compact {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.ig-shop--compact .ig-shop__compact-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ig-shop--compact .ig-shop__compact-title {
+  margin: 0;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--brown);
+}
+
+.ig-shop--compact .ig-shop__compact-nav {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.ig-shop--compact .ig-shop__compact-arrow {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(43, 30, 22, 0.16);
+  background: #fff;
+  color: var(--brown);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+}
+
+.ig-shop--compact .ig-shop__compact-arrow:hover {
+  border-color: rgba(181, 80, 46, 0.45);
+  color: var(--accent, #b5502e);
+}
+
+.ig-shop--compact .ig-shop__stage {
+  margin-top: 0;
+  padding: 0;
+}
+
+.ig-shop--compact .ig-shop__rail {
+  padding: 0 0 0.25rem;
+  gap: 0.85rem;
+}
+
+.ig-shop--compact .ig-shop__card {
+  flex-basis: min(42vw, 200px);
+  max-width: 220px;
+  border-radius: 0.75rem;
+  scroll-snap-align: start;
+}
+
+.ig-shop--compact .ig-shop__foot {
+  margin-top: 1rem;
+  justify-content: flex-start;
+}
+
+.ig-shop--compact .ig-shop__foot .btn {
+  padding: 0.7rem 1.25rem;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 560px) {
+  .ig-shop--compact .ig-shop__compact-title {
+    font-size: 1.15rem;
+  }
+
+  .ig-shop--compact .ig-shop__card {
+    flex-basis: min(46vw, 180px);
+  }
+}

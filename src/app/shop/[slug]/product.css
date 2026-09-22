@@ -331,6 +331,99 @@
   color: var(--text-muted);
 }
 
+.related-products {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid rgba(43, 30, 22, 0.08);
+  margin-bottom: 0;
+}
+
+.related-products + .ig-shop--compact {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(43, 30, 22, 0.08);
+}
+
+.ecom-page .product-detail > .ig-shop--compact:first-of-type {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(43, 30, 22, 0.08);
+}
+
+.related-products__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.related-products__title {
+  margin: 0;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--brown);
+}
+
+.related-products__nav {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.related-products__arrow {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(43, 30, 22, 0.16);
+  background: #fff;
+  color: var(--brown);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+}
+
+.related-products__arrow:hover {
+  border-color: rgba(181, 80, 46, 0.45);
+  color: var(--accent, #b5502e);
+}
+
+.related-products__rail {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  margin-inline: -0.15rem;
+  padding-bottom: 0.25rem;
+}
+
+.related-products__rail::-webkit-scrollbar {
+  display: none;
+}
+
+.related-products__track {
+  display: flex;
+  gap: 0.85rem;
+  width: max-content;
+  padding-inline: 0.15rem;
+}
+
+.related-products__card {
+  flex: 0 0 min(42vw, 200px);
+  max-width: 220px;
+  scroll-snap-align: start;
+}
+
+.related-products__card .product-card__name {
+  font-size: 0.92rem;
+}
+
 .product-detail__bar {
   position: fixed;
   left: 0;
@@ -424,11 +517,28 @@
   .product-detail__bar-actions {
     width: 100%;
   }
+
+  .related-products {
+    margin-top: 2rem;
+  }
+
+  .related-products + .ig-shop--compact {
+    margin-top: 1.15rem;
+    padding-top: 1rem;
+  }
+
+  .related-products__card {
+    flex-basis: min(46vw, 180px);
+  }
 }
 
 @media (max-width: 480px) {
   .product-detail__bar-actions .btn-sm {
     padding: 0.8rem 0.65rem;
     font-size: 0.72rem;
+  }
+
+  .related-products__title {
+    font-size: 1.15rem;
   }
 }
