@@ -12,7 +12,16 @@ export async function POST(request) {
     })
     const data = schema.parse(await request.json())
     const user = await User.findOne({ email: data.email.toLowerCase() })
-    if (!user || !(await user.comparePassword(data.password))) {
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+    }
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        { error: 'This account uses Google Sign-In. Continue with Google instead.' },
+        { status: 401 }
+      )
+    }
+    if (!(await user.comparePassword(data.password))) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
     const token = await signToken(user)

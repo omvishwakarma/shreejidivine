@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import AuthShell from '../../components/AuthShell'
+import GoogleSignInButton from '../../components/GoogleSignInButton'
 import { useAuth } from '../../context/AuthContext'
 
 export default function SignupClient() {
-  const { signup } = useAuth()
+  const { signup, loginWithGoogle } = useAuth()
   const router = useRouter()
   const search = useSearchParams()
   const next = search.get('next') || '/profile'
@@ -30,8 +31,22 @@ export default function SignupClient() {
     }
   }
 
+  const onGoogle = useCallback(
+    async (idToken) => {
+      setError('')
+      await loginWithGoogle(idToken)
+      router.push(next)
+    },
+    [loginWithGoogle, router, next]
+  )
+
   return (
     <AuthShell mode="signup" next={next}>
+      <GoogleSignInButton onCredential={onGoogle} disabled={loading} />
+      <div className="auth-divider" role="separator" aria-label="or">
+        <span>or</span>
+      </div>
+
       <form className="auth-form" onSubmit={onSubmit}>
         <div className="auth-field">
           <label htmlFor="name">Full name</label>
