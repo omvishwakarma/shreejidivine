@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { adminApi } from '../../../../lib/adminApi'
 
 const empty = {
@@ -23,6 +23,8 @@ export default function AdminCategoriesPage() {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const imageInputId = useId()
 
   async function load() {
     const data = await adminApi('/api/admin/categories')
@@ -75,6 +77,25 @@ export default function AdminCategoriesPage() {
     setFormOpen(false)
     setEditingId(null)
     setForm(empty)
+    setUploading(false)
+  }
+
+  async function uploadImage(file) {
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('kind', 'image')
+      const data = await adminApi('/api/admin/upload', { method: 'POST', body })
+      setForm((f) => ({ ...f, image: data.url }))
+      setMsg('Image uploaded — save the category to apply')
+    } catch (err) {
+      setError(err.message || 'Upload failed')
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function onSubmit(e) {
@@ -169,7 +190,10 @@ export default function AdminCategoriesPage() {
                 <select
                   value={form.parent}
                   onChange={(e) => setForm((f) => ({ ...f, parent: e.target.value }))}
-                  disabled={!!editingId && rows.some((r) => r.id === editingId && r.level === 0 && (r.children || []).length)}
+                  disabled={
+                    !!editingId &&
+                    rows.some((r) => r.id === editingId && r.level === 0 && (r.children || []).length)
+                  }
                 >
                   <option value="">— Top level —</option>
                   {parents
@@ -190,14 +214,62 @@ export default function AdminCategoriesPage() {
                 />
               </label>
             </div>
-            <label>
-              Image URL
-              <input
-                value={form.image}
-                onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
-                placeholder="/images/..."
-              />
-            </label>
+
+            <div className="admin-media-card admin-media-card--compact">
+              <div className="admin-media-card__head">
+                <div>
+                  <p className="admin-media-card__badge">Image</p>
+                  <h3>Category image</h3>
+                </div>
+              </div>
+              <div className="admin-cat-upload">
+                <div className="admin-cat-upload__preview">
+                  {form.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={form.image} alt="" />
+                  ) : (
+                    <span>No image</span>
+                  )}
+                </div>
+                <div className="admin-cat-upload__actions">
+                  <label
+                    htmlFor={imageInputId}
+                    className={`admin-dropzone admin-dropzone--sm ${uploading ? 'is-busy' : ''}`}
+                  >
+                    <input
+                      id={imageInputId}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        e.target.value = ''
+                        uploadImage(file)
+                      }}
+                    />
+                    <span className="admin-dropzone__title">
+                      {uploading ? 'Uploading…' : form.image ? 'Change' : 'Upload'}
+                    </span>
+                  </label>
+                  <input
+                    value={form.image}
+                    onChange={(e) => setForm((f) => ({ ...f, image: e.target.value }))}
+                    placeholder="Image URL (optional)"
+                    aria-label="Image URL"
+                  />
+                  {form.image ? (
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-ghost"
+                      onClick={() => setForm((f) => ({ ...f, image: '' }))}
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
             <label>
               Description
               <textarea
@@ -233,7 +305,11 @@ export default function AdminCategoriesPage() {
               </label>
             </div>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button type="submit" className="admin-btn admin-btn-primary">
+              <button
+                type="submit"
+                className="admin-btn admin-btn-primary"
+                disabled={uploading}
+              >
                 {editingId ? 'Save' : 'Create'}
               </button>
               <button type="button" className="admin-btn admin-btn-ghost" onClick={closeForm}>
@@ -259,11 +335,21 @@ export default function AdminCategoriesPage() {
             {rows.map((c) => (
               <tr key={c.id}>
                 <td style={{ paddingLeft: c.level ? '1.75rem' : undefined }}>
-                  {c.level ? '↳ ' : ''}
-                  <strong>{c.name}</strong>
-                  {c.parentName ? (
-                    <span style={{ opacity: 0.55, marginLeft: 6 }}>({c.parentName})</span>
-                  ) : null}
+                  <span className="admin-cat-cell">
+                    {c.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={c.image} alt="" className="admin-cat-thumb" />
+                    ) : (
+                      <span className="admin-cat-thumb admin-cat-thumb--empty" aria-hidden="true" />
+                    )}
+                    <span>
+                      {c.level ? '↳ ' : ''}
+                      <strong>{c.name}</strong>
+                      {c.parentName ? (
+                        <span style={{ opacity: 0.55, marginLeft: 6 }}>({c.parentName})</span>
+                      ) : null}
+                    </span>
+                  </span>
                 </td>
                 <td className="admin-mono">{c.slug}</td>
                 <td>{c.level ? 'Subcategory' : 'Category'}</td>

@@ -101,6 +101,12 @@
   position: relative;
 }
 
+/* Categories + Know your Bracelet: mobile menu only */
+.store-header__nav--desk .store-header__cat,
+.store-header__nav--desk .store-header__kyb {
+  display: none;
+}
+
 .store-header__mega {
   position: absolute;
   top: calc(100% + 0.85rem);
@@ -363,6 +369,8 @@
   flex: 1;
   min-width: 0;
   line-height: 1.25;
+  position: relative;
+  z-index: 1;
 }
 
 .menu-drawer__item--parent .menu-drawer__arrow {

@@ -206,7 +206,7 @@ export default function StoreHeader({ promo = true }) {
             {categories.map((cat) => (
               <div
                 key={cat.id}
-                className={`store-header__drop ${deskOpen === cat.id ? 'is-open' : ''}`}
+                className={`store-header__drop store-header__cat ${deskOpen === cat.id ? 'is-open' : ''}`}
                 onMouseEnter={() => setDeskOpen(cat.id)}
                 onMouseLeave={() => setDeskOpen(null)}
               >
@@ -227,7 +227,7 @@ export default function StoreHeader({ promo = true }) {
             ))}
             <Link
               href="/know-your-bracelet"
-              className={pathname.startsWith('/know-your-bracelet') ? 'is-active' : undefined}
+              className={`store-header__kyb ${pathname.startsWith('/know-your-bracelet') ? 'is-active' : undefined}`}
             >
               Know your Bracelet
             </Link>
