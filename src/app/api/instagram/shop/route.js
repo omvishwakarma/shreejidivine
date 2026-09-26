@@ -40,11 +40,21 @@ export async function GET() {
   let catalog = []
   let shopLooks = DEFAULT_INSTAGRAM_SHOP_LOOKS
   let enabled = true
+  let copy = {
+    eyebrow: 'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
+    title: 'Pure for Your Home.',
+    subtitle: 'Shop the look on Instagram',
+  }
 
   try {
     await dbConnect()
     const settings = await getStoreSettings()
     enabled = settings.instagramShopEnabled !== false
+    copy = {
+      eyebrow: settings.instagramShopEyebrow || copy.eyebrow,
+      title: settings.instagramShopTitle || copy.title,
+      subtitle: settings.instagramShopSubtitle || copy.subtitle,
+    }
     shopLooks = Array.isArray(settings.instagramShopLooks)
       ? settings.instagramShopLooks.filter((l) => l.active !== false)
       : DEFAULT_INSTAGRAM_SHOP_LOOKS
@@ -125,7 +135,7 @@ export async function GET() {
   )
 
   return NextResponse.json(
-    { enabled: true, looks },
+    { enabled: true, ...copy, looks },
     {
       headers: {
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',

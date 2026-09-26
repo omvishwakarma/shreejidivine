@@ -9,6 +9,7 @@ const FALLBACK = {
   desktop: '/videos/home.mp4',
   mobile: '/videos/home.mp4',
   poster: '/images/banners/royal-chandan.png',
+  posterMobile: '/images/banners/royal-chandan.png',
   headline: SITE_TAGLINE,
   ctaText: 'Shop Now',
   ctaHref: '/shop',
@@ -32,6 +33,7 @@ export default function Hero() {
             desktop: data.desktop || FALLBACK.desktop,
             mobile: data.mobile || FALLBACK.mobile,
             poster: data.poster || FALLBACK.poster,
+            posterMobile: data.posterMobile || data.poster || FALLBACK.posterMobile,
             headline: data.headline || FALLBACK.headline,
             ctaText: data.ctaText || FALLBACK.ctaText,
             ctaHref: data.ctaHref || FALLBACK.ctaHref,
@@ -54,6 +56,7 @@ export default function Hero() {
   }, [])
 
   const src = isMobile ? hero.mobile : hero.desktop
+  const poster = isMobile ? hero.posterMobile || hero.poster : hero.poster
 
   useEffect(() => {
     const el = videoRef.current
@@ -61,7 +64,7 @@ export default function Hero() {
     el.load()
     const play = el.play()
     if (play?.catch) play.catch(() => {})
-  }, [src])
+  }, [src, poster])
 
   return (
     <section className="hero" id="top" aria-label={`${SITE_NAME} fragrance oils`}>
@@ -71,11 +74,11 @@ export default function Hero() {
 
       <div className="hero__stage">
         <video
-          key={src}
+          key={`${src}-${poster}`}
           ref={videoRef}
           className="hero__video"
           src={src}
-          poster={hero.poster}
+          poster={poster}
           autoPlay
           muted
           loop

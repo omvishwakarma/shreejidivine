@@ -44,8 +44,15 @@ function ShopVideo({ src, poster, label }) {
   )
 }
 
+const DEFAULT_COPY = {
+  eyebrow: 'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
+  title: 'Pure for Your Home.',
+  subtitle: 'Shop the look on Instagram',
+}
+
 export default function InstagramShop({ compact = false }) {
   const [looks, setLooks] = useState([])
+  const [copy, setCopy] = useState(DEFAULT_COPY)
   const [loading, setLoading] = useState(true)
   const railRef = useRef(null)
 
@@ -55,6 +62,11 @@ export default function InstagramShop({ compact = false }) {
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return
+        setCopy({
+          eyebrow: data.eyebrow || DEFAULT_COPY.eyebrow,
+          title: data.title || DEFAULT_COPY.title,
+          subtitle: data.subtitle || DEFAULT_COPY.subtitle,
+        })
         if (data.enabled === false) {
           setLooks([])
           return
@@ -91,7 +103,7 @@ export default function InstagramShop({ compact = false }) {
       {compact ? (
         <div className="ig-shop__compact-head">
           <h2 id={headingId} className="ig-shop__compact-title">
-            Shop the look on Instagram
+            {copy.subtitle}
           </h2>
           {looks.length > 2 || loading ? (
             <div className="ig-shop__compact-nav">
@@ -117,15 +129,13 @@ export default function InstagramShop({ compact = false }) {
       ) : (
         <div className="ig-shop__banner">
           <div className="container">
-            <p className="ig-shop__values">
-              Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity
-            </p>
+            <p className="ig-shop__values">{copy.eyebrow}</p>
             <h2 id={headingId} className="ig-shop__title">
-              Pure for Your Home.
+              {copy.title}
             </h2>
             <p className="ig-shop__subtitle">
               <span className="ig-shop__flourish" aria-hidden="true" />
-              Shop the look on Instagram
+              {copy.subtitle}
               <span className="ig-shop__flourish" aria-hidden="true" />
             </p>
           </div>

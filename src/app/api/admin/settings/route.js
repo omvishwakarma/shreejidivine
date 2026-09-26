@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { StoreSettings, STORE_SETTINGS_DEFAULTS } from '@/lib/mongo/StoreSettings'
 import { shippingNote } from '@/lib/shipping'
+import { isSafePublicImage } from '@/lib/media'
 
 export async function GET(request) {
   const gate = await requireAdmin(request)
@@ -27,12 +28,26 @@ export async function PATCH(request) {
       freeShippingMinOrder: z.number().min(0).optional(),
       heroVideoDesktop: z.string().min(1).max(500).optional(),
       heroVideoMobile: z.string().min(1).max(500).optional(),
-      heroPoster: z.string().max(500).optional(),
+      heroPoster: z.string().max(800).optional(),
+      heroPosterMobile: z.string().max(800).optional(),
       heroHeadline: z.string().max(200).optional(),
       heroCtaText: z.string().min(1).max(60).optional(),
       heroCtaHref: z.string().min(1).max(200).optional(),
     })
     const data = schema.parse(await request.json())
+
+    for (const key of ['heroPoster', 'heroPosterMobile']) {
+      const value = String(data[key] || '').trim()
+      if (data[key] !== undefined && value && !isSafePublicImage(value)) {
+        return NextResponse.json(
+          {
+            error:
+              'Poster must be an uploaded image or a web path like /images/... Desktop file paths are not allowed.',
+          },
+          { status: 400 }
+        )
+      }
+    }
 
     const $set = {}
     for (const key of Object.keys(data)) {

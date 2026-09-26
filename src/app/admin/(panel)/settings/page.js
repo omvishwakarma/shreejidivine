@@ -9,6 +9,7 @@ const EMPTY = {
   heroVideoDesktop: '/videos/home.mp4',
   heroVideoMobile: '/videos/home.mp4',
   heroPoster: '/images/banners/royal-chandan.png',
+  heroPosterMobile: '',
   heroHeadline: '',
   heroCtaText: 'Shop Now',
   heroCtaHref: '/shop',
@@ -75,6 +76,56 @@ function VideoSlot({
   )
 }
 
+function PosterSlot({ title, badge, hint, value, field, uploading, onUpload, onPathChange }) {
+  const inputId = useId()
+  const busy = uploading === field
+
+  return (
+    <div className="admin-media-card admin-media-card--compact">
+      <div className="admin-media-card__head">
+        <div>
+          <p className="admin-media-card__badge">{badge}</p>
+          <h3>{title}</h3>
+          {hint ? <p className="admin-dropzone__hint">{hint}</p> : null}
+        </div>
+      </div>
+      <div className="admin-cat-upload">
+        <div className="admin-cat-upload__preview">
+          {value ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={value} alt="" />
+          ) : (
+            <span>No image</span>
+          )}
+        </div>
+        <div className="admin-cat-upload__actions">
+          <label htmlFor={inputId} className={`admin-dropzone admin-dropzone--sm ${busy ? 'is-busy' : ''}`}>
+            <input
+              id={inputId}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              disabled={!!uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                e.target.value = ''
+                onUpload(field, file)
+              }}
+            />
+            <span className="admin-dropzone__title">{busy ? 'Uploading…' : value ? 'Change' : 'Upload'}</span>
+          </label>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => onPathChange(e.target.value)}
+            placeholder="Image URL"
+            aria-label={`${title} path`}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminSettingsPage() {
   const [form, setForm] = useState(EMPTY)
   const [note, setNote] = useState('')
@@ -92,6 +143,7 @@ export default function AdminSettingsPage() {
       heroVideoDesktop: data.settings?.heroVideoDesktop || EMPTY.heroVideoDesktop,
       heroVideoMobile: data.settings?.heroVideoMobile || EMPTY.heroVideoMobile,
       heroPoster: data.settings?.heroPoster || EMPTY.heroPoster,
+      heroPosterMobile: data.settings?.heroPosterMobile || '',
       heroHeadline: data.settings?.heroHeadline ?? '',
       heroCtaText: data.settings?.heroCtaText || EMPTY.heroCtaText,
       heroCtaHref: data.settings?.heroCtaHref || EMPTY.heroCtaHref,
@@ -119,6 +171,7 @@ export default function AdminSettingsPage() {
           heroVideoDesktop: form.heroVideoDesktop.trim(),
           heroVideoMobile: form.heroVideoMobile.trim(),
           heroPoster: form.heroPoster.trim(),
+          heroPosterMobile: form.heroPosterMobile.trim(),
           heroHeadline: form.heroHeadline.trim(),
           heroCtaText: form.heroCtaText.trim() || 'Shop Now',
           heroCtaHref: form.heroCtaHref.trim() || '/shop',
@@ -130,6 +183,7 @@ export default function AdminSettingsPage() {
         heroVideoDesktop: data.settings.heroVideoDesktop,
         heroVideoMobile: data.settings.heroVideoMobile,
         heroPoster: data.settings.heroPoster,
+        heroPosterMobile: data.settings.heroPosterMobile || '',
         heroHeadline: data.settings.heroHeadline ?? '',
         heroCtaText: data.settings.heroCtaText,
         heroCtaHref: data.settings.heroCtaHref,
@@ -143,7 +197,7 @@ export default function AdminSettingsPage() {
     }
   }
 
-  async function uploadVideo(field, file) {
+  async function uploadMedia(field, file, kind) {
     if (!file) return
     setUploading(field)
     setError('')
@@ -151,12 +205,18 @@ export default function AdminSettingsPage() {
     try {
       const body = new FormData()
       body.append('file', file)
-      body.append('kind', 'video')
+      body.append('kind', kind)
       const data = await adminApi('/api/admin/upload', { method: 'POST', body })
       setForm((f) => ({ ...f, [field]: data.url }))
-      setMsg(
-        `${field === 'heroVideoDesktop' ? 'Desktop' : 'Mobile'} video uploaded — click Save to apply`
-      )
+      const label =
+        field === 'heroVideoDesktop'
+          ? 'Desktop video'
+          : field === 'heroVideoMobile'
+            ? 'Mobile video'
+            : field === 'heroPoster'
+              ? 'Desktop poster'
+              : 'Mobile poster'
+      setMsg(`${label} uploaded — click Save to apply`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -200,7 +260,7 @@ export default function AdminSettingsPage() {
               value={form.heroVideoDesktop}
               field="heroVideoDesktop"
               uploading={uploading}
-              onUpload={uploadVideo}
+              onUpload={(field, file) => uploadMedia(field, file, 'video')}
               onPathChange={(v) => setForm((f) => ({ ...f, heroVideoDesktop: v }))}
             />
             <VideoSlot
@@ -211,22 +271,39 @@ export default function AdminSettingsPage() {
               field="heroVideoMobile"
               portrait
               uploading={uploading}
-              onUpload={uploadVideo}
+              onUpload={(field, file) => uploadMedia(field, file, 'video')}
               onPathChange={(v) => setForm((f) => ({ ...f, heroVideoMobile: v }))}
             />
           </div>
 
           <div className="admin-card__divider" />
 
+          <div className="admin-media-grid">
+            <PosterSlot
+              title="Desktop poster"
+              badge="Before video"
+              hint="Recommended 1920 × 823 px · 21:9 · JPG or WebP"
+              value={form.heroPoster}
+              field="heroPoster"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, heroPoster: v }))}
+            />
+            <PosterSlot
+              title="Mobile poster"
+              badge="Before video"
+              hint="Recommended 1080 × 1440 px · 3:4 · JPG or WebP"
+              value={form.heroPosterMobile}
+              field="heroPosterMobile"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, heroPosterMobile: v }))}
+            />
+          </div>
+
+          <div className="admin-card__divider" />
+
           <div className="admin-form-grid two">
-            <label className="admin-field">
-              <span>Poster image path</span>
-              <input
-                type="text"
-                value={form.heroPoster}
-                onChange={(e) => setForm((f) => ({ ...f, heroPoster: e.target.value }))}
-              />
-            </label>
             <label className="admin-field">
               <span>Headline</span>
               <input

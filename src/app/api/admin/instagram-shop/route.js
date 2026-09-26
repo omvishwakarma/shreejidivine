@@ -37,6 +37,9 @@ export async function GET(request) {
 
   return NextResponse.json({
     enabled: settings.instagramShopEnabled,
+    eyebrow: settings.instagramShopEyebrow,
+    title: settings.instagramShopTitle,
+    subtitle: settings.instagramShopSubtitle,
     looks: settings.instagramShopLooks,
     products: products.map((p) => ({
       slug: p.slug,
@@ -55,6 +58,9 @@ export async function PUT(request) {
     await dbConnect()
     const schema = z.object({
       enabled: z.boolean().optional(),
+      eyebrow: z.string().max(240).optional(),
+      title: z.string().max(120).optional(),
+      subtitle: z.string().max(120).optional(),
       looks: z.array(lookSchema).max(24),
     })
     const data = schema.parse(await request.json())
@@ -69,6 +75,9 @@ export async function PUT(request) {
 
     const $set = { instagramShopLooks: looks }
     if (data.enabled !== undefined) $set.instagramShopEnabled = data.enabled
+    if (data.eyebrow !== undefined) $set.instagramShopEyebrow = data.eyebrow.trim()
+    if (data.title !== undefined) $set.instagramShopTitle = data.title.trim()
+    if (data.subtitle !== undefined) $set.instagramShopSubtitle = data.subtitle.trim()
 
     const doc = await StoreSettings.findOneAndUpdate(
       { key: 'default' },
@@ -82,6 +91,9 @@ export async function PUT(request) {
     const settings = doc.toJSONSafe()
     return NextResponse.json({
       enabled: settings.instagramShopEnabled,
+      eyebrow: settings.instagramShopEyebrow,
+      title: settings.instagramShopTitle,
+      subtitle: settings.instagramShopSubtitle,
       looks: settings.instagramShopLooks,
     })
   } catch (err) {

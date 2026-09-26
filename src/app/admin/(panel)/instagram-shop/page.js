@@ -3,6 +3,12 @@
 import { useEffect, useId, useMemo, useState } from 'react'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
 
+const DEFAULT_COPY = {
+  eyebrow: 'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
+  title: 'Pure for Your Home.',
+  subtitle: 'Shop the look on Instagram',
+}
+
 function emptyLook(index = 0) {
   return {
     id: '',
@@ -18,6 +24,7 @@ function emptyLook(index = 0) {
 
 export default function AdminInstagramShopPage() {
   const [enabled, setEnabled] = useState(true)
+  const [copy, setCopy] = useState(DEFAULT_COPY)
   const [looks, setLooks] = useState([])
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -38,6 +45,11 @@ export default function AdminInstagramShopPage() {
   async function load() {
     const data = await adminApi('/api/admin/instagram-shop')
     setEnabled(data.enabled !== false)
+    setCopy({
+      eyebrow: data.eyebrow || DEFAULT_COPY.eyebrow,
+      title: data.title || DEFAULT_COPY.title,
+      subtitle: data.subtitle || DEFAULT_COPY.subtitle,
+    })
     setLooks(
       Array.isArray(data.looks) && data.looks.length
         ? data.looks.map((l, i) => ({ ...emptyLook(i), ...l, sortOrder: i }))
@@ -76,9 +88,12 @@ export default function AdminInstagramShopPage() {
     setForm(emptyLook())
   }
 
-  async function persist(nextEnabled, nextLooks) {
+  async function persist(nextEnabled, nextLooks, nextCopy = copy) {
     const payload = {
       enabled: nextEnabled,
+      eyebrow: nextCopy.eyebrow,
+      title: nextCopy.title,
+      subtitle: nextCopy.subtitle,
       looks: nextLooks
         .map((look, i) => ({
           ...look,
@@ -98,8 +113,34 @@ export default function AdminInstagramShopPage() {
       body: JSON.stringify(payload),
     })
     setEnabled(data.enabled !== false)
+    setCopy({
+      eyebrow: data.eyebrow || DEFAULT_COPY.eyebrow,
+      title: data.title || DEFAULT_COPY.title,
+      subtitle: data.subtitle || DEFAULT_COPY.subtitle,
+    })
     setLooks(data.looks.map((l, i) => ({ ...emptyLook(i), ...l, sortOrder: i })))
     return data
+  }
+
+  async function saveCopy(e) {
+    e.preventDefault()
+    setError('')
+    setMsg('')
+    setSaving(true)
+    try {
+      const nextCopy = {
+        eyebrow: copy.eyebrow.trim() || DEFAULT_COPY.eyebrow,
+        title: copy.title.trim() || DEFAULT_COPY.title,
+        subtitle: copy.subtitle.trim() || DEFAULT_COPY.subtitle,
+      }
+      setCopy(nextCopy)
+      await persist(enabled, looks, nextCopy)
+      setMsg('Section text updated')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function onToggleSection() {
@@ -272,6 +313,42 @@ export default function AdminInstagramShopPage() {
           Status:{' '}
           <strong>{enabled ? 'Visible on homepage' : 'Hidden from homepage'}</strong>
         </p>
+        <form className="admin-form-grid" onSubmit={saveCopy} style={{ marginTop: '1rem' }}>
+          <label className="admin-field">
+            <span>Top line</span>
+            <input
+              type="text"
+              value={copy.eyebrow}
+              maxLength={240}
+              onChange={(e) => setCopy((c) => ({ ...c, eyebrow: e.target.value }))}
+            />
+          </label>
+          <div className="admin-form-grid two">
+            <label className="admin-field">
+              <span>Heading</span>
+              <input
+                type="text"
+                value={copy.title}
+                maxLength={120}
+                onChange={(e) => setCopy((c) => ({ ...c, title: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Subheading</span>
+              <input
+                type="text"
+                value={copy.subtitle}
+                maxLength={120}
+                onChange={(e) => setCopy((c) => ({ ...c, subtitle: e.target.value }))}
+              />
+            </label>
+          </div>
+          <div>
+            <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
+              {saving ? 'Saving…' : 'Save section text'}
+            </button>
+          </div>
+        </form>
       </section>
 
       <section className="admin-card admin-card--lg">
