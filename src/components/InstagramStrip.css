@@ -1,11 +1,11 @@
 .ig-strip {
-  padding: var(--section-pad) 0 0;
+  padding: clamp(1.35rem, 3vw, 2.15rem) 0 0;
   background: var(--surface-muted);
 }
 
 .ig-strip__head {
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1rem;
 }
 
 .ig-strip__head .section-title a {

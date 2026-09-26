@@ -1,5 +1,5 @@
 .best-sellers {
-  padding: var(--section-pad) 0;
+  padding: clamp(1.35rem, 3vw, 2.15rem) 0;
   background:
     radial-gradient(ellipse 80% 50% at 50% 0%, rgba(181, 80, 46, 0.04), transparent 55%),
     var(--surface-muted);
@@ -8,7 +8,7 @@
 .best-sellers__head {
   text-align: center;
   max-width: 36rem;
-  margin: 0 auto 2.75rem;
+  margin: 0 auto 1.35rem;
 }
 
 .best-sellers__head .section-lead {
@@ -234,7 +234,7 @@
 .best-sellers__cta {
   display: flex;
   justify-content: center;
-  margin-top: 2.75rem;
+  margin-top: 1.25rem;
 }
 
 .best-sellers__cta .btn {
@@ -266,7 +266,7 @@
 
   .best-sellers__head {
     padding-inline: 1.15rem;
-    margin-bottom: 1.75rem;
+    margin-bottom: 1rem;
   }
 
   .best-sellers__rail {
@@ -303,7 +303,7 @@
 
   .best-sellers__cta {
     padding-inline: 1.15rem;
-    margin-top: 1.75rem;
+    margin-top: 1rem;
   }
 }
 

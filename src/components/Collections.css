@@ -1,12 +1,12 @@
 .collections {
-  padding: var(--section-pad) 0;
+  padding: clamp(1.35rem, 3vw, 2.15rem) 0;
   background: var(--surface);
 }
 
 .collections__head {
   text-align: center;
   max-width: 36rem;
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 1.35rem;
 }
 
 .collections__head .section-lead {

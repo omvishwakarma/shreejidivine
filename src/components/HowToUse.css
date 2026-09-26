@@ -3,7 +3,7 @@
   --howto-ink: #3a2a1c;
   --howto-muted: #6b5648;
   position: relative;
-  padding: clamp(2.25rem, 5vw, 3.5rem) 0;
+  padding: clamp(1.35rem, 3vw, 2.15rem) 0;
   background: linear-gradient(180deg, #fdfbf7 0%, #f7f1e8 100%);
   overflow: hidden;
 }
@@ -15,7 +15,7 @@
 
 .howto__head {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .howto__head .section-title {
@@ -177,11 +177,11 @@
 
 @media (max-width: 560px) {
   .howto {
-    padding: 1.75rem 0;
+    padding: 1.15rem 0;
   }
 
   .howto__head {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .howto__steps {

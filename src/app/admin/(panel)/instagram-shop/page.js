@@ -46,9 +46,9 @@ export default function AdminInstagramShopPage() {
     const data = await adminApi('/api/admin/instagram-shop')
     setEnabled(data.enabled !== false)
     setCopy({
-      eyebrow: data.eyebrow || DEFAULT_COPY.eyebrow,
-      title: data.title || DEFAULT_COPY.title,
-      subtitle: data.subtitle || DEFAULT_COPY.subtitle,
+      eyebrow: data.eyebrow ?? DEFAULT_COPY.eyebrow,
+      title: data.title ?? DEFAULT_COPY.title,
+      subtitle: data.subtitle ?? DEFAULT_COPY.subtitle,
     })
     setLooks(
       Array.isArray(data.looks) && data.looks.length
@@ -114,9 +114,9 @@ export default function AdminInstagramShopPage() {
     })
     setEnabled(data.enabled !== false)
     setCopy({
-      eyebrow: data.eyebrow || DEFAULT_COPY.eyebrow,
-      title: data.title || DEFAULT_COPY.title,
-      subtitle: data.subtitle || DEFAULT_COPY.subtitle,
+      eyebrow: data.eyebrow ?? DEFAULT_COPY.eyebrow,
+      title: data.title ?? DEFAULT_COPY.title,
+      subtitle: data.subtitle ?? DEFAULT_COPY.subtitle,
     })
     setLooks(data.looks.map((l, i) => ({ ...emptyLook(i), ...l, sortOrder: i })))
     return data
@@ -129,9 +129,9 @@ export default function AdminInstagramShopPage() {
     setSaving(true)
     try {
       const nextCopy = {
-        eyebrow: copy.eyebrow.trim() || DEFAULT_COPY.eyebrow,
-        title: copy.title.trim() || DEFAULT_COPY.title,
-        subtitle: copy.subtitle.trim() || DEFAULT_COPY.subtitle,
+        eyebrow: copy.eyebrow.trim(),
+        title: copy.title.trim(),
+        subtitle: copy.subtitle.trim(),
       }
       setCopy(nextCopy)
       await persist(enabled, looks, nextCopy)
@@ -312,6 +312,10 @@ export default function AdminInstagramShopPage() {
         <p className="admin-page-sub" style={{ margin: 0 }}>
           Status:{' '}
           <strong>{enabled ? 'Visible on homepage' : 'Hidden from homepage'}</strong>
+        </p>
+        <p className="admin-page-sub" style={{ margin: '0.75rem 0 0' }}>
+          Top line, heading, and subheading are optional. Leave a field blank and it will not show
+          on the site.
         </p>
         <form className="admin-form-grid" onSubmit={saveCopy} style={{ marginTop: '1rem' }}>
           <label className="admin-field">

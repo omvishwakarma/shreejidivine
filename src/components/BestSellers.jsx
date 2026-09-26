@@ -54,7 +54,7 @@ export default function BestSellers() {
 
         {error ? (
           <p className="best-sellers__error">Could not load products.</p>
-        ) : (
+        ) : loading || products.length > 0 ? (
           <div className="best-sellers__rail" role="region" aria-label="Best sellers products">
             <div className="best-sellers__grid">
               {loading
@@ -107,7 +107,7 @@ export default function BestSellers() {
                   })}
             </div>
           </div>
-        )}
+        ) : null}
 
         <div className="best-sellers__cta reveal">
           <Link href="/shop" className="btn">

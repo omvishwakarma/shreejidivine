@@ -41,16 +41,29 @@ export async function PATCH(request) {
       homeBestLead: z.string().max(280).optional(),
       homeReviewsTitle: z.string().max(120).optional(),
       homeReviewsLead: z.string().max(280).optional(),
+      menuIconHome: z.string().max(800).optional(),
+      menuIconShop: z.string().max(800).optional(),
+      menuIconBracelet: z.string().max(800).optional(),
+      menuIconBest: z.string().max(800).optional(),
+      menuIconAbout: z.string().max(800).optional(),
     })
     const data = schema.parse(await request.json())
 
-    for (const key of ['heroPoster', 'heroPosterMobile']) {
+    for (const key of [
+      'heroPoster',
+      'heroPosterMobile',
+      'menuIconHome',
+      'menuIconShop',
+      'menuIconBracelet',
+      'menuIconBest',
+      'menuIconAbout',
+    ]) {
       const value = String(data[key] || '').trim()
       if (data[key] !== undefined && value && !isSafePublicImage(value)) {
         return NextResponse.json(
           {
             error:
-              'Poster must be an uploaded image or a web path like /images/... Desktop file paths are not allowed.',
+              'Image must be an uploaded file or a web path like /images/... Desktop file paths are not allowed.',
           },
           { status: 400 }
         )

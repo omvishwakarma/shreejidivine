@@ -22,6 +22,11 @@ const EMPTY = {
   homeBestLead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
   homeReviewsTitle: 'Testimonials',
   homeReviewsLead: 'Loved in homes across India',
+  menuIconHome: '',
+  menuIconShop: '',
+  menuIconBracelet: '',
+  menuIconBest: '',
+  menuIconAbout: '',
 }
 
 function VideoSlot({
@@ -164,6 +169,11 @@ export default function AdminSettingsPage() {
       homeBestLead: data.settings?.homeBestLead || EMPTY.homeBestLead,
       homeReviewsTitle: data.settings?.homeReviewsTitle || EMPTY.homeReviewsTitle,
       homeReviewsLead: data.settings?.homeReviewsLead || EMPTY.homeReviewsLead,
+      menuIconHome: data.settings?.menuIconHome || '',
+      menuIconShop: data.settings?.menuIconShop || '',
+      menuIconBracelet: data.settings?.menuIconBracelet || '',
+      menuIconBest: data.settings?.menuIconBest || '',
+      menuIconAbout: data.settings?.menuIconAbout || '',
     })
     setNote(data.note || '')
   }
@@ -200,6 +210,11 @@ export default function AdminSettingsPage() {
           homeBestLead: form.homeBestLead.trim(),
           homeReviewsTitle: form.homeReviewsTitle.trim(),
           homeReviewsLead: form.homeReviewsLead.trim(),
+          menuIconHome: form.menuIconHome.trim(),
+          menuIconShop: form.menuIconShop.trim(),
+          menuIconBracelet: form.menuIconBracelet.trim(),
+          menuIconBest: form.menuIconBest.trim(),
+          menuIconAbout: form.menuIconAbout.trim(),
         }),
       })
       setForm({
@@ -220,6 +235,11 @@ export default function AdminSettingsPage() {
         homeBestLead: data.settings.homeBestLead || EMPTY.homeBestLead,
         homeReviewsTitle: data.settings.homeReviewsTitle || EMPTY.homeReviewsTitle,
         homeReviewsLead: data.settings.homeReviewsLead || EMPTY.homeReviewsLead,
+        menuIconHome: data.settings.menuIconHome || '',
+        menuIconShop: data.settings.menuIconShop || '',
+        menuIconBracelet: data.settings.menuIconBracelet || '',
+        menuIconBest: data.settings.menuIconBest || '',
+        menuIconAbout: data.settings.menuIconAbout || '',
       })
       setNote(data.note || '')
       setMsg('Settings saved successfully')
@@ -241,15 +261,18 @@ export default function AdminSettingsPage() {
       body.append('kind', kind)
       const data = await adminApi('/api/admin/upload', { method: 'POST', body })
       setForm((f) => ({ ...f, [field]: data.url }))
-      const label =
-        field === 'heroVideoDesktop'
-          ? 'Desktop video'
-          : field === 'heroVideoMobile'
-            ? 'Mobile video'
-            : field === 'heroPoster'
-              ? 'Desktop poster'
-              : 'Mobile poster'
-      setMsg(`${label} uploaded — click Save to apply`)
+      const labels = {
+        heroVideoDesktop: 'Desktop video',
+        heroVideoMobile: 'Mobile video',
+        heroPoster: 'Desktop poster',
+        heroPosterMobile: 'Mobile poster',
+        menuIconHome: 'Home icon',
+        menuIconShop: 'Shop icon',
+        menuIconBracelet: 'Know your Bracelet icon',
+        menuIconBest: 'Best Sellers icon',
+        menuIconAbout: 'About us icon',
+      }
+      setMsg(`${labels[field] || 'Image'} uploaded — click Save to apply`)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -362,6 +385,67 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, heroCtaHref: e.target.value }))}
               />
             </label>
+          </div>
+        </section>
+
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>Mobile menu icons</h2>
+              <p>Home, Shop, Know your Bracelet, Best Sellers, and About us. Clear the URL and save to keep the current icon.</p>
+            </div>
+          </div>
+          <div className="admin-media-grid">
+            <PosterSlot
+              title="Home"
+              badge="Menu"
+              hint="Square image · JPG, PNG, or WebP"
+              value={form.menuIconHome}
+              field="menuIconHome"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, menuIconHome: v }))}
+            />
+            <PosterSlot
+              title="Shop"
+              badge="Menu"
+              hint="Square image · JPG, PNG, or WebP"
+              value={form.menuIconShop}
+              field="menuIconShop"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, menuIconShop: v }))}
+            />
+            <PosterSlot
+              title="Know your Bracelet"
+              badge="Menu"
+              hint="Square image · JPG, PNG, or WebP"
+              value={form.menuIconBracelet}
+              field="menuIconBracelet"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, menuIconBracelet: v }))}
+            />
+            <PosterSlot
+              title="Best Sellers"
+              badge="Menu"
+              hint="Square image · JPG, PNG, or WebP"
+              value={form.menuIconBest}
+              field="menuIconBest"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, menuIconBest: v }))}
+            />
+            <PosterSlot
+              title="About us"
+              badge="Menu"
+              hint="Square image · JPG, PNG, or WebP"
+              value={form.menuIconAbout}
+              field="menuIconAbout"
+              uploading={uploading}
+              onUpload={(field, file) => uploadMedia(field, file, 'image')}
+              onPathChange={(v) => setForm((f) => ({ ...f, menuIconAbout: v }))}
+            />
           </div>
         </section>
 

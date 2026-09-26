@@ -2,7 +2,15 @@
   --ig-banner: #6b3a22;
   --ig-cream: #f7efe4;
   background: #f3ebe0;
-  padding-bottom: clamp(2.5rem, 5vw, 3.75rem);
+  padding-bottom: clamp(1.15rem, 2.5vw, 1.75rem);
+}
+
+.ig-shop--plain {
+  padding-top: clamp(1.15rem, 2.5vw, 1.75rem);
+}
+
+.ig-shop--plain .ig-shop__stage {
+  margin-top: 0;
 }
 
 .ig-shop__banner {
@@ -242,7 +250,7 @@
 .ig-shop__foot {
   display: flex;
   justify-content: center;
-  margin-top: 1.5rem;
+  margin-top: 0.85rem;
 }
 
 .ig-shop__foot .btn {

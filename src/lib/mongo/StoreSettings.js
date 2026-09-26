@@ -31,6 +31,11 @@ const DEFAULTS = {
   homeBestLead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
   homeReviewsTitle: 'Testimonials',
   homeReviewsLead: 'Loved in homes across India',
+  menuIconHome: '',
+  menuIconShop: '',
+  menuIconBracelet: '',
+  menuIconBest: '',
+  menuIconAbout: '',
   instagramShopEnabled: true,
   instagramShopEyebrow:
     'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
@@ -111,6 +116,11 @@ const storeSettingsSchema = new mongoose.Schema(
     homeBestLead: { type: String, default: DEFAULTS.homeBestLead },
     homeReviewsTitle: { type: String, default: DEFAULTS.homeReviewsTitle },
     homeReviewsLead: { type: String, default: DEFAULTS.homeReviewsLead },
+    menuIconHome: { type: String, default: '' },
+    menuIconShop: { type: String, default: '' },
+    menuIconBracelet: { type: String, default: '' },
+    menuIconBest: { type: String, default: '' },
+    menuIconAbout: { type: String, default: '' },
     instagramShopEnabled: { type: Boolean, default: DEFAULTS.instagramShopEnabled },
     instagramShopEyebrow: { type: String, default: DEFAULTS.instagramShopEyebrow },
     instagramShopTitle: { type: String, default: DEFAULTS.instagramShopTitle },
@@ -162,10 +172,20 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     homeBestLead: this.homeBestLead || DEFAULTS.homeBestLead,
     homeReviewsTitle: this.homeReviewsTitle || DEFAULTS.homeReviewsTitle,
     homeReviewsLead: this.homeReviewsLead || DEFAULTS.homeReviewsLead,
+    menuIconHome: this.menuIconHome || '',
+    menuIconShop: this.menuIconShop || '',
+    menuIconBracelet: this.menuIconBracelet || '',
+    menuIconBest: this.menuIconBest || '',
+    menuIconAbout: this.menuIconAbout || '',
     instagramShopEnabled: this.instagramShopEnabled !== false,
-    instagramShopEyebrow: this.instagramShopEyebrow || DEFAULTS.instagramShopEyebrow,
-    instagramShopTitle: this.instagramShopTitle || DEFAULTS.instagramShopTitle,
-    instagramShopSubtitle: this.instagramShopSubtitle || DEFAULTS.instagramShopSubtitle,
+    instagramShopEyebrow:
+      this.instagramShopEyebrow == null ? DEFAULTS.instagramShopEyebrow : this.instagramShopEyebrow,
+    instagramShopTitle:
+      this.instagramShopTitle == null ? DEFAULTS.instagramShopTitle : this.instagramShopTitle,
+    instagramShopSubtitle:
+      this.instagramShopSubtitle == null
+        ? DEFAULTS.instagramShopSubtitle
+        : this.instagramShopSubtitle,
     instagramShopLooks: looks,
     instagramStripLabel: this.instagramStripLabel || DEFAULTS.instagramStripLabel,
     instagramStripHandle: this.instagramStripHandle || DEFAULTS.instagramStripHandle,

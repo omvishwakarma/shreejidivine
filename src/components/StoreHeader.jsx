@@ -109,6 +109,13 @@ export default function StoreHeader({ promo = true }) {
   const [promoIndex, setPromoIndex] = useState(0)
   const [shipNote, setShipNote] = useState('')
   const [categories, setCategories] = useState([])
+  const [menuIcons, setMenuIcons] = useState({
+    home: '',
+    shop: '',
+    bracelet: '',
+    best: '',
+    about: '',
+  })
   const [deskOpen, setDeskOpen] = useState(null)
 
   useEffect(() => {
@@ -122,6 +129,13 @@ export default function StoreHeader({ promo = true }) {
       .then((r) => r.json())
       .then((d) => {
         if (d?.note) setShipNote(d.note)
+        setMenuIcons({
+          home: d?.menuIconHome || '',
+          shop: d?.menuIconShop || '',
+          bracelet: d?.menuIconBracelet || '',
+          best: d?.menuIconBest || '',
+          about: d?.menuIconAbout || '',
+        })
       })
       .catch(() => {})
   }, [])
@@ -286,13 +300,13 @@ export default function StoreHeader({ promo = true }) {
               <ul className="menu-drawer__list">
                 <li>
                   <Link href="/" className="menu-drawer__item" onClick={closeDrawer}>
-                    <MenuMedia icon="home" />
+                    <MenuMedia image={menuIcons.home} icon="home" />
                     <span className="menu-drawer__label">Home</span>
                   </Link>
                 </li>
                 <li>
                   <Link href="/shop" className="menu-drawer__item" onClick={closeDrawer}>
-                    <MenuMedia icon="shop" />
+                    <MenuMedia image={menuIcons.shop} icon="shop" />
                     <span className="menu-drawer__label">Shop All</span>
                   </Link>
                 </li>
@@ -326,19 +340,19 @@ export default function StoreHeader({ promo = true }) {
                     className="menu-drawer__item"
                     onClick={closeDrawer}
                   >
-                    <MenuMedia icon="bracelet" />
+                    <MenuMedia image={menuIcons.bracelet} icon="bracelet" />
                     <span className="menu-drawer__label">Know your Bracelet</span>
                   </Link>
                 </li>
                 <li>
                   <Link href="/#products" className="menu-drawer__item" onClick={closeDrawer}>
-                    <MenuMedia icon="best" />
+                    <MenuMedia image={menuIcons.best} icon="best" />
                     <span className="menu-drawer__label">Best Sellers</span>
                   </Link>
                 </li>
                 <li>
                   <Link href="/#testimonials" className="menu-drawer__item" onClick={closeDrawer}>
-                    <MenuMedia icon="about" />
+                    <MenuMedia image={menuIcons.about} icon="about" />
                     <span className="menu-drawer__label">About us</span>
                   </Link>
                 </li>

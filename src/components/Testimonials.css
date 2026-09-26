@@ -1,12 +1,12 @@
 .testimonials {
-  padding: var(--section-pad) 0;
+  padding: clamp(1.35rem, 3vw, 2.15rem) 0;
   background: #fff;
   text-align: center;
 }
 
 .testimonials__head {
   max-width: 36rem;
-  margin: 0 auto 2.25rem;
+  margin: 0 auto 1.15rem;
 }
 
 .testimonials__head .section-title {

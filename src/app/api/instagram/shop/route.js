@@ -51,9 +51,9 @@ export async function GET() {
     const settings = await getStoreSettings()
     enabled = settings.instagramShopEnabled !== false
     copy = {
-      eyebrow: settings.instagramShopEyebrow || copy.eyebrow,
-      title: settings.instagramShopTitle || copy.title,
-      subtitle: settings.instagramShopSubtitle || copy.subtitle,
+      eyebrow: settings.instagramShopEyebrow ?? copy.eyebrow,
+      title: settings.instagramShopTitle ?? copy.title,
+      subtitle: settings.instagramShopSubtitle ?? copy.subtitle,
     }
     shopLooks = Array.isArray(settings.instagramShopLooks)
       ? settings.instagramShopLooks.filter((l) => l.active !== false)

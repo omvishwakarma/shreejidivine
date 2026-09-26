@@ -63,9 +63,9 @@ export default function InstagramShop({ compact = false }) {
       .then((data) => {
         if (cancelled) return
         setCopy({
-          eyebrow: data.eyebrow || DEFAULT_COPY.eyebrow,
-          title: data.title || DEFAULT_COPY.title,
-          subtitle: data.subtitle || DEFAULT_COPY.subtitle,
+          eyebrow: data.eyebrow ?? DEFAULT_COPY.eyebrow,
+          title: data.title ?? DEFAULT_COPY.title,
+          subtitle: data.subtitle ?? DEFAULT_COPY.subtitle,
         })
         if (data.enabled === false) {
           setLooks([])
@@ -93,19 +93,27 @@ export default function InstagramShop({ compact = false }) {
 
   if (!loading && looks.length === 0) return null
 
+  const eyebrow = String(copy.eyebrow || '').trim()
+  const title = String(copy.title || '').trim()
+  const subtitle = String(copy.subtitle || '').trim()
+  const hasBanner = Boolean(eyebrow || title || subtitle)
   const headingId = compact ? 'ig-shop-heading-compact' : 'ig-shop-heading'
 
   return (
     <section
-      className={`ig-shop${compact ? ' ig-shop--compact' : ''}`}
-      aria-labelledby={headingId}
+      className={`ig-shop${compact ? ' ig-shop--compact' : ''}${hasBanner ? '' : ' ig-shop--plain'}`}
+      aria-labelledby={(compact ? subtitle : title) ? headingId : undefined}
+      aria-label={(compact ? subtitle : title) ? undefined : 'Shop the look on Instagram'}
     >
       {compact ? (
-        <div className="ig-shop__compact-head">
-          <h2 id={headingId} className="ig-shop__compact-title">
-            {copy.subtitle}
-          </h2>
-          {looks.length > 2 || loading ? (
+        subtitle || looks.length > 2 || loading ? (
+          <div className="ig-shop__compact-head">
+            {subtitle ? (
+              <h2 id={headingId} className="ig-shop__compact-title">
+                {subtitle}
+              </h2>
+            ) : null}
+            {looks.length > 2 || loading ? (
             <div className="ig-shop__compact-nav">
               <button
                 type="button"
@@ -125,22 +133,27 @@ export default function InstagramShop({ compact = false }) {
               </button>
             </div>
           ) : null}
-        </div>
-      ) : (
+          </div>
+        ) : null
+      ) : hasBanner ? (
         <div className="ig-shop__banner">
           <div className="container">
-            <p className="ig-shop__values">{copy.eyebrow}</p>
-            <h2 id={headingId} className="ig-shop__title">
-              {copy.title}
-            </h2>
-            <p className="ig-shop__subtitle">
-              <span className="ig-shop__flourish" aria-hidden="true" />
-              {copy.subtitle}
-              <span className="ig-shop__flourish" aria-hidden="true" />
-            </p>
+            {eyebrow ? <p className="ig-shop__values">{eyebrow}</p> : null}
+            {title ? (
+              <h2 id={headingId} className="ig-shop__title">
+                {title}
+              </h2>
+            ) : null}
+            {subtitle ? (
+              <p className="ig-shop__subtitle">
+                <span className="ig-shop__flourish" aria-hidden="true" />
+                {subtitle}
+                <span className="ig-shop__flourish" aria-hidden="true" />
+              </p>
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="ig-shop__stage">
         {!compact ? (
