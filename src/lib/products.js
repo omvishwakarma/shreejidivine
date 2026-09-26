@@ -14,6 +14,13 @@ export function toTitleCase(value) {
     .replace(/\b([a-z0-9])/g, (ch) => ch.toUpperCase())
 }
 
+export function discountPct(price, compareAt) {
+  const current = Number(price) || 0
+  const was = Number(compareAt) || 0
+  if (!was || was <= current) return 0
+  return Math.round(((was - current) / was) * 100)
+}
+
 /** @deprecated Prefer /api/shipping — kept for fallbacks */
 export const SHIPPING_FEE = 0
 /** @deprecated Prefer /api/shipping note */
