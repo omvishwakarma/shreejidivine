@@ -45,6 +45,7 @@ export async function PATCH(request, { params }) {
       'colours',
       'fragrances',
       'active',
+      'bestSeller',
     ]
     const update = {}
     for (const key of allowed) {

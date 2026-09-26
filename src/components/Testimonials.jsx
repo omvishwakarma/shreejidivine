@@ -7,6 +7,19 @@ export default function Testimonials() {
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [active, setActive] = useState(0)
+  const [copy, setCopy] = useState({
+    title: 'Testimonials',
+    lead: 'Loved in homes across India',
+  })
+
+  useEffect(() => {
+    fetch('/api/homepage')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.testimonials) setCopy(d.testimonials)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -64,9 +77,9 @@ export default function Testimonials() {
       <div className="container">
         <div className="testimonials__head reveal">
           <h2 id="testimonials-heading" className="section-title">
-            Testimonials
+            {copy.title}
           </h2>
-          <p className="section-lead">Loved in homes across India</p>
+          <p className="section-lead">{copy.lead}</p>
         </div>
 
         {loading || !review ? (

@@ -7,6 +7,10 @@ import {
   DEFAULT_TESTIMONIALS,
   normalizeTestimonials,
 } from '@/lib/testimonials'
+import {
+  INSTAGRAM_STRIP_DEFAULTS,
+  normalizeInstagramStripPosts,
+} from '@/lib/instagramStrip'
 
 const DEFAULTS = {
   shippingFee: 0,
@@ -18,12 +22,26 @@ const DEFAULTS = {
   heroHeadline: '',
   heroCtaText: 'Shop Now',
   heroCtaHref: '/shop',
+  homeCategoryLabel: 'Shop by Category',
+  homeCategoryTitle: 'For Every Ritual',
+  homeCategoryLead:
+    'Explore Divine and Lifestyle collections — fragrance for prayer, home, and gifting.',
+  homeBestLabel: 'Customer favourites',
+  homeBestTitle: 'Best Sellers',
+  homeBestLead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
+  homeReviewsTitle: 'Testimonials',
+  homeReviewsLead: 'Loved in homes across India',
   instagramShopEnabled: true,
   instagramShopEyebrow:
     'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
   instagramShopTitle: 'Pure for Your Home.',
   instagramShopSubtitle: 'Shop the look on Instagram',
   instagramShopLooks: DEFAULT_INSTAGRAM_SHOP_LOOKS,
+  instagramStripLabel: INSTAGRAM_STRIP_DEFAULTS.label,
+  instagramStripHandle: INSTAGRAM_STRIP_DEFAULTS.handle,
+  instagramStripUrl: INSTAGRAM_STRIP_DEFAULTS.url,
+  instagramStripCta: INSTAGRAM_STRIP_DEFAULTS.cta,
+  instagramStripPosts: [],
   testimonialsEnabled: true,
   testimonials: DEFAULT_TESTIMONIALS,
 }
@@ -57,6 +75,18 @@ const testimonialSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const instagramStripPostSchema = new mongoose.Schema(
+  {
+    id: { type: String, default: '' },
+    image: { type: String, default: '' },
+    video: { type: String, default: '' },
+    permalink: { type: String, default: '' },
+    active: { type: Boolean, default: true },
+    sortOrder: { type: Number, default: 0 },
+  },
+  { _id: false }
+)
+
 const storeSettingsSchema = new mongoose.Schema(
   {
     key: { type: String, unique: true, default: 'default' },
@@ -73,6 +103,14 @@ const storeSettingsSchema = new mongoose.Schema(
     heroHeadline: { type: String, default: DEFAULTS.heroHeadline },
     heroCtaText: { type: String, default: DEFAULTS.heroCtaText },
     heroCtaHref: { type: String, default: DEFAULTS.heroCtaHref },
+    homeCategoryLabel: { type: String, default: DEFAULTS.homeCategoryLabel },
+    homeCategoryTitle: { type: String, default: DEFAULTS.homeCategoryTitle },
+    homeCategoryLead: { type: String, default: DEFAULTS.homeCategoryLead },
+    homeBestLabel: { type: String, default: DEFAULTS.homeBestLabel },
+    homeBestTitle: { type: String, default: DEFAULTS.homeBestTitle },
+    homeBestLead: { type: String, default: DEFAULTS.homeBestLead },
+    homeReviewsTitle: { type: String, default: DEFAULTS.homeReviewsTitle },
+    homeReviewsLead: { type: String, default: DEFAULTS.homeReviewsLead },
     instagramShopEnabled: { type: Boolean, default: DEFAULTS.instagramShopEnabled },
     instagramShopEyebrow: { type: String, default: DEFAULTS.instagramShopEyebrow },
     instagramShopTitle: { type: String, default: DEFAULTS.instagramShopTitle },
@@ -81,6 +119,11 @@ const storeSettingsSchema = new mongoose.Schema(
       type: [instagramShopLookSchema],
       default: () => DEFAULT_INSTAGRAM_SHOP_LOOKS.map((l) => ({ ...l })),
     },
+    instagramStripLabel: { type: String, default: DEFAULTS.instagramStripLabel },
+    instagramStripHandle: { type: String, default: DEFAULTS.instagramStripHandle },
+    instagramStripUrl: { type: String, default: DEFAULTS.instagramStripUrl },
+    instagramStripCta: { type: String, default: DEFAULTS.instagramStripCta },
+    instagramStripPosts: { type: [instagramStripPostSchema], default: [] },
     testimonialsEnabled: { type: Boolean, default: DEFAULTS.testimonialsEnabled },
     testimonials: {
       type: [testimonialSchema],
@@ -111,11 +154,24 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     heroHeadline: this.heroHeadline ?? DEFAULTS.heroHeadline,
     heroCtaText: this.heroCtaText || DEFAULTS.heroCtaText,
     heroCtaHref: this.heroCtaHref || DEFAULTS.heroCtaHref,
+    homeCategoryLabel: this.homeCategoryLabel || DEFAULTS.homeCategoryLabel,
+    homeCategoryTitle: this.homeCategoryTitle || DEFAULTS.homeCategoryTitle,
+    homeCategoryLead: this.homeCategoryLead || DEFAULTS.homeCategoryLead,
+    homeBestLabel: this.homeBestLabel || DEFAULTS.homeBestLabel,
+    homeBestTitle: this.homeBestTitle || DEFAULTS.homeBestTitle,
+    homeBestLead: this.homeBestLead || DEFAULTS.homeBestLead,
+    homeReviewsTitle: this.homeReviewsTitle || DEFAULTS.homeReviewsTitle,
+    homeReviewsLead: this.homeReviewsLead || DEFAULTS.homeReviewsLead,
     instagramShopEnabled: this.instagramShopEnabled !== false,
     instagramShopEyebrow: this.instagramShopEyebrow || DEFAULTS.instagramShopEyebrow,
     instagramShopTitle: this.instagramShopTitle || DEFAULTS.instagramShopTitle,
     instagramShopSubtitle: this.instagramShopSubtitle || DEFAULTS.instagramShopSubtitle,
     instagramShopLooks: looks,
+    instagramStripLabel: this.instagramStripLabel || DEFAULTS.instagramStripLabel,
+    instagramStripHandle: this.instagramStripHandle || DEFAULTS.instagramStripHandle,
+    instagramStripUrl: this.instagramStripUrl || DEFAULTS.instagramStripUrl,
+    instagramStripCta: this.instagramStripCta || DEFAULTS.instagramStripCta,
+    instagramStripPosts: normalizeInstagramStripPosts(this.instagramStripPosts),
     testimonialsEnabled: this.testimonialsEnabled !== false,
     testimonials,
     updatedAt: this.updatedAt,

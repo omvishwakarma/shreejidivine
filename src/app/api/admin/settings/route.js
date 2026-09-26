@@ -33,6 +33,14 @@ export async function PATCH(request) {
       heroHeadline: z.string().max(200).optional(),
       heroCtaText: z.string().min(1).max(60).optional(),
       heroCtaHref: z.string().min(1).max(200).optional(),
+      homeCategoryLabel: z.string().max(80).optional(),
+      homeCategoryTitle: z.string().max(120).optional(),
+      homeCategoryLead: z.string().max(280).optional(),
+      homeBestLabel: z.string().max(80).optional(),
+      homeBestTitle: z.string().max(120).optional(),
+      homeBestLead: z.string().max(280).optional(),
+      homeReviewsTitle: z.string().max(120).optional(),
+      homeReviewsLead: z.string().max(280).optional(),
     })
     const data = schema.parse(await request.json())
 

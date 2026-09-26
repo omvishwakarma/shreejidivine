@@ -23,6 +23,7 @@ export async function GET(request) {
     const category = searchParams.get('category') || ''
     const subcategory = searchParams.get('subcategory') || ''
     const filter = { active: true }
+    if (searchParams.get('best') === '1') filter.bestSeller = true
     if (subcategory) {
       filter.subcategorySlug = subcategory
     } else if (category) {
@@ -64,6 +65,7 @@ export async function POST(request) {
       colours: z.array(colourSchema).max(20).optional(),
       fragrances: z.array(fragranceSchema).max(30).optional(),
       active: z.boolean().optional(),
+      bestSeller: z.boolean().optional(),
     })
     const data = schema.parse(await request.json())
     data.colours = normalizeColours(data.colours)

@@ -10,6 +10,20 @@ const FALLBACK_IMAGE = '/images/aroma-collection.png'
 
 export default function Collections() {
   const [categories, setCategories] = useState([])
+  const [copy, setCopy] = useState({
+    label: 'Shop by Category',
+    title: 'For Every Ritual',
+    lead: 'Explore Divine and Lifestyle collections — fragrance for prayer, home, and gifting.',
+  })
+
+  useEffect(() => {
+    fetch('/api/homepage')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.category) setCopy(d.category)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     fetch('/api/categories?home=1')
@@ -45,13 +59,11 @@ export default function Collections() {
     <section className="collections" id="collections" aria-labelledby="collections-heading">
       <div className="container">
         <div className="collections__head reveal">
-          <p className="section-label">Shop by Category</p>
+          <p className="section-label">{copy.label}</p>
           <h2 id="collections-heading" className="section-title">
-            For Every Ritual
+            {copy.title}
           </h2>
-          <p className="section-lead">
-            Explore Divine and Lifestyle collections — fragrance for prayer, home, and gifting.
-          </p>
+          <p className="section-lead">{copy.lead}</p>
         </div>
 
         <ul className="collections__grid">

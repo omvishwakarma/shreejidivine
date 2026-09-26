@@ -19,10 +19,24 @@ export default function BestSellers() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [copy, setCopy] = useState({
+    label: 'Customer favourites',
+    title: 'Best Sellers',
+    lead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
+  })
 
   useEffect(() => {
-    api('/api/products')
-      .then((d) => setProducts((d.products || []).slice(0, 4)))
+    fetch('/api/homepage')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.bestSellers) setCopy(d.bestSellers)
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    api('/api/products?best=1')
+      .then((d) => setProducts(d.products || []))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
@@ -31,13 +45,11 @@ export default function BestSellers() {
     <section className="best-sellers" id="products" aria-labelledby="best-sellers-heading">
       <div className="container">
         <div className="best-sellers__head reveal">
-          <p className="section-label">Customer favourites</p>
+          <p className="section-label">{copy.label}</p>
           <h2 id="best-sellers-heading" className="section-title">
-            Best Sellers
+            {copy.title}
           </h2>
-          <p className="section-lead">
-            Most-loved aroma stones and oils — ready for home rituals and gifting.
-          </p>
+          <p className="section-lead">{copy.lead}</p>
         </div>
 
         {error ? (

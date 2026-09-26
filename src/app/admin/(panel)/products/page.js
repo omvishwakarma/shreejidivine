@@ -31,6 +31,7 @@ const empty = {
   colours: [],
   fragrances: [],
   active: true,
+  bestSeller: false,
 }
 
 function slugify(value) {
@@ -175,6 +176,7 @@ export default function AdminProductsPage() {
           }))
         : [],
       active: p.active !== false,
+      bestSeller: p.bestSeller === true,
     })
     setError('')
     setMsg('')
@@ -947,6 +949,17 @@ export default function AdminProductsPage() {
                       </small>
                     </span>
                   </label>
+                  <label className="admin-toggle">
+                    <input
+                      type="checkbox"
+                      checked={form.bestSeller}
+                      onChange={(e) => setForm((f) => ({ ...f, bestSeller: e.target.checked }))}
+                    />
+                    <span>
+                      <strong>Best seller</strong>
+                      <small>Show this product in the homepage Best Sellers row</small>
+                    </span>
+                  </label>
                 </div>
               </aside>
             </div>
@@ -1057,6 +1070,7 @@ export default function AdminProductsPage() {
                           <strong>{p.name}</strong>
                           <div className="admin-product-cell__meta">{p.slug}</div>
                           {p.badge ? <span className="admin-chip">{p.badge}</span> : null}
+                          {p.bestSeller ? <span className="admin-chip">Best seller</span> : null}
                         </div>
                       </div>
                     </td>

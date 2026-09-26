@@ -185,20 +185,43 @@
   }
 
   .howto__steps {
-    grid-template-columns: 1fr;
-    row-gap: 1.75rem;
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 1.5rem;
+  }
+
+  .howto__steps li {
+    padding: 0 0.35rem;
+  }
+
+  .howto__icon {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .howto__title {
+    font-size: 0.82rem;
+  }
+
+  .howto__text {
+    font-size: 0.74rem;
+    max-width: 11rem;
   }
 
   .howto__steps li:not(:last-child)::after {
-    display: none;
+    top: 2.1rem;
+    left: calc(50% + 2.35rem);
+    width: calc(100% - 4.7rem);
   }
 
-  .howto__steps li .howto__arrow {
-    display: grid;
-    top: auto;
-    bottom: -1.35rem;
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%) rotate(90deg);
+  .howto__arrow {
+    top: 1.4rem;
+    right: -0.45rem;
+  }
+
+  .howto__steps li:nth-child(2)::after,
+  .howto__steps li:nth-child(2) .howto__arrow,
+  .howto__steps li:nth-child(4)::after,
+  .howto__steps li:nth-child(4) .howto__arrow {
+    display: none;
   }
 }

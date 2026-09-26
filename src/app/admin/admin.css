@@ -825,6 +825,10 @@
   border: 1px solid var(--admin-border);
 }
 
+.admin-form-section .admin-toggle + .admin-toggle {
+  margin-top: 0.65rem;
+}
+
 .admin-toggle {
   display: flex;
   align-items: flex-start;

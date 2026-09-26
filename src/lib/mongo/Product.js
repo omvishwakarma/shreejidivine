@@ -41,6 +41,7 @@ const productSchema = new mongoose.Schema(
     colours: { type: [colourOptionSchema], default: [] },
     fragrances: { type: [fragranceOptionSchema], default: [] },
     active: { type: Boolean, default: true },
+    bestSeller: { type: Boolean, default: false },
   },
   { timestamps: true }
 )
@@ -73,6 +74,7 @@ productSchema.methods.toPublicJSON = function () {
     colours: normalizeColours(this.colours),
     fragrances: normalizeFragrances(this.fragrances),
     active: this.active,
+    bestSeller: this.bestSeller === true,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   }

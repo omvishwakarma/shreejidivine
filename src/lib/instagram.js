@@ -36,14 +36,12 @@ export function isInstagramConfigured() {
   return Boolean(process.env.INSTAGRAM_ACCESS_TOKEN)
 }
 
-export async function fetchCuratedInstagramPosts(limit = 6) {
-  const capped = Math.min(Math.max(Number(limit) || 6, 1), 12)
-  const items = CURATED_INSTAGRAM_FEED.slice(0, capped)
-
+async function postsFromLinks(items) {
   const posts = await Promise.all(
     items.map(async (item) => {
-      const code = item.id || instagramShortcode(item.permalink)
-      const embed = await fetchEmbedMedia(item.permalink)
+      const permalink = String(item.permalink || '').trim()
+      const code = item.id || instagramShortcode(permalink)
+      const embed = await fetchEmbedMedia(permalink)
       const mediaUrl = embed.videoUrl || embed.thumbnail || ''
       const thumbnailUrl = embed.thumbnail || embed.videoUrl || ''
       return {
@@ -51,14 +49,26 @@ export async function fetchCuratedInstagramPosts(limit = 6) {
         type: embed.videoUrl ? 'VIDEO' : 'IMAGE',
         mediaUrl,
         thumbnailUrl,
-        permalink: item.permalink,
+        permalink,
         caption: '',
         timestamp: '',
       }
     })
   )
-
   return posts.filter((p) => p.mediaUrl || p.thumbnailUrl)
+}
+
+export async function fetchInstagramPostsFromLinks(items, limit = 12) {
+  const capped = Math.min(Math.max(Number(limit) || 12, 1), 12)
+  const list = (Array.isArray(items) ? items : [])
+    .filter((item) => item && item.active !== false && item.permalink)
+    .slice(0, capped)
+  return postsFromLinks(list)
+}
+
+export async function fetchCuratedInstagramPosts(limit = 6) {
+  const capped = Math.min(Math.max(Number(limit) || 6, 1), 12)
+  return postsFromLinks(CURATED_INSTAGRAM_FEED.slice(0, capped))
 }
 
 export async function fetchInstagramPosts(limit = 6) {

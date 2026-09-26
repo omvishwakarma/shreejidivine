@@ -13,6 +13,15 @@ const EMPTY = {
   heroHeadline: '',
   heroCtaText: 'Shop Now',
   heroCtaHref: '/shop',
+  homeCategoryLabel: 'Shop by Category',
+  homeCategoryTitle: 'For Every Ritual',
+  homeCategoryLead:
+    'Explore Divine and Lifestyle collections — fragrance for prayer, home, and gifting.',
+  homeBestLabel: 'Customer favourites',
+  homeBestTitle: 'Best Sellers',
+  homeBestLead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
+  homeReviewsTitle: 'Testimonials',
+  homeReviewsLead: 'Loved in homes across India',
 }
 
 function VideoSlot({
@@ -147,6 +156,14 @@ export default function AdminSettingsPage() {
       heroHeadline: data.settings?.heroHeadline ?? '',
       heroCtaText: data.settings?.heroCtaText || EMPTY.heroCtaText,
       heroCtaHref: data.settings?.heroCtaHref || EMPTY.heroCtaHref,
+      homeCategoryLabel: data.settings?.homeCategoryLabel || EMPTY.homeCategoryLabel,
+      homeCategoryTitle: data.settings?.homeCategoryTitle || EMPTY.homeCategoryTitle,
+      homeCategoryLead: data.settings?.homeCategoryLead || EMPTY.homeCategoryLead,
+      homeBestLabel: data.settings?.homeBestLabel || EMPTY.homeBestLabel,
+      homeBestTitle: data.settings?.homeBestTitle || EMPTY.homeBestTitle,
+      homeBestLead: data.settings?.homeBestLead || EMPTY.homeBestLead,
+      homeReviewsTitle: data.settings?.homeReviewsTitle || EMPTY.homeReviewsTitle,
+      homeReviewsLead: data.settings?.homeReviewsLead || EMPTY.homeReviewsLead,
     })
     setNote(data.note || '')
   }
@@ -175,6 +192,14 @@ export default function AdminSettingsPage() {
           heroHeadline: form.heroHeadline.trim(),
           heroCtaText: form.heroCtaText.trim() || 'Shop Now',
           heroCtaHref: form.heroCtaHref.trim() || '/shop',
+          homeCategoryLabel: form.homeCategoryLabel.trim(),
+          homeCategoryTitle: form.homeCategoryTitle.trim(),
+          homeCategoryLead: form.homeCategoryLead.trim(),
+          homeBestLabel: form.homeBestLabel.trim(),
+          homeBestTitle: form.homeBestTitle.trim(),
+          homeBestLead: form.homeBestLead.trim(),
+          homeReviewsTitle: form.homeReviewsTitle.trim(),
+          homeReviewsLead: form.homeReviewsLead.trim(),
         }),
       })
       setForm({
@@ -187,6 +212,14 @@ export default function AdminSettingsPage() {
         heroHeadline: data.settings.heroHeadline ?? '',
         heroCtaText: data.settings.heroCtaText,
         heroCtaHref: data.settings.heroCtaHref,
+        homeCategoryLabel: data.settings.homeCategoryLabel || EMPTY.homeCategoryLabel,
+        homeCategoryTitle: data.settings.homeCategoryTitle || EMPTY.homeCategoryTitle,
+        homeCategoryLead: data.settings.homeCategoryLead || EMPTY.homeCategoryLead,
+        homeBestLabel: data.settings.homeBestLabel || EMPTY.homeBestLabel,
+        homeBestTitle: data.settings.homeBestTitle || EMPTY.homeBestTitle,
+        homeBestLead: data.settings.homeBestLead || EMPTY.homeBestLead,
+        homeReviewsTitle: data.settings.homeReviewsTitle || EMPTY.homeReviewsTitle,
+        homeReviewsLead: data.settings.homeReviewsLead || EMPTY.homeReviewsLead,
       })
       setNote(data.note || '')
       setMsg('Settings saved successfully')
@@ -327,6 +360,87 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={form.heroCtaHref}
                 onChange={(e) => setForm((f) => ({ ...f, heroCtaHref: e.target.value }))}
+              />
+            </label>
+          </div>
+        </section>
+
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>Homepage sections</h2>
+              <p>Edit the headings shown above Shop by Category, Best Sellers, and Testimonials.</p>
+            </div>
+          </div>
+
+          <div className="admin-form-grid">
+            <p className="admin-kicker">Shop by Category</p>
+            <label className="admin-field">
+              <span>Small label</span>
+              <input
+                type="text"
+                value={form.homeCategoryLabel}
+                onChange={(e) => setForm((f) => ({ ...f, homeCategoryLabel: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Heading</span>
+              <input
+                type="text"
+                value={form.homeCategoryTitle}
+                onChange={(e) => setForm((f) => ({ ...f, homeCategoryTitle: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Description</span>
+              <textarea
+                rows={2}
+                value={form.homeCategoryLead}
+                onChange={(e) => setForm((f) => ({ ...f, homeCategoryLead: e.target.value }))}
+              />
+            </label>
+
+            <p className="admin-kicker">Best Sellers</p>
+            <label className="admin-field">
+              <span>Small label</span>
+              <input
+                type="text"
+                value={form.homeBestLabel}
+                onChange={(e) => setForm((f) => ({ ...f, homeBestLabel: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Heading</span>
+              <input
+                type="text"
+                value={form.homeBestTitle}
+                onChange={(e) => setForm((f) => ({ ...f, homeBestTitle: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Description</span>
+              <textarea
+                rows={2}
+                value={form.homeBestLead}
+                onChange={(e) => setForm((f) => ({ ...f, homeBestLead: e.target.value }))}
+              />
+            </label>
+
+            <p className="admin-kicker">Testimonials</p>
+            <label className="admin-field">
+              <span>Heading</span>
+              <input
+                type="text"
+                value={form.homeReviewsTitle}
+                onChange={(e) => setForm((f) => ({ ...f, homeReviewsTitle: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Description</span>
+              <textarea
+                rows={2}
+                value={form.homeReviewsLead}
+                onChange={(e) => setForm((f) => ({ ...f, homeReviewsLead: e.target.value }))}
               />
             </label>
           </div>
