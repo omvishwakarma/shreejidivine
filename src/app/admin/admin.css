@@ -1678,6 +1678,33 @@
   color: var(--brown);
 }
 
+.admin-ship-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.admin-track {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.admin-track li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.82rem;
+}
+
+.admin-track span {
+  color: var(--text-muted, #5c5f66);
+}
+
 .admin-ship-edit {
   margin-top: 1.25rem;
   padding-top: 1rem;

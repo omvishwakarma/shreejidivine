@@ -284,6 +284,17 @@
   margin-bottom: 0.35rem;
 }
 
+.od-awb {
+  margin-top: 0.65rem;
+  color: var(--brown);
+}
+
+.od-awb a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .od-rows {
   display: flex;
   flex-direction: column;

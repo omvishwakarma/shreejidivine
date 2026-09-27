@@ -48,6 +48,9 @@ const orderSchema = new mongoose.Schema(
     shippingState: String,
     shippingPincode: String,
     notes: String,
+    delhiveryWaybill: { type: String, default: '' },
+    delhiveryStatus: { type: String, default: '' },
+    delhiverySortCode: { type: String, default: '' },
     items: [orderItemSchema],
   },
   { timestamps: true }
@@ -77,6 +80,9 @@ orderSchema.methods.toJSONSafe = function () {
     shippingState: this.shippingState,
     shippingPincode: this.shippingPincode,
     notes: this.notes,
+    delhiveryWaybill: this.delhiveryWaybill || '',
+    delhiveryStatus: this.delhiveryStatus || '',
+    delhiverySortCode: this.delhiverySortCode || '',
     items: this.items.map((i) => ({
       id: i._id?.toString(),
       productId: i.product?.toString(),
@@ -96,4 +102,8 @@ orderSchema.methods.toJSONSafe = function () {
   }
 }
 
-export const Order = mongoose.models.Order || mongoose.model('Order', orderSchema)
+if (mongoose.models.Order) {
+  delete mongoose.models.Order
+}
+
+export const Order = mongoose.model('Order', orderSchema)

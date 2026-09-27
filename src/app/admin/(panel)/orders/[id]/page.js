@@ -17,6 +17,8 @@ export default function AdminOrderDetailPage() {
   const [msg, setMsg] = useState('')
   const [shippingInput, setShippingInput] = useState('')
   const [savingShip, setSavingShip] = useState(false)
+  const [shippingBusy, setShippingBusy] = useState('')
+  const [tracking, setTracking] = useState(null)
 
   async function load() {
     const data = await adminApi(`/api/orders/${id}`)
@@ -44,6 +46,49 @@ export default function AdminOrderDetailPage() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function createShipment() {
+    setShippingBusy('create')
+    setError('')
+    setMsg('')
+    try {
+      const data = await adminApi(`/api/orders/${id}/delhivery`, { method: 'POST' })
+      setOrder(data.order)
+      setTracking(null)
+      setMsg(`Shipment created. AWB ${data.order.delhiveryWaybill}`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setShippingBusy('')
+    }
+  }
+
+  async function refreshTracking() {
+    setShippingBusy('track')
+    setError('')
+    try {
+      const data = await adminApi(`/api/orders/${id}/delhivery`)
+      setOrder(data.order)
+      setTracking(data.tracking)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setShippingBusy('')
+    }
+  }
+
+  async function openLabel() {
+    setShippingBusy('label')
+    setError('')
+    try {
+      const data = await adminApi(`/api/orders/${id}/delhivery?label=1`)
+      if (data.url) window.open(data.url, '_blank', 'noopener,noreferrer')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setShippingBusy('')
     }
   }
 
@@ -217,6 +262,77 @@ export default function AdminOrderDetailPage() {
                 <dd>{order.shippingPhone}</dd>
               </div>
             </dl>
+          </div>
+
+          <div className="admin-card">
+            <h2>Delhivery shipment</h2>
+            {order.delhiveryWaybill ? (
+              <>
+                <dl className="admin-dl">
+                  <div>
+                    <dt>AWB</dt>
+                    <dd className="admin-mono">{order.delhiveryWaybill}</dd>
+                  </div>
+                  {order.delhiveryStatus ? (
+                    <div>
+                      <dt>Status</dt>
+                      <dd>{order.delhiveryStatus}</dd>
+                    </div>
+                  ) : null}
+                  {order.delhiverySortCode ? (
+                    <div>
+                      <dt>Sort code</dt>
+                      <dd>{order.delhiverySortCode}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+                {tracking?.scans?.length ? (
+                  <ul className="admin-track">
+                    {tracking.scans.map((scan, index) => (
+                      <li key={`${scan.at}-${index}`}>
+                        <strong>{scan.status || scan.instructions}</strong>
+                        <span>
+                          {[scan.location, scan.at].filter(Boolean).join(' · ')}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                <div className="admin-ship-actions">
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-primary"
+                    disabled={Boolean(shippingBusy)}
+                    onClick={refreshTracking}
+                  >
+                    {shippingBusy === 'track' ? 'Checking…' : 'Refresh tracking'}
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-ghost"
+                    disabled={Boolean(shippingBusy)}
+                    onClick={openLabel}
+                  >
+                    {shippingBusy === 'label' ? 'Opening…' : 'Shipping label'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="admin-page-sub" style={{ marginTop: 0 }}>
+                  Creates a Delhivery waybill for this address. Pickup name must match the warehouse
+                  in Delhivery One.
+                </p>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-primary"
+                  disabled={Boolean(shippingBusy) || order.status === 'CANCELLED'}
+                  onClick={createShipment}
+                >
+                  {shippingBusy === 'create' ? 'Creating…' : 'Create shipment'}
+                </button>
+              </>
+            )}
           </div>
 
           <div className="admin-card">

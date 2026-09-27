@@ -204,6 +204,19 @@ export default function OrderDetailClient() {
                     <p>
                       {order.shippingCity}, {order.shippingState} — {order.shippingPincode}
                     </p>
+                    {order.delhiveryWaybill ? (
+                      <p className="od-awb">
+                        AWB{' '}
+                        <a
+                          href={`https://www.delhivery.com/track/package/${order.delhiveryWaybill}`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {order.delhiveryWaybill}
+                        </a>
+                        {order.delhiveryStatus ? ` · ${order.delhiveryStatus}` : ''}
+                      </p>
+                    ) : null}
                   </div>
                 </section>
 
