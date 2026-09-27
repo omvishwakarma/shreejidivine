@@ -36,6 +36,7 @@ const DEFAULTS = {
   menuIconBracelet: '',
   menuIconBest: '',
   menuIconAbout: '',
+  authBanner: '/images/hero-banner.png',
   instagramShopEnabled: true,
   instagramShopEyebrow:
     'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
@@ -121,6 +122,7 @@ const storeSettingsSchema = new mongoose.Schema(
     menuIconBracelet: { type: String, default: '' },
     menuIconBest: { type: String, default: '' },
     menuIconAbout: { type: String, default: '' },
+    authBanner: { type: String, default: DEFAULTS.authBanner },
     instagramShopEnabled: { type: Boolean, default: DEFAULTS.instagramShopEnabled },
     instagramShopEyebrow: { type: String, default: DEFAULTS.instagramShopEyebrow },
     instagramShopTitle: { type: String, default: DEFAULTS.instagramShopTitle },
@@ -177,6 +179,7 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     menuIconBracelet: this.menuIconBracelet || '',
     menuIconBest: this.menuIconBest || '',
     menuIconAbout: this.menuIconAbout || '',
+    authBanner: this.authBanner || DEFAULTS.authBanner,
     instagramShopEnabled: this.instagramShopEnabled !== false,
     instagramShopEyebrow:
       this.instagramShopEyebrow == null ? DEFAULTS.instagramShopEyebrow : this.instagramShopEyebrow,

@@ -273,8 +273,30 @@ export default function StoreHeader({ promo = true }) {
               className="store-header__cart"
               aria-label={`Cart${count ? `, ${count} items` : ''}`}
             >
-              Cart
-              {count > 0 ? <span className="store-header__badge">{count}</span> : null}
+              <span className="store-header__cart-mark" aria-hidden="true">
+                <svg className="store-header__cart-icon" viewBox="0 0 32 32">
+                  <path
+                    d="M4 6h3.2l1.4 2.2h16.2a1.2 1.2 0 0 1 1.16 1.5l-1.7 6.2a1.2 1.2 0 0 1-1.16.88H11.1"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8.6 8.2 11 18.2h11.2"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="12.2" cy="24.2" r="1.7" fill="currentColor" />
+                  <circle cx="20.6" cy="24.2" r="1.7" fill="currentColor" />
+                </svg>
+                {count > 0 ? <span className="store-header__cart-count">{count}</span> : null}
+              </span>
+              <span className="store-header__cart-label">Cart</span>
             </Link>
           </div>
         </div>

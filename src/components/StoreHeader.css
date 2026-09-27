@@ -154,20 +154,44 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  color: inherit;
+  text-decoration: none;
 }
 
-.store-header__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.2rem;
-  height: 1.2rem;
-  padding: 0 0.3rem;
+.store-header__cart-mark {
+  position: relative;
+  width: 1.55rem;
+  height: 1.55rem;
+  flex-shrink: 0;
+}
+
+.store-header__cart-icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.store-header__cart-count {
+  position: absolute;
+  top: -0.28rem;
+  right: -0.42rem;
+  min-width: 0.95rem;
+  height: 0.95rem;
+  padding: 0 0.18rem;
   border-radius: 999px;
-  background: var(--accent, #b5502e);
-  color: #ffffff;
-  font-size: 0.65rem;
+  background: #b45615;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 0.95rem;
   letter-spacing: 0;
+  text-align: center;
+}
+
+.store-header__cart-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .store-header__toggle {

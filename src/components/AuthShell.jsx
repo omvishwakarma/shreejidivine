@@ -1,22 +1,32 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { SITE_NAME, SITE_TAGLINE } from '../lib/site'
 import '../app/auth.css'
 
+const DEFAULT_BANNER = '/images/hero-banner.png'
+
 export default function AuthShell({ mode = 'signup', next = '/profile', children }) {
   const nextQuery = next && next !== '/profile' ? `?next=${encodeURIComponent(next)}` : ''
+  const [banner, setBanner] = useState(DEFAULT_BANNER)
+
+  useEffect(() => {
+    fetch('/api/shipping')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.authBanner) setBanner(data.authBanner)
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <div className="auth-split">
       <aside className="auth-visual" aria-hidden={false}>
         <div className="auth-visual__media">
-          <Image
-            src="/images/hero-banner.png"
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 960px) 100vw, 55vw"
-          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={banner} alt="" />
         </div>
         <div className="auth-visual__shade" />
         <div className="auth-visual__content">

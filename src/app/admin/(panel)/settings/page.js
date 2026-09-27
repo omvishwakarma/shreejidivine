@@ -27,6 +27,7 @@ const EMPTY = {
   menuIconBracelet: '',
   menuIconBest: '',
   menuIconAbout: '',
+  authBanner: '/images/hero-banner.png',
 }
 
 function VideoSlot({
@@ -174,6 +175,7 @@ export default function AdminSettingsPage() {
       menuIconBracelet: data.settings?.menuIconBracelet || '',
       menuIconBest: data.settings?.menuIconBest || '',
       menuIconAbout: data.settings?.menuIconAbout || '',
+      authBanner: data.settings?.authBanner || EMPTY.authBanner,
     })
     setNote(data.note || '')
   }
@@ -215,6 +217,7 @@ export default function AdminSettingsPage() {
           menuIconBracelet: form.menuIconBracelet.trim(),
           menuIconBest: form.menuIconBest.trim(),
           menuIconAbout: form.menuIconAbout.trim(),
+          authBanner: form.authBanner.trim() || EMPTY.authBanner,
         }),
       })
       setForm({
@@ -240,6 +243,7 @@ export default function AdminSettingsPage() {
         menuIconBracelet: data.settings.menuIconBracelet || '',
         menuIconBest: data.settings.menuIconBest || '',
         menuIconAbout: data.settings.menuIconAbout || '',
+        authBanner: data.settings.authBanner || EMPTY.authBanner,
       })
       setNote(data.note || '')
       setMsg('Settings saved successfully')
@@ -271,6 +275,7 @@ export default function AdminSettingsPage() {
         menuIconBracelet: 'Know your Bracelet icon',
         menuIconBest: 'Best Sellers icon',
         menuIconAbout: 'About us icon',
+        authBanner: 'Login banner',
       }
       setMsg(`${labels[field] || 'Image'} uploaded — click Save to apply`)
     } catch (err) {
@@ -386,6 +391,25 @@ export default function AdminSettingsPage() {
               />
             </label>
           </div>
+        </section>
+
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>Login & signup banner</h2>
+              <p>The large photo on the left of the login and signup pages.</p>
+            </div>
+          </div>
+          <PosterSlot
+            title="Banner image"
+            badge="Auth"
+            hint="Recommended 1400 × 1800 px · portrait · JPG or WebP"
+            value={form.authBanner}
+            field="authBanner"
+            uploading={uploading}
+            onUpload={(field, file) => uploadMedia(field, file, 'image')}
+            onPathChange={(v) => setForm((f) => ({ ...f, authBanner: v }))}
+          />
         </section>
 
         <section className="admin-card admin-card--lg">

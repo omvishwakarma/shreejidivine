@@ -136,6 +136,54 @@
   padding-top: 0.25rem;
 }
 
+.product-detail__skel-media {
+  aspect-ratio: 1;
+  min-height: 280px;
+  border-radius: 0;
+}
+
+.product-detail__skel-thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.55rem;
+}
+
+.product-detail__skel-thumbs .skel {
+  aspect-ratio: 1;
+}
+
+.product-detail__skel-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+.product-detail__skel-line {
+  height: 0.9rem;
+  width: 100%;
+}
+
+.product-detail__skel-line--title {
+  height: 2rem;
+  width: 78%;
+}
+
+.product-detail__skel-line--price {
+  width: 36%;
+  height: 1.35rem;
+}
+
+.product-detail__skel-line--short {
+  width: 62%;
+}
+
+.product-detail__skel-btn {
+  height: 2.75rem;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
 .product-detail__description p {
   margin: 0 0 0.75em;
 }

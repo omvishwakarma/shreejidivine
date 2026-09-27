@@ -188,7 +188,27 @@ export default function ProductClient() {
         </p>
 
         {error ? <div className="empty-state">{error}</div> : null}
-        {!product && !error ? <div className="empty-state">Loading…</div> : null}
+        {!product && !error ? (
+          <div className="product-detail__grid product-detail__skel" aria-busy="true" aria-label="Loading product">
+            <div className="product-detail__gallery">
+              <div className="skel product-detail__skel-media" />
+              <div className="product-detail__skel-thumbs">
+                <span className="skel" />
+                <span className="skel" />
+                <span className="skel" />
+                <span className="skel" />
+              </div>
+            </div>
+            <div className="product-detail__info product-detail__skel-copy">
+              <span className="skel product-detail__skel-line product-detail__skel-line--title" />
+              <span className="skel product-detail__skel-line product-detail__skel-line--price" />
+              <span className="skel product-detail__skel-line" />
+              <span className="skel product-detail__skel-line product-detail__skel-line--short" />
+              <span className="skel product-detail__skel-btn" />
+              <span className="skel product-detail__skel-btn" />
+            </div>
+          </div>
+        ) : null}
 
         {product ? (
           <div className="product-detail__grid">

@@ -43,7 +43,7 @@ export async function GET() {
   let copy = {
     eyebrow: 'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
     title: 'Pure for Your Home.',
-    subtitle: 'Shop the look on Instagram',
+    subtitle: 'Instagram Shop',
   }
 
   try {

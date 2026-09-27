@@ -46,6 +46,7 @@ export async function PATCH(request) {
       menuIconBracelet: z.string().max(800).optional(),
       menuIconBest: z.string().max(800).optional(),
       menuIconAbout: z.string().max(800).optional(),
+      authBanner: z.string().max(800).optional(),
     })
     const data = schema.parse(await request.json())
 
@@ -57,6 +58,7 @@ export async function PATCH(request) {
       'menuIconBracelet',
       'menuIconBest',
       'menuIconAbout',
+      'authBanner',
     ]) {
       const value = String(data[key] || '').trim()
       if (data[key] !== undefined && value && !isSafePublicImage(value)) {

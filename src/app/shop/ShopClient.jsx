@@ -249,7 +249,20 @@ export default function ShopClient() {
           ) : null}
         </div>
 
-        {loading ? <div className="empty-state">Loading products…</div> : null}
+        {loading ? (
+          <div className="ecom-grid" aria-busy="true" aria-label="Loading products">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <article key={i} className="product-card product-card--skel" aria-hidden="true">
+                <div className="product-card__media product-card__skel-block" />
+                <div className="product-card__body">
+                  <span className="product-card__skel-line product-card__skel-line--name" />
+                  <span className="product-card__skel-line product-card__skel-line--price" />
+                  <span className="product-card__skel-line product-card__skel-line--btn" />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
         {error ? (
           <div className="empty-state">
             <p>Could not load products: {error}</p>

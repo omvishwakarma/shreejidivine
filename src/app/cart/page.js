@@ -41,7 +41,30 @@ export default function CartPage() {
       <ShopNav />
       <div className="cart-shell">
         {!ready ? (
-          <div className="cart-loading">Gathering your selection…</div>
+          <div className="cart-skel" aria-busy="true" aria-label="Loading cart">
+            <div className="cart-skel__top">
+              <span className="skel cart-skel__title" />
+              <span className="skel cart-skel__meta" />
+            </div>
+            <div className="cart-board">
+              <div>
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="cart-skel__line">
+                    <span className="skel cart-skel__thumb" />
+                    <span className="cart-skel__copy">
+                      <span className="skel cart-skel__name" />
+                      <span className="skel cart-skel__price" />
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="cart-skel__summary">
+                <span className="skel cart-skel__sum-line" />
+                <span className="skel cart-skel__sum-line cart-skel__sum-line--short" />
+                <span className="skel cart-skel__sum-btn" />
+              </div>
+            </div>
+          </div>
         ) : items.length === 0 ? (
           <div className="cart-empty">
             <div className="cart-empty__mark" aria-hidden="true">

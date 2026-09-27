@@ -262,8 +262,11 @@
     display: none;
   }
 
-  .ig-shop__card {
-    flex-basis: min(78vw, 280px);
+  .ig-shop:not(.ig-shop--compact) .ig-shop__card {
+    flex-basis: min(46vw, 180px);
+    max-width: 220px;
+    border-radius: 0.75rem;
+    scroll-snap-align: start;
   }
 }
 

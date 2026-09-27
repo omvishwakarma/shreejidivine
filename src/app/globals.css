@@ -287,3 +287,23 @@ ul {
 .reveal-delay-4 {
   transition-delay: 0.48s;
 }
+
+.skel {
+  display: block;
+  background: linear-gradient(110deg, #ece7e1 20%, #f7f4f0 40%, #ece7e1 60%);
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.2s linear infinite;
+  border-radius: 6px;
+}
+
+@keyframes skel-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+  }
+}
