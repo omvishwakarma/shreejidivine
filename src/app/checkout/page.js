@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Script from 'next/script'
 import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
+import CheckoutMobile from './CheckoutMobile'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { formatINR } from '../../lib/products'
@@ -22,6 +23,90 @@ function calcFee(subtotal, settings) {
   return fee
 }
 
+function CheckoutSkeleton({ mobileOnly = false }) {
+  const mobile = (
+    <div className="ck-skel-mobile" aria-hidden="true">
+      <div className="ck-skel-mobile__bar">
+        <span className="skel ck-skel-mobile__back" />
+        <span className="skel ck-skel-mobile__title" />
+      </div>
+      <div className="ck-skel-mobile__steps">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <span key={i} className="ck-skel-mobile__step">
+            <span className="skel ck-skel-mobile__dot" />
+            <span className="skel ck-skel-mobile__label" />
+          </span>
+        ))}
+      </div>
+      <div className="ck-skel-mobile__block">
+        <span className="skel ck-skel-line" />
+        <span className="skel ck-skel-line ck-skel-line--mid" />
+        <span className="skel ck-skel-line ck-skel-line--long" />
+      </div>
+      <div className="ck-skel-mobile__item">
+        <span className="skel ck-skel-mobile__thumb" />
+        <span className="ck-skel-mobile__copy">
+          <span className="skel ck-skel-line ck-skel-line--mid" />
+          <span className="skel ck-skel-line ck-skel-line--short" />
+          <span className="skel ck-skel-line ck-skel-line--price" />
+        </span>
+      </div>
+      <div className="ck-skel-mobile__block">
+        <span className="skel ck-skel-line ck-skel-line--short" />
+        <span className="skel ck-skel-line" />
+        <span className="skel ck-skel-line" />
+        <span className="skel ck-skel-mobile__save" />
+      </div>
+      <div className="ck-skel-mobile__dock">
+        <span className="skel ck-skel-mobile__due" />
+        <span className="skel ck-skel-mobile__go" />
+      </div>
+    </div>
+  )
+
+  if (mobileOnly) {
+    return (
+      <div className="ecom-page checkout-page checkout-page--mobile" aria-busy="true" aria-label="Loading checkout">
+        {mobile}
+      </div>
+    )
+  }
+
+  return (
+    <div className="ecom-page checkout-page ck-skel-page" aria-busy="true" aria-label="Loading checkout">
+      <ShopNav />
+      <div className="checkout-shell ck-skel-desk">
+        <div className="checkout-board">
+          <div className="checkout-form-col">
+            <div className="ck-skel-desk__top">
+              <span className="skel ck-skel-desk__back" />
+              <span className="skel ck-skel-desk__heading" />
+            </div>
+            {Array.from({ length: 2 }).map((_, section) => (
+              <section key={section} className="ck-section ck-skel-desk__card">
+                <span className="skel ck-skel-line ck-skel-line--short" />
+                <div className="ck-skel-desk__grid">
+                  {Array.from({ length: 4 }).map((_, field) => (
+                    <span key={field} className="skel ck-skel-desk__field" />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+          <aside className="ck-skel-desk__order">
+            <span className="skel ck-skel-desk__photo" />
+            <span className="skel ck-skel-line ck-skel-line--mid" />
+            <span className="skel ck-skel-line ck-skel-line--short" />
+            <span className="skel ck-skel-line" />
+            <span className="skel ck-skel-desk__btn" />
+          </aside>
+        </div>
+      </div>
+      {mobile}
+    </div>
+  )
+}
+
 const emptyShipping = {
   fullName: '',
   phone: '',
@@ -34,10 +119,11 @@ const emptyShipping = {
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, clearCart, ready } = useCart()
+  const { items, subtotal, clearCart, ready, updateQty } = useCart()
   const { user, loading } = useAuth()
   const [shipping, setShipping] = useState(emptyShipping)
   const [addresses, setAddresses] = useState([])
+  const [selectedAddressId, setSelectedAddressId] = useState('')
   const [saveAddress, setSaveAddress] = useState(true)
   const [notes, setNotes] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('RAZORPAY')
@@ -53,6 +139,16 @@ export default function CheckoutPage() {
     shippingFee: 0,
     freeShippingMinOrder: 0,
   })
+  const [isMobile, setIsMobile] = useState(null)
+  const [addressesReady, setAddressesReady] = useState(false)
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 760px)')
+    const apply = () => setIsMobile(query.matches)
+    apply()
+    query.addEventListener('change', apply)
+    return () => query.removeEventListener('change', apply)
+  }, [])
 
   useEffect(() => {
     fetch('/api/shipping')
@@ -79,6 +175,8 @@ export default function CheckoutPage() {
         setAddresses(data.addresses || [])
         const def = (data.addresses || []).find((a) => a.isDefault) || data.addresses?.[0]
         if (def) {
+          setSelectedAddressId(def.id)
+          setSaveAddress(false)
           setShipping({
             fullName: def.fullName,
             phone: def.phone,
@@ -91,6 +189,7 @@ export default function CheckoutPage() {
         }
       })
       .catch(() => {})
+      .finally(() => setAddressesReady(true))
   }, [user])
 
   useEffect(() => {
@@ -138,7 +237,7 @@ export default function CheckoutPage() {
         shipping,
         paymentMethod: 'COD',
         notes,
-        saveAddress,
+        saveAddress: Boolean(saveAddress && !selectedAddressId),
         addressLabel: 'Home',
         couponCode: coupon?.code || '',
       }),
@@ -159,7 +258,7 @@ export default function CheckoutPage() {
         })),
         shipping,
         notes,
-        saveAddress,
+        saveAddress: Boolean(saveAddress && !selectedAddressId),
         addressLabel: 'Home',
         couponCode: coupon?.code || '',
       }),
@@ -239,13 +338,34 @@ export default function CheckoutPage() {
     }
   }
 
-  if (loading || !ready) {
-    return (
-      <div className="ecom-page checkout-page">
-        <ShopNav />
-        <div className="empty-state">Loading checkout…</div>
-      </div>
-    )
+  function selectAddress(e) {
+    const id = e.target.value
+    setSelectedAddressId(id)
+    if (!id) {
+      setSaveAddress(true)
+      setShipping((s) => ({
+        ...emptyShipping,
+        fullName: s.fullName || user?.name || '',
+        phone: s.phone || user?.phone || '',
+      }))
+      return
+    }
+    const match = addresses.find((item) => item.id === id)
+    if (!match) return
+    setSaveAddress(false)
+    setShipping({
+      fullName: match.fullName,
+      phone: match.phone,
+      line1: match.line1,
+      line2: match.line2 || '',
+      city: match.city,
+      state: match.state,
+      pincode: match.pincode,
+    })
+  }
+
+  if (loading || !ready || isMobile === null) {
+    return <CheckoutSkeleton />
   }
 
   if (!user) return null
@@ -270,6 +390,53 @@ export default function CheckoutPage() {
   const discount = coupon?.discount || 0
   const shippingFee = calcFee(subtotal, shipSettings)
   const total = Math.max(0, subtotal - discount) + shippingFee
+
+  if (isMobile && !addressesReady) {
+    return <CheckoutSkeleton mobileOnly />
+  }
+
+  if (isMobile) {
+    return (
+      <div className="ecom-page checkout-page checkout-page--mobile">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+        <CheckoutMobile
+          user={user}
+          items={items}
+          updateQty={updateQty}
+          shipping={shipping}
+          setShipping={setShipping}
+          addresses={addresses}
+          selectedAddressId={selectedAddressId}
+          onSelectAddress={selectAddress}
+          saveAddress={saveAddress}
+          setSaveAddress={setSaveAddress}
+          notes={notes}
+          setNotes={setNotes}
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          couponInput={couponInput}
+          setCouponInput={setCouponInput}
+          coupon={coupon}
+          couponError={couponError}
+          couponLoading={couponLoading}
+          applyCoupon={applyCoupon}
+          removeCoupon={removeCoupon}
+          acceptTerms={acceptTerms}
+          setAcceptTerms={setAcceptTerms}
+          error={error}
+          setError={setError}
+          submitting={submitting}
+          subtotal={subtotal}
+          discount={discount}
+          shippingFee={shippingFee}
+          total={total}
+          placeOrder={placeOrder}
+          onLeave={() => router.push('/cart')}
+        />
+      </div>
+    )
+  }
+
   const current = items[Math.min(activeItem, items.length - 1)]
   const nameParts = (shipping.fullName || '').trim().split(/\s+/)
   const firstName = nameParts[0] || ''
@@ -354,38 +521,15 @@ export default function CheckoutPage() {
                 <span>2</span> Delivery details
               </h2>
 
-              <div className="ck-toggle-row" role="group" aria-label="Delivery method">
-                <button type="button" className="ck-toggle is-active" disabled>
-                  Delivery
-                </button>
-                <button type="button" className="ck-toggle" disabled title="Coming soon">
-                  Store pickup
-                </button>
-              </div>
-
               {addresses.length > 0 ? (
                 <div className="ck-field ck-field--full">
                   <label htmlFor="saved">Saved address</label>
                   <select
                     id="saved"
-                    onChange={(e) => {
-                      const a = addresses.find((x) => x.id === e.target.value)
-                      if (!a) return
-                      setShipping({
-                        fullName: a.fullName,
-                        phone: a.phone,
-                        line1: a.line1,
-                        line2: a.line2 || '',
-                        city: a.city,
-                        state: a.state,
-                        pincode: a.pincode,
-                      })
-                    }}
-                    defaultValue=""
+                    value={selectedAddressId}
+                    onChange={selectAddress}
                   >
-                    <option value="" disabled>
-                      Choose a saved address
-                    </option>
+                    <option value="">Enter a new address</option>
                     {addresses.map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.label} — {a.city}
@@ -458,14 +602,16 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <label className="ck-check">
-                <input
-                  type="checkbox"
-                  checked={saveAddress}
-                  onChange={(e) => setSaveAddress(e.target.checked)}
-                />
-                Save this address for next time
-              </label>
+              {!selectedAddressId ? (
+                <label className="ck-check">
+                  <input
+                    type="checkbox"
+                    checked={saveAddress}
+                    onChange={(e) => setSaveAddress(e.target.checked)}
+                  />
+                  Save this address for next time
+                </label>
+              ) : null}
             </section>
 
             <section className="ck-section">
