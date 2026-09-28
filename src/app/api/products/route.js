@@ -51,6 +51,7 @@ export async function POST(request) {
       tagline: z.string().optional(),
       price: z.number().min(0),
       compareAt: z.number().nullable().optional(),
+      purchaseCost: z.number().min(0).optional(),
       image: z.string().min(1),
       gallery: z.array(z.string()).max(12).optional(),
       video: z.string().optional(),
@@ -75,7 +76,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Slug already exists' }, { status: 409 })
     }
     const product = await Product.create(data)
-    return NextResponse.json({ product: product.toPublicJSON() }, { status: 201 })
+    return NextResponse.json({ product: product.toAdminJSON() }, { status: 201 })
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json(

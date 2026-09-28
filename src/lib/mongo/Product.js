@@ -27,6 +27,7 @@ const productSchema = new mongoose.Schema(
     tagline: { type: String, default: '' },
     price: { type: Number, required: true, min: 0 },
     compareAt: { type: Number, default: null },
+    purchaseCost: { type: Number, default: 0, min: 0 },
     image: { type: String, required: true },
     gallery: [{ type: String }],
     video: { type: String, default: '' },
@@ -77,6 +78,13 @@ productSchema.methods.toPublicJSON = function () {
     bestSeller: this.bestSeller === true,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
+  }
+}
+
+productSchema.methods.toAdminJSON = function () {
+  return {
+    ...this.toPublicJSON(),
+    purchaseCost: Number(this.purchaseCost) || 0,
   }
 }
 

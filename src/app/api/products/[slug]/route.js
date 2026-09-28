@@ -31,6 +31,7 @@ export async function PATCH(request, { params }) {
       'tagline',
       'price',
       'compareAt',
+      'purchaseCost',
       'image',
       'gallery',
       'video',
@@ -64,6 +65,14 @@ export async function PATCH(request, { params }) {
     if (update.fragrances !== undefined) {
       update.fragrances = normalizeFragrances(update.fragrances)
     }
+    if (update.purchaseCost !== undefined) {
+      const cost = Number(update.purchaseCost)
+      update.purchaseCost = Number.isFinite(cost) && cost >= 0 ? cost : 0
+    }
+    if (update.stock !== undefined) {
+      const qty = Math.floor(Number(update.stock))
+      update.stock = Number.isFinite(qty) && qty >= 0 ? qty : 0
+    }
     const product = await Product.findByIdAndUpdate(id, update, {
       new: true,
       runValidators: true,
@@ -71,7 +80,7 @@ export async function PATCH(request, { params }) {
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
-    return NextResponse.json({ product: product.toPublicJSON() })
+    return NextResponse.json({ product: product.toAdminJSON() })
   } catch (err) {
     console.error(err)
     return NextResponse.json({ error: 'Could not update product' }, { status: 500 })

@@ -18,6 +18,7 @@ const empty = {
   tagline: '',
   price: 699,
   compareAt: '',
+  purchaseCost: '',
   image: '',
   gallery: [],
   video: '',
@@ -53,6 +54,7 @@ export default function AdminProductsPage() {
   useAdminToasts(msg, error)
   const [uploading, setUploading] = useState('')
   const [saving, setSaving] = useState(false)
+  const [addQty, setAddQty] = useState('')
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [activeFilter, setActiveFilter] = useState('all')
@@ -131,6 +133,7 @@ export default function AdminProductsPage() {
   function openAdd() {
     setEditingId(null)
     setForm(empty)
+    setAddQty('')
     slugTouched.current = false
     setError('')
     setMsg('')
@@ -152,6 +155,7 @@ export default function AdminProductsPage() {
       tagline: p.tagline || '',
       price: p.price,
       compareAt: p.compareAt ?? '',
+      purchaseCost: p.purchaseCost ?? '',
       image: p.image || gallery[0] || '',
       gallery,
       video: p.video || '',
@@ -180,6 +184,7 @@ export default function AdminProductsPage() {
       active: p.active !== false,
       bestSeller: p.bestSeller === true,
     })
+    setAddQty('')
     setError('')
     setMsg('')
     setFormOpen(true)
@@ -190,6 +195,7 @@ export default function AdminProductsPage() {
     setFormOpen(false)
     setEditingId(null)
     setForm(empty)
+    setAddQty('')
     slugTouched.current = false
     setError('')
     setMsg('')
@@ -313,8 +319,9 @@ export default function AdminProductsPage() {
       video: form.video || '',
       price: Number(form.price),
       compareAt: form.compareAt === '' ? null : Number(form.compareAt),
+      purchaseCost: form.purchaseCost === '' ? 0 : Number(form.purchaseCost),
       badge: form.badge || null,
-      stock: Number(form.stock),
+      stock: Math.max(0, Math.floor(Number(form.stock) || 0)) + Math.max(0, Math.floor(Number(addQty) || 0)),
       highlights: String(form.highlights)
         .split(',')
         .map((s) => s.trim())
@@ -495,13 +502,58 @@ export default function AdminProductsPage() {
                       />
                     </label>
                     <label className="admin-field">
-                      <span>Stock</span>
+                      <span>Purchase cost (₹)</span>
                       <input
                         type="number"
                         min="0"
+                        step="0.01"
+                        value={form.purchaseCost}
+                        onChange={(e) => setForm((f) => ({ ...f, purchaseCost: e.target.value }))}
+                      />
+                      <small>Accounting only. This is not shown on the website.</small>
+                    </label>
+                    <label className="admin-field">
+                      <span>Quantity</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
                         value={form.stock}
                         onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
                       />
+                    </label>
+                    <label className="admin-field">
+                      <span>Add quantity</span>
+                      <span className="admin-qty-add">
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={addQty}
+                          placeholder="0"
+                          onChange={(e) => setAddQty(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-ghost"
+                          onClick={() => {
+                            const qty = Math.floor(Number(addQty))
+                            if (!Number.isFinite(qty) || qty <= 0) {
+                              setError('Enter a quantity greater than 0.')
+                              return
+                            }
+                            setError('')
+                            setForm((f) => ({
+                              ...f,
+                              stock: Math.max(0, Math.floor(Number(f.stock) || 0)) + qty,
+                            }))
+                            setAddQty('')
+                          }}
+                        >
+                          Add
+                        </button>
+                      </span>
+                      <small>Adds units to the quantity above, then save the product.</small>
                     </label>
                     <label className="admin-field">
                       <span>Badge</span>
@@ -1043,7 +1095,8 @@ export default function AdminProductsPage() {
                   <th>Product</th>
                   <th>Category</th>
                   <th>Price</th>
-                  <th>Stock</th>
+                  <th>Cost</th>
+                  <th>Quantity</th>
                   <th>Status</th>
                   <th />
                 </tr>
@@ -1085,6 +1138,7 @@ export default function AdminProductsPage() {
                         ) : null}
                       </div>
                     </td>
+                    <td>{formatINR(Number(p.purchaseCost) || 0)}</td>
                     <td>
                       <span
                         className={`admin-stock ${

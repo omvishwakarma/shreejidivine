@@ -8,7 +8,7 @@ export async function GET(request) {
   try {
     await dbConnect()
     const products = await Product.find().sort({ createdAt: -1 })
-    return NextResponse.json({ products: products.map((p) => p.toPublicJSON()) })
+    return NextResponse.json({ products: products.map((p) => p.toAdminJSON()) })
   } catch (err) {
     console.error(err)
     return NextResponse.json({ error: 'Could not load products' }, { status: 500 })
