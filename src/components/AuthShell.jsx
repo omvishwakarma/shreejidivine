@@ -8,6 +8,25 @@ import '../app/auth.css'
 
 const DEFAULT_BANNER = '/images/hero-banner.png'
 
+const COPY = {
+  login: {
+    title: 'Welcome back',
+    sub: 'Sign in to checkout, track orders, and manage addresses.',
+  },
+  signup: {
+    title: 'Join Shreeji',
+    sub: 'Create an account to save addresses and follow every order.',
+  },
+  forgot: {
+    title: 'Forgot password',
+    sub: 'Enter the email on your account and we will send a reset link.',
+  },
+  reset: {
+    title: 'Set a new password',
+    sub: 'Choose a new password, then sign in with it.',
+  },
+}
+
 export default function AuthShell({ mode = 'signup', next = '/profile', children }) {
   const nextQuery = next && next !== '/profile' ? `?next=${encodeURIComponent(next)}` : ''
   const [banner, setBanner] = useState(DEFAULT_BANNER)
@@ -73,12 +92,8 @@ export default function AuthShell({ mode = 'signup', next = '/profile', children
             className="auth-logo"
             priority
           />
-          <h1>{mode === 'login' ? 'Welcome back' : 'Join Shreeji'}</h1>
-          <p className="auth-panel__sub">
-            {mode === 'login'
-              ? 'Sign in to checkout, track orders, and manage addresses.'
-              : 'Create an account to save addresses and follow every order.'}
-          </p>
+          <h1>{(COPY[mode] || COPY.signup).title}</h1>
+          <p className="auth-panel__sub">{(COPY[mode] || COPY.signup).sub}</p>
 
           <div className="auth-toggle" role="tablist" aria-label="Account mode">
             <Link

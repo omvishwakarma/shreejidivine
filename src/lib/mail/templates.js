@@ -90,6 +90,34 @@ export function buildWelcomeEmail({ name, email }) {
   }
 }
 
+export function buildPasswordResetEmail({ name, resetUrl }) {
+  const first = (name || '').trim().split(/\s+/)[0] || 'there'
+  const html = emailShell({
+    title: `Reset your ${SITE_NAME} password`,
+    preheader: `Reset your ${SITE_NAME} password. This link expires in 1 hour.`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;font-size:18px;font-family:Georgia,serif;">Namaste ${esc(first)},</p>
+      <p style="margin:0 0 14px;color:#5c4332;">
+        We received a request to reset the password for your ${esc(SITE_NAME)} account.
+        This link expires in 1 hour.
+      </p>
+      <p style="margin:0 0 8px;text-align:center;">
+        <a href="${esc(resetUrl)}" style="display:inline-block;padding:14px 28px;background:#2b1e16;color:#e4c878;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
+          Reset password
+        </a>
+      </p>
+      <p style="margin:22px 0 0;color:#6b5648;font-size:13px;">
+        If you did not ask for this, you can ignore this email. Your password will stay the same.
+      </p>
+    `,
+  })
+
+  return {
+    subject: `Reset your ${SITE_NAME} password`,
+    html,
+  }
+}
+
 export function buildOrderEmail({ order, customer = {} }) {
   const name = order.shippingName || customer.name || 'there'
   const first = String(name).trim().split(/\s+/)[0] || 'there'

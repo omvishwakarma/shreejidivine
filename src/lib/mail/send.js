@@ -3,7 +3,7 @@ import { CONTACT_EMAIL, SITE_NAME } from '../site'
 
 let transporter
 
-function isMailConfigured() {
+export function isMailConfigured() {
   return Boolean(
     process.env.SMTP_HOST &&
       process.env.SMTP_USER &&

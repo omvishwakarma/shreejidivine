@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema(
     authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
     phone: { type: String, default: '' },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    resetPasswordTokenHash: { type: String, default: '' },
+    resetPasswordExpires: { type: Date, default: null },
   },
   { timestamps: true }
 )
@@ -34,4 +36,8 @@ userSchema.methods.toSafeJSON = function () {
   }
 }
 
-export const User = mongoose.models.User || mongoose.model('User', userSchema)
+if (mongoose.models.User) {
+  delete mongoose.models.User
+}
+
+export const User = mongoose.model('User', userSchema)

@@ -1,11 +1,20 @@
 import { sendMail } from './send'
-import { buildOrderEmail, buildWelcomeEmail } from './templates'
+import { buildOrderEmail, buildPasswordResetEmail, buildWelcomeEmail } from './templates'
 
 export async function sendWelcomeEmail(user) {
   if (!user?.email) return { skipped: true }
   const { subject, html } = buildWelcomeEmail({
     name: user.name,
     email: user.email,
+  })
+  return sendMail({ to: user.email, subject, html })
+}
+
+export async function sendPasswordResetEmail(user, resetUrl) {
+  if (!user?.email) return { skipped: true }
+  const { subject, html } = buildPasswordResetEmail({
+    name: user.name,
+    resetUrl,
   })
   return sendMail({ to: user.email, subject, html })
 }

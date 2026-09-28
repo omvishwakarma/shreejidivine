@@ -123,6 +123,9 @@ export default function LoginClient() {
             />
             Remember me
           </label>
+          <Link href="/forgot-password" className="auth-forgot">
+            Forgot password?
+          </Link>
         </div>
 
         <button type="submit" className="auth-submit" disabled={loading}>
