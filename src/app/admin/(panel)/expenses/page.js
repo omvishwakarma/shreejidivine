@@ -22,6 +22,7 @@ function todayInput() {
 
 function emptyForm() {
   return {
+    name: '',
     type: 'ads',
     amount: '',
     image: '',
@@ -96,6 +97,7 @@ export default function AdminExpensesPage() {
   function openEdit(item) {
     setEditingId(item.id)
     setForm({
+      name: item.name || '',
       type: item.type,
       amount: item.amount,
       image: item.image || '',
@@ -133,6 +135,10 @@ export default function AdminExpensesPage() {
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
+    if (!form.name.trim()) {
+      setError('Enter an expense name.')
+      return
+    }
     const amount = Number(form.amount)
     if (!Number.isFinite(amount) || amount < 0) {
       setError('Enter a valid amount.')
@@ -143,6 +149,7 @@ export default function AdminExpensesPage() {
       return
     }
     const payload = {
+      name: form.name.trim(),
       type: form.type,
       amount,
       image: form.image || '',
@@ -222,6 +229,15 @@ export default function AdminExpensesPage() {
           <h2>{editingId ? 'Edit expense' : 'Add expense'}</h2>
           <form className="admin-form-grid" onSubmit={onSubmit}>
             <div className="admin-form-grid two">
+              <div className="admin-field" style={{ gridColumn: '1 / -1' }}>
+                <label>Name</label>
+                <input
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
+                  placeholder="Facebook ads, boxes, domain…"
+                />
+              </div>
               <div className="admin-field">
                 <label>Type</label>
                 <select
@@ -332,6 +348,7 @@ export default function AdminExpensesPage() {
               <thead>
                 <tr>
                   <th>Date</th>
+                  <th>Name</th>
                   <th>Type</th>
                   <th>Amount</th>
                   <th>By</th>
@@ -343,6 +360,9 @@ export default function AdminExpensesPage() {
                 {filtered.map((item) => (
                   <tr key={item.id}>
                     <td>{formatDate(item.date)}</td>
+                    <td>
+                      <strong>{item.name}</strong>
+                    </td>
                     <td>{typeLabel(item.type)}</td>
                     <td>
                       <strong>{formatINR(item.amount)}</strong>

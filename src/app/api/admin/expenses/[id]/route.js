@@ -4,6 +4,7 @@ import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Expense } from '@/lib/mongo/Expense'
 
 const schema = z.object({
+  name: z.string().trim().min(1).max(120),
   type: z.enum(['ads', 'packaging', 'website', 'product', 'other']),
   amount: z.number().min(0),
   image: z.string().optional().default(''),
@@ -21,6 +22,7 @@ export async function PATCH(request, { params }) {
     const expense = await Expense.findByIdAndUpdate(
       id,
       {
+        name: data.name,
         type: data.type,
         amount: data.amount,
         image: data.image || '',

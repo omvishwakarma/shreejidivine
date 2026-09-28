@@ -5,6 +5,7 @@ export const EXPENSE_BY = ['Sanket', 'Om', 'Vikrant']
 
 const expenseSchema = new mongoose.Schema(
   {
+    name: { type: String, required: true, trim: true },
     type: { type: String, enum: EXPENSE_TYPES, required: true },
     amount: { type: Number, required: true, min: 0 },
     image: { type: String, default: '' },
@@ -17,6 +18,7 @@ const expenseSchema = new mongoose.Schema(
 expenseSchema.methods.toJSONSafe = function () {
   return {
     id: this._id.toString(),
+    name: this.name,
     type: this.type,
     amount: this.amount,
     image: this.image || '',
