@@ -123,6 +123,20 @@
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
+.ck-field__error {
+  margin: 0;
+  color: #8b1e1e;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.ck-field input.is-invalid,
+.ck-input-wrap.is-invalid {
+  border-color: #c24545;
+}
+
 .ck-field input:focus,
 .ck-field select:focus {
   outline: none;

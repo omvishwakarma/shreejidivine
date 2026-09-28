@@ -16,18 +16,35 @@ export default function LoginClient() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(true)
-  const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  function clearField(key) {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const nextErrors = { ...prev }
+      delete nextErrors[key]
+      return nextErrors
+    })
+  }
 
   async function onSubmit(e) {
     e.preventDefault()
-    setError('')
+    const nextErrors = {}
+    if (!email.trim()) nextErrors.email = 'Enter your email.'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) nextErrors.email = 'Enter a valid email.'
+    if (!password) nextErrors.password = 'Enter your password.'
+    setFieldErrors(nextErrors)
+    if (Object.keys(nextErrors).length) return
+
     setLoading(true)
     try {
       await login(email, password)
       router.push(next)
     } catch (err) {
-      setError(err.message)
+      const message = err.message || 'Could not sign in.'
+      if (/google/i.test(message)) setFieldErrors({ email: message })
+      else setFieldErrors({ password: message })
     } finally {
       setLoading(false)
     }
@@ -35,9 +52,13 @@ export default function LoginClient() {
 
   const onGoogle = useCallback(
     async (idToken) => {
-      setError('')
-      await loginWithGoogle(idToken)
-      router.push(next)
+      setFieldErrors({})
+      try {
+        await loginWithGoogle(idToken)
+        router.push(next)
+      } catch (err) {
+        setFieldErrors({ email: err.message || 'Could not sign in with Google.' })
+      }
     },
     [loginWithGoogle, router, next]
   )
@@ -49,36 +70,48 @@ export default function LoginClient() {
         <span>or</span>
       </div>
 
-      <form className="auth-form" onSubmit={onSubmit}>
+      <form className="auth-form" onSubmit={onSubmit} noValidate>
         <div className="auth-field">
           <label htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
-            required
             autoComplete="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            aria-invalid={Boolean(fieldErrors.email)}
+            className={fieldErrors.email ? 'is-invalid' : ''}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              clearField('email')
+            }}
           />
+          {fieldErrors.email ? <p className="auth-field__error">{fieldErrors.email}</p> : null}
         </div>
         <div className="auth-field auth-field--password">
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            type="button"
-            className="auth-eye"
-            onClick={() => setShowPassword((v) => !v)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-          >
-            {showPassword ? 'Hide' : 'Show'}
-          </button>
+          <div className="auth-field__control">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              aria-invalid={Boolean(fieldErrors.password)}
+              className={fieldErrors.password ? 'is-invalid' : ''}
+              onChange={(e) => {
+                setPassword(e.target.value)
+                clearField('password')
+              }}
+            />
+            <button
+              type="button"
+              className="auth-eye"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {fieldErrors.password ? <p className="auth-field__error">{fieldErrors.password}</p> : null}
         </div>
 
         <div className="auth-row">
@@ -91,8 +124,6 @@ export default function LoginClient() {
             Remember me
           </label>
         </div>
-
-        {error ? <p className="auth-error">{error}</p> : null}
 
         <button type="submit" className="auth-submit" disabled={loading}>
           {loading ? 'Signing in…' : 'Sign in'}

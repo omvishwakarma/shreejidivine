@@ -27,6 +27,71 @@ function paymentLabel(method) {
   return method || '—'
 }
 
+export function OrderDetailSkeleton({ placed = false }) {
+  return (
+    <div className="ecom-page order-detail-page" aria-busy="true" aria-label="Loading order">
+      <ShopNav />
+      <div className="od-shell">
+        <span className="skel od-skel__crumb" />
+        {placed ? <span className="skel od-skel__banner" /> : null}
+        <div className="od-skel__hero">
+          <span className="od-skel__hero-copy">
+            <span className="skel od-skel__kicker" />
+            <span className="skel od-skel__title" />
+            <span className="skel od-skel__meta" />
+          </span>
+          <span className="od-skel__hero-actions">
+            <span className="skel od-skel__btn" />
+            <span className="skel od-skel__btn" />
+          </span>
+        </div>
+        <div className="od-skel__pills">
+          <span className="skel od-skel__pill" />
+          <span className="skel od-skel__pill" />
+          <span className="skel od-skel__pill od-skel__pill--wide" />
+        </div>
+        <div className="od-skel__timeline">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <span key={i} className="od-skel__step">
+              <span className="skel od-skel__dot" />
+              <span className="skel od-skel__step-label" />
+            </span>
+          ))}
+        </div>
+        <div className="od-grid">
+          <section className="od-card">
+            <span className="skel od-skel__card-title" />
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="od-skel__item">
+                <span className="skel od-skel__thumb" />
+                <span className="od-skel__item-copy">
+                  <span className="skel od-skel__line od-skel__line--mid" />
+                  <span className="skel od-skel__line od-skel__line--short" />
+                </span>
+              </div>
+            ))}
+          </section>
+          <div className="od-side">
+            <section className="od-card od-skel__stack">
+              <span className="skel od-skel__card-title" />
+              <span className="skel od-skel__line" />
+              <span className="skel od-skel__line od-skel__line--mid" />
+              <span className="skel od-skel__line od-skel__line--short" />
+            </section>
+            <section className="od-card od-skel__stack">
+              <span className="skel od-skel__card-title" />
+              <span className="skel od-skel__line" />
+              <span className="skel od-skel__line" />
+              <span className="skel od-skel__line od-skel__line--total" />
+              <span className="skel od-skel__btn od-skel__btn--full" />
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function OrderDetailClient() {
   const { id } = useParams()
   const { user, loading } = useAuth()
@@ -50,12 +115,7 @@ export default function OrderDetailClient() {
   const step = useMemo(() => (order ? statusIndex(order.status) : 0), [order])
 
   if (loading || (!order && !error)) {
-    return (
-      <div className="ecom-page order-detail-page">
-        <ShopNav />
-        <div className="empty-state">Loading order…</div>
-      </div>
-    )
+    return <OrderDetailSkeleton placed={Boolean(placed)} />
   }
 
   const placedMsg =

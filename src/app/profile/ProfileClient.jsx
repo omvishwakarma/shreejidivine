@@ -10,6 +10,41 @@ import { formatINR } from '../../lib/products'
 import { api } from '../../lib/api'
 import '../ecom.css'
 
+export function ProfileSkeleton() {
+  return (
+    <div className="ecom-page" aria-busy="true" aria-label="Loading profile">
+      <ShopNav />
+      <div className="ecom-wrap">
+        <header className="ecom-hero">
+          <span className="skel profile-skel__kicker" />
+          <span className="skel profile-skel__title" />
+          <span className="skel profile-skel__lead" />
+        </header>
+        <div className="profile-layout">
+          <aside className="profile-side">
+            <div className="profile-side__user">
+              <span className="skel profile-skel__name" />
+              <span className="skel profile-skel__email" />
+            </div>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <span key={i} className="skel profile-skel__nav" />
+            ))}
+          </aside>
+          <div>
+            <span className="skel profile-skel__heading" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="profile-skel__card">
+                <span className="skel profile-skel__line" />
+                <span className="skel profile-skel__line profile-skel__line--short" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ProfileClient() {
   const { user, loading, logout } = useAuth()
   const router = useRouter()
@@ -17,6 +52,7 @@ export default function ProfileClient() {
   const tab = search.get('tab') || 'orders'
   const [orders, setOrders] = useState([])
   const [addresses, setAddresses] = useState([])
+  const [listsReady, setListsReady] = useState(false)
   const [msg, setMsg] = useState('')
   const [error, setError] = useState('')
   const [addrForm, setAddrForm] = useState({
@@ -37,17 +73,29 @@ export default function ProfileClient() {
 
   useEffect(() => {
     if (!user) return
-    api('/api/orders')
-      .then((d) => setOrders(d.orders || []))
-      .catch(() => {})
-    api('/api/addresses')
-      .then((d) => setAddresses(d.addresses || []))
-      .catch(() => {})
+    let cancelled = false
+    setListsReady(false)
+    Promise.all([
+      api('/api/orders')
+        .then((d) => d.orders || [])
+        .catch(() => []),
+      api('/api/addresses')
+        .then((d) => d.addresses || [])
+        .catch(() => []),
+    ]).then(([nextOrders, nextAddresses]) => {
+      if (cancelled) return
+      setOrders(nextOrders)
+      setAddresses(nextAddresses)
+      setListsReady(true)
+    })
     setAddrForm((f) => ({
       ...f,
       fullName: user.name || '',
       phone: user.phone || '',
     }))
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
   async function saveAddress(e) {
@@ -75,13 +123,8 @@ export default function ProfileClient() {
     }
   }
 
-  if (loading || !user) {
-    return (
-      <div className="ecom-page">
-        <ShopNav />
-        <div className="empty-state">Loading…</div>
-      </div>
-    )
+  if (loading || !user || !listsReady) {
+    return <ProfileSkeleton />
   }
 
   return (

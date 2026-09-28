@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import { adminApi } from '../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../components/admin/adminToast'
 
 const empty = {
   name: '',
@@ -23,6 +24,7 @@ export default function AdminCategoriesPage() {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [uploading, setUploading] = useState(false)
   const imageInputId = useId()
 
@@ -159,8 +161,6 @@ export default function AdminCategoriesPage() {
         </button>
       </div>
 
-      {error ? <p className="admin-error">{error}</p> : null}
-      {msg ? <p className="admin-success">{msg}</p> : null}
 
       {formOpen ? (
         <div className="admin-card" style={{ marginBottom: '1.25rem' }}>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { clearAdminAuth, getAdminUser } from '../../lib/adminApi'
+import { AdminToastHost } from './adminToast'
 import { APP_VERSION } from '../../lib/appVersion'
 
 const links = [
@@ -67,6 +68,7 @@ export default function AdminShell({ children }) {
         </div>
       </aside>
       <main className="admin-main">{children}</main>
+      <AdminToastHost />
     </div>
   )
 }

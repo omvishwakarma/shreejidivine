@@ -902,6 +902,70 @@
 }
 
 /* ── Profile ── */
+.profile-skel__kicker {
+  display: block;
+  width: 5.5rem;
+  height: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.profile-skel__title {
+  display: block;
+  width: min(14rem, 70%);
+  height: 2.2rem;
+  margin-bottom: 0.7rem;
+}
+
+.profile-skel__lead {
+  display: block;
+  width: min(28rem, 90%);
+  height: 0.9rem;
+}
+
+.profile-skel__name {
+  display: block;
+  width: 70%;
+  height: 1.15rem;
+  margin-bottom: 0.45rem;
+}
+
+.profile-skel__email {
+  display: block;
+  width: 88%;
+  height: 0.75rem;
+}
+
+.profile-skel__nav {
+  height: 2.4rem;
+  border-radius: 0.2rem;
+}
+
+.profile-skel__heading {
+  display: block;
+  width: 9rem;
+  height: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.profile-skel__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid rgba(43, 30, 22, 0.08);
+  background: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.9rem;
+}
+
+.profile-skel__line {
+  height: 0.9rem;
+  width: 100%;
+}
+
+.profile-skel__line--short {
+  width: 55%;
+}
+
 .profile-side {
   display: flex;
   flex-direction: column;

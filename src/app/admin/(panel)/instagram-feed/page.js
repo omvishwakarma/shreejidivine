@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { adminApi } from '../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../components/admin/adminToast'
 
 const DEFAULT_COPY = {
   label: 'Follow us on Instagram',
@@ -33,6 +34,7 @@ export default function AdminInstagramFeedPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [formOpen, setFormOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState(null)
   const [form, setForm] = useState(emptyPost())
@@ -180,8 +182,6 @@ export default function AdminInstagramFeedPage() {
         </button>
       </div>
 
-      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-      {msg ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
       <section className="admin-card admin-card--lg">
         <div className="admin-card__head">

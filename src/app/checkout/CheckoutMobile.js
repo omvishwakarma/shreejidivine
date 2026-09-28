@@ -3,22 +3,13 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { discountPct, formatINR } from '../../lib/products'
+import { checkoutFieldErrors } from './checkoutValidation'
 
 const STEPS = [
   { id: 'address', label: 'Address' },
   { id: 'summary', label: 'Order Summary' },
   { id: 'payment', label: 'Payment' },
 ]
-
-function addressError(shipping) {
-  if (!String(shipping.fullName || '').trim()) return 'Please enter your name.'
-  if (!String(shipping.phone || '').trim()) return 'Please enter your phone number.'
-  if (!String(shipping.line1 || '').trim()) return 'Please enter your address.'
-  if (!String(shipping.city || '').trim()) return 'Please enter your city.'
-  if (!String(shipping.state || '').trim()) return 'Please enter your state.'
-  if (!String(shipping.pincode || '').trim()) return 'Please enter your zip code.'
-  return ''
-}
 
 function formatAddress(shipping) {
   return [shipping.line1, shipping.line2, [shipping.city, shipping.pincode].filter(Boolean).join(' '), shipping.state]
@@ -52,7 +43,8 @@ export default function CheckoutMobile({
   acceptTerms,
   setAcceptTerms,
   error,
-  setError,
+  fieldErrors,
+  setFieldErrors,
   submitting,
   subtotal,
   discount,
@@ -62,7 +54,9 @@ export default function CheckoutMobile({
   onLeave,
 }) {
   const [step, setStep] = useState(() =>
-    selectedAddressId && !addressError(shipping) ? 'summary' : 'address'
+    selectedAddressId && Object.keys(checkoutFieldErrors(shipping)).length === 0
+      ? 'summary'
+      : 'address'
   )
   const [compareById, setCompareById] = useState({})
 
@@ -112,16 +106,24 @@ export default function CheckoutMobile({
   const saveAmount = Math.max(0, mrpTotal - subtotal) + discount
   const title = STEPS[currentIndex]?.label || 'Checkout'
 
+  function clearField(key) {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const nextErrors = { ...prev }
+      delete nextErrors[key]
+      return nextErrors
+    })
+  }
+
   function goTo(next) {
     if (next !== 'address') {
-      const message = addressError(shipping)
-      if (message) {
-        setError(message)
+      const errors = checkoutFieldErrors(shipping)
+      setFieldErrors(errors)
+      if (Object.keys(errors).length) {
         setStep('address')
         return
       }
     }
-    setError('')
     setStep(next)
   }
 
@@ -138,6 +140,12 @@ export default function CheckoutMobile({
     }
     if (step === 'summary') {
       goTo('payment')
+      return
+    }
+    const errors = checkoutFieldErrors(shipping)
+    if (Object.keys(errors).length) {
+      setFieldErrors(errors)
+      setStep('address')
       return
     }
     placeOrder({ preventDefault() {} })
@@ -188,11 +196,18 @@ export default function CheckoutMobile({
                 <label htmlFor="m-first">First name</label>
                 <input
                   id="m-first"
-                  required
                   value={firstName}
-                  onChange={(e) => setNamePart('first', e.target.value)}
+                  aria-invalid={Boolean(fieldErrors.firstName)}
+                  className={fieldErrors.firstName ? 'is-invalid' : ''}
+                  onChange={(e) => {
+                    setNamePart('first', e.target.value)
+                    clearField('firstName')
+                  }}
                   autoComplete="given-name"
                 />
+                {fieldErrors.firstName ? (
+                  <p className="ck-field__error">{fieldErrors.firstName}</p>
+                ) : null}
               </div>
               <div className="ck-field">
                 <label htmlFor="m-last">Last name</label>
@@ -205,17 +220,21 @@ export default function CheckoutMobile({
               </div>
               <div className="ck-field">
                 <label htmlFor="m-phone">Phone</label>
-                <div className="ck-input-wrap">
+                <div className={`ck-input-wrap${fieldErrors.phone ? ' is-invalid' : ''}`}>
                   <span className="ck-prefix">+91</span>
                   <input
                     id="m-phone"
-                    required
                     value={shipping.phone}
-                    onChange={(e) => setShipping((s) => ({ ...s, phone: e.target.value }))}
+                    aria-invalid={Boolean(fieldErrors.phone)}
+                    onChange={(e) => {
+                      setShipping((s) => ({ ...s, phone: e.target.value }))
+                      clearField('phone')
+                    }}
                     autoComplete="tel"
                     inputMode="tel"
                   />
                 </div>
+                {fieldErrors.phone ? <p className="ck-field__error">{fieldErrors.phone}</p> : null}
               </div>
               <div className="ck-field">
                 <label htmlFor="m-email">E-mail</label>
@@ -244,12 +263,17 @@ export default function CheckoutMobile({
                 <label htmlFor="m-line1">Address</label>
                 <input
                   id="m-line1"
-                  required
                   value={shipping.line1}
-                  onChange={(e) => setShipping((s) => ({ ...s, line1: e.target.value }))}
+                  aria-invalid={Boolean(fieldErrors.line1)}
+                  className={fieldErrors.line1 ? 'is-invalid' : ''}
+                  onChange={(e) => {
+                    setShipping((s) => ({ ...s, line1: e.target.value }))
+                    clearField('line1')
+                  }}
                   placeholder="House / street / landmark"
                   autoComplete="address-line1"
                 />
+                {fieldErrors.line1 ? <p className="ck-field__error">{fieldErrors.line1}</p> : null}
               </div>
               <div className="ck-field ck-field--full">
                 <label htmlFor="m-line2">Address line 2 (optional)</label>
@@ -264,32 +288,49 @@ export default function CheckoutMobile({
                 <label htmlFor="m-city">City</label>
                 <input
                   id="m-city"
-                  required
                   value={shipping.city}
-                  onChange={(e) => setShipping((s) => ({ ...s, city: e.target.value }))}
+                  aria-invalid={Boolean(fieldErrors.city)}
+                  className={fieldErrors.city ? 'is-invalid' : ''}
+                  onChange={(e) => {
+                    setShipping((s) => ({ ...s, city: e.target.value }))
+                    clearField('city')
+                  }}
                   autoComplete="address-level2"
                 />
+                {fieldErrors.city ? <p className="ck-field__error">{fieldErrors.city}</p> : null}
               </div>
               <div className="ck-field">
                 <label htmlFor="m-state">State</label>
                 <input
                   id="m-state"
-                  required
                   value={shipping.state}
-                  onChange={(e) => setShipping((s) => ({ ...s, state: e.target.value }))}
+                  aria-invalid={Boolean(fieldErrors.state)}
+                  className={fieldErrors.state ? 'is-invalid' : ''}
+                  onChange={(e) => {
+                    setShipping((s) => ({ ...s, state: e.target.value }))
+                    clearField('state')
+                  }}
                   autoComplete="address-level1"
                 />
+                {fieldErrors.state ? <p className="ck-field__error">{fieldErrors.state}</p> : null}
               </div>
               <div className="ck-field">
                 <label htmlFor="m-pin">Zip code</label>
                 <input
                   id="m-pin"
-                  required
                   value={shipping.pincode}
-                  onChange={(e) => setShipping((s) => ({ ...s, pincode: e.target.value }))}
+                  aria-invalid={Boolean(fieldErrors.pincode)}
+                  className={fieldErrors.pincode ? 'is-invalid' : ''}
+                  onChange={(e) => {
+                    setShipping((s) => ({ ...s, pincode: e.target.value }))
+                    clearField('pincode')
+                  }}
                   autoComplete="postal-code"
                   inputMode="numeric"
                 />
+                {fieldErrors.pincode ? (
+                  <p className="ck-field__error">{fieldErrors.pincode}</p>
+                ) : null}
               </div>
               <div className="ck-field">
                 <label htmlFor="m-notes">Notes (optional)</label>
@@ -468,13 +509,17 @@ export default function CheckoutMobile({
               <input
                 type="checkbox"
                 checked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
+                onChange={(e) => {
+                  setAcceptTerms(e.target.checked)
+                  clearField('terms')
+                }}
               />
               <span>
                 By confirming the order, I accept the terms of sale and privacy policy of Shreeji
                 Divine.
               </span>
             </label>
+            {fieldErrors.terms ? <p className="ck-field__error">{fieldErrors.terms}</p> : null}
           </section>
         </div>
       ) : null}

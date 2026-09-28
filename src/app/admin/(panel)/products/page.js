@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../components/admin/adminToast'
 import { plainTextToHtml } from '../../../../lib/productHtml'
 
 const AdminRichTextEditor = dynamic(() => import('../../../../components/AdminRichTextEditor'), {
@@ -49,6 +50,7 @@ export default function AdminProductsPage() {
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [uploading, setUploading] = useState('')
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
@@ -391,8 +393,6 @@ export default function AdminProductsPage() {
         ) : null}
       </div>
 
-      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-      {msg && !formOpen ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
       <div className="admin-stats admin-stats--products">
         <div className="admin-stat-card">
@@ -964,8 +964,6 @@ export default function AdminProductsPage() {
               </aside>
             </div>
 
-            {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-            {msg ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
             <div className="admin-sticky-actions">
               <p>{editingId ? 'Saving updates this product live.' : 'Create to add it to the catalog.'}</p>

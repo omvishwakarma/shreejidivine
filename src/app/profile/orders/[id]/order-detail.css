@@ -26,6 +26,152 @@
   text-underline-offset: 3px;
 }
 
+.od-skel__crumb {
+  width: 9rem;
+  height: 0.8rem;
+  margin-bottom: 1.25rem;
+}
+
+.od-skel__banner {
+  display: block;
+  height: 5.2rem;
+  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+}
+
+.od-skel__hero {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1.25rem;
+  align-items: flex-end;
+  margin-bottom: 1.15rem;
+}
+
+.od-skel__hero-copy,
+.od-skel__stack,
+.od-skel__item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.od-skel__kicker {
+  width: 6.5rem;
+  height: 0.7rem;
+}
+
+.od-skel__title {
+  width: min(16rem, 70%);
+  height: 2.1rem;
+}
+
+.od-skel__meta {
+  width: 11rem;
+  height: 0.85rem;
+}
+
+.od-skel__hero-actions {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.od-skel__btn {
+  width: 8.5rem;
+  height: 2.6rem;
+  border-radius: 999px;
+}
+
+.od-skel__btn--full {
+  width: 100%;
+  margin-top: 0.4rem;
+}
+
+.od-skel__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.od-skel__pill {
+  width: 6.5rem;
+  height: 1.7rem;
+  border-radius: 999px;
+}
+
+.od-skel__pill--wide {
+  width: 9rem;
+}
+
+.od-skel__timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin: 0 0 1.75rem;
+  padding: 1rem 0.5rem 1.15rem;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(43, 30, 22, 0.06);
+  border-radius: 1.1rem;
+}
+
+.od-skel__step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.od-skel__dot {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+}
+
+.od-skel__step-label {
+  width: 4.2rem;
+  height: 0.65rem;
+}
+
+.od-skel__card-title {
+  width: 8rem;
+  height: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.od-skel__item {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.od-skel__thumb {
+  width: 96px;
+  height: 96px;
+  border-radius: 0.85rem;
+}
+
+.od-skel__line {
+  height: 0.85rem;
+  width: 100%;
+}
+
+.od-skel__line--mid {
+  width: 68%;
+}
+
+.od-skel__line--short {
+  width: 42%;
+}
+
+.od-skel__line--total {
+  width: 100%;
+  height: 1.15rem;
+  margin-top: 0.35rem;
+}
+
 .od-success {
   padding: 1.1rem 1.25rem;
   margin-bottom: 1.5rem;
@@ -453,6 +599,10 @@
   .od-timeline li:not(:last-child)::after {
     display: none;
   }
+
+  .od-skel__timeline {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -470,5 +620,14 @@
 
   .od-hero__actions .od-btn {
     flex: 1;
+  }
+
+  .od-skel__item {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .od-skel__thumb {
+    width: 72px;
+    height: 72px;
   }
 }

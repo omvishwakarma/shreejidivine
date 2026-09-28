@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
+import { adminToast, useAdminToasts } from '../../../../components/admin/adminToast'
 
 const empty = {
   code: '',
@@ -20,6 +21,7 @@ export default function AdminCouponsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState('')
+  useAdminToasts('', error)
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
 
@@ -90,11 +92,13 @@ export default function AdminCouponsPage() {
           method: 'PATCH',
           body: JSON.stringify(payload),
         })
+        adminToast('Coupon updated')
       } else {
         await adminApi('/api/admin/coupons', {
           method: 'POST',
           body: JSON.stringify(payload),
         })
+        adminToast('Coupon created')
       }
       closeForm()
       await load()
@@ -105,9 +109,14 @@ export default function AdminCouponsPage() {
 
   async function remove(id) {
     if (!confirm('Delete this coupon?')) return
-    await adminApi(`/api/admin/coupons/${id}`, { method: 'DELETE' })
-    if (editingId === id) closeForm()
-    await load()
+    try {
+      await adminApi(`/api/admin/coupons/${id}`, { method: 'DELETE' })
+      adminToast('Coupon deleted')
+      if (editingId === id) closeForm()
+      await load()
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   return (
@@ -208,7 +217,6 @@ export default function AdminCouponsPage() {
               />
               Active
             </label>
-            {error ? <p className="admin-error">{error}</p> : null}
             <div className="admin-row-actions">
               <button type="submit" className="admin-btn admin-btn-primary">
                 {editingId ? 'Update' : 'Create'}

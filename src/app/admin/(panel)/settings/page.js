@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from 'react'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../components/admin/adminToast'
 
 const EMPTY = {
   shippingFee: 0,
@@ -146,6 +147,7 @@ export default function AdminSettingsPage() {
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState('')
@@ -301,8 +303,6 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-      {msg ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
       <form className="admin-settings__form" onSubmit={onSubmit}>
         <section className="admin-card admin-card--lg">

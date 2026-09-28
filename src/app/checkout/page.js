@@ -14,6 +14,7 @@ import { formatINR } from '../../lib/products'
 import { api } from '../../lib/api'
 import '../ecom.css'
 import './checkout.css'
+import { checkoutFieldErrors } from './checkoutValidation'
 
 function calcFee(subtotal, settings) {
   const fee = Math.max(0, Number(settings?.shippingFee) || 0)
@@ -129,6 +130,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('RAZORPAY')
   const [acceptTerms, setAcceptTerms] = useState(true)
   const [error, setError] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [activeItem, setActiveItem] = useState(0)
   const [couponInput, setCouponInput] = useState('')
@@ -317,13 +319,22 @@ export default function CheckoutPage() {
     })
   }
 
+  function clearCheckoutField(key) {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev
+      const nextErrors = { ...prev }
+      delete nextErrors[key]
+      return nextErrors
+    })
+  }
+
   async function placeOrder(e) {
     e.preventDefault()
     setError('')
-    if (!acceptTerms) {
-      setError('Please accept the terms to continue.')
-      return
-    }
+    const nextErrors = checkoutFieldErrors(shipping)
+    if (!acceptTerms) nextErrors.terms = 'Please accept the terms to continue.'
+    setFieldErrors(nextErrors)
+    if (Object.keys(nextErrors).length) return
     setSubmitting(true)
     try {
       if (paymentMethod === 'RAZORPAY') {
@@ -425,6 +436,8 @@ export default function CheckoutPage() {
           setAcceptTerms={setAcceptTerms}
           error={error}
           setError={setError}
+          fieldErrors={fieldErrors}
+          setFieldErrors={setFieldErrors}
           submitting={submitting}
           subtotal={subtotal}
           discount={discount}
@@ -462,7 +475,7 @@ export default function CheckoutPage() {
       <ShopNav />
 
       <div className="checkout-shell">
-        <form className="checkout-board" onSubmit={placeOrder}>
+        <form className="checkout-board" onSubmit={placeOrder} noValidate>
           <div className="checkout-form-col">
             <header className="checkout-top">
               <Link href="/cart" className="checkout-back-btn" aria-label="Back to cart">
@@ -480,11 +493,18 @@ export default function CheckoutPage() {
                   <label htmlFor="firstName">First name</label>
                   <input
                     id="firstName"
-                    required
                     value={firstName}
-                    onChange={(e) => setNamePart('first', e.target.value)}
+                    aria-invalid={Boolean(fieldErrors.firstName)}
+                    className={fieldErrors.firstName ? 'is-invalid' : ''}
+                    onChange={(e) => {
+                      setNamePart('first', e.target.value)
+                      clearCheckoutField('firstName')
+                    }}
                     autoComplete="given-name"
                   />
+                  {fieldErrors.firstName ? (
+                    <p className="ck-field__error">{fieldErrors.firstName}</p>
+                  ) : null}
                 </div>
                 <div className="ck-field">
                   <label htmlFor="lastName">Last name</label>
@@ -497,17 +517,21 @@ export default function CheckoutPage() {
                 </div>
                 <div className="ck-field">
                   <label htmlFor="phone">Phone</label>
-                  <div className="ck-input-wrap">
+                  <div className={`ck-input-wrap${fieldErrors.phone ? ' is-invalid' : ''}`}>
                     <span className="ck-prefix">+91</span>
                     <input
                       id="phone"
-                      required
                       value={shipping.phone}
-                      onChange={(e) => setShipping((s) => ({ ...s, phone: e.target.value }))}
+                      aria-invalid={Boolean(fieldErrors.phone)}
+                      onChange={(e) => {
+                        setShipping((s) => ({ ...s, phone: e.target.value }))
+                        clearCheckoutField('phone')
+                      }}
                       autoComplete="tel"
                       inputMode="tel"
                     />
                   </div>
+                  {fieldErrors.phone ? <p className="ck-field__error">{fieldErrors.phone}</p> : null}
                 </div>
                 <div className="ck-field">
                   <label htmlFor="email">E-mail</label>
@@ -544,12 +568,17 @@ export default function CheckoutPage() {
                   <label htmlFor="line1">Address</label>
                   <input
                     id="line1"
-                    required
                     value={shipping.line1}
-                    onChange={(e) => setShipping((s) => ({ ...s, line1: e.target.value }))}
+                    aria-invalid={Boolean(fieldErrors.line1)}
+                    className={fieldErrors.line1 ? 'is-invalid' : ''}
+                    onChange={(e) => {
+                      setShipping((s) => ({ ...s, line1: e.target.value }))
+                      clearCheckoutField('line1')
+                    }}
                     placeholder="House / street / landmark"
                     autoComplete="address-line1"
                   />
+                  {fieldErrors.line1 ? <p className="ck-field__error">{fieldErrors.line1}</p> : null}
                 </div>
                 <div className="ck-field ck-field--full">
                   <label htmlFor="line2">Address line 2 (optional)</label>
@@ -564,32 +593,49 @@ export default function CheckoutPage() {
                   <label htmlFor="city">City</label>
                   <input
                     id="city"
-                    required
                     value={shipping.city}
-                    onChange={(e) => setShipping((s) => ({ ...s, city: e.target.value }))}
+                    aria-invalid={Boolean(fieldErrors.city)}
+                    className={fieldErrors.city ? 'is-invalid' : ''}
+                    onChange={(e) => {
+                      setShipping((s) => ({ ...s, city: e.target.value }))
+                      clearCheckoutField('city')
+                    }}
                     autoComplete="address-level2"
                   />
+                  {fieldErrors.city ? <p className="ck-field__error">{fieldErrors.city}</p> : null}
                 </div>
                 <div className="ck-field">
                   <label htmlFor="state">State</label>
                   <input
                     id="state"
-                    required
                     value={shipping.state}
-                    onChange={(e) => setShipping((s) => ({ ...s, state: e.target.value }))}
+                    aria-invalid={Boolean(fieldErrors.state)}
+                    className={fieldErrors.state ? 'is-invalid' : ''}
+                    onChange={(e) => {
+                      setShipping((s) => ({ ...s, state: e.target.value }))
+                      clearCheckoutField('state')
+                    }}
                     autoComplete="address-level1"
                   />
+                  {fieldErrors.state ? <p className="ck-field__error">{fieldErrors.state}</p> : null}
                 </div>
                 <div className="ck-field">
                   <label htmlFor="pincode">Zip code</label>
                   <input
                     id="pincode"
-                    required
                     value={shipping.pincode}
-                    onChange={(e) => setShipping((s) => ({ ...s, pincode: e.target.value }))}
+                    aria-invalid={Boolean(fieldErrors.pincode)}
+                    className={fieldErrors.pincode ? 'is-invalid' : ''}
+                    onChange={(e) => {
+                      setShipping((s) => ({ ...s, pincode: e.target.value }))
+                      clearCheckoutField('pincode')
+                    }}
                     autoComplete="postal-code"
                     inputMode="numeric"
                   />
+                  {fieldErrors.pincode ? (
+                    <p className="ck-field__error">{fieldErrors.pincode}</p>
+                  ) : null}
                 </div>
                 <div className="ck-field">
                   <label htmlFor="notes">Notes (optional)</label>
@@ -774,13 +820,17 @@ export default function CheckoutPage() {
                 <input
                   type="checkbox"
                   checked={acceptTerms}
-                  onChange={(e) => setAcceptTerms(e.target.checked)}
+                  onChange={(e) => {
+                    setAcceptTerms(e.target.checked)
+                    clearCheckoutField('terms')
+                  }}
                 />
                 <span>
                   By confirming the order, I accept the terms of sale and privacy policy of
                   Shreeji Divine.
                 </span>
               </label>
+              {fieldErrors.terms ? <p className="ck-field__error">{fieldErrors.terms}</p> : null}
             </div>
           </aside>
         </form>

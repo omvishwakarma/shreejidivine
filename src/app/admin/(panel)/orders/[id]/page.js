@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
 import { adminApi, formatINR } from '../../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../../components/admin/adminToast'
 
 const STATUSES = ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED']
 
@@ -15,6 +16,7 @@ export default function AdminOrderDetailPage() {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [shippingInput, setShippingInput] = useState('')
   const [savingShip, setSavingShip] = useState(false)
   const [shippingBusy, setShippingBusy] = useState('')
@@ -164,8 +166,6 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {error ? <p className="admin-error">{error}</p> : null}
-      {msg ? <p className="admin-success">{msg}</p> : null}
 
       <div className="admin-order-grid">
         <div className="admin-card">

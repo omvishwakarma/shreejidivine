@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from 'react'
 import { adminApi } from '../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../components/admin/adminToast'
 import { instagramHandleFromUrl } from '../../../../lib/testimonials'
 
 function emptyReview(index = 0) {
@@ -26,6 +27,7 @@ export default function AdminTestimonialsPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [formOpen, setFormOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState(null)
   const [form, setForm] = useState(emptyReview())
@@ -234,8 +236,6 @@ export default function AdminTestimonialsPage() {
         </button>
       </div>
 
-      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-      {msg ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
       <section className="admin-card admin-card--lg">
         <div className="admin-card__head">

@@ -351,6 +351,21 @@
   box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.18);
 }
 
+.auth-field__control {
+  position: relative;
+}
+
+.auth-field__error {
+  margin: 0;
+  color: #8b1e1e;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.auth-field input.is-invalid {
+  border-color: #c24545;
+}
+
 .auth-field--password {
   position: relative;
 }
@@ -362,7 +377,8 @@
 .auth-eye {
   position: absolute;
   right: 0.55rem;
-  bottom: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
   width: 2.35rem;
   height: 2.35rem;
   border: none;

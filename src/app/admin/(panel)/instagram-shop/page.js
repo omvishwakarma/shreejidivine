@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
+import { useAdminToasts } from '../../../../components/admin/adminToast'
 
 const DEFAULT_COPY = {
   eyebrow: 'Smoke-Free · Handmade in India · Gift Ready · A Fragrance of Divinity',
@@ -32,6 +33,7 @@ export default function AdminInstagramShopPage() {
   const [uploading, setUploading] = useState('')
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
+  useAdminToasts(msg, error)
   const [formOpen, setFormOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState(null)
   const [form, setForm] = useState(emptyLook())
@@ -288,8 +290,6 @@ export default function AdminInstagramShopPage() {
         </button>
       </div>
 
-      {error ? <div className="admin-alert admin-alert--error">{error}</div> : null}
-      {msg ? <div className="admin-alert admin-alert--success">{msg}</div> : null}
 
       <section className="admin-card admin-card--lg">
         <div className="admin-card__head">
