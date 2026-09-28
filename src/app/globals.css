@@ -307,3 +307,105 @@ ul {
     animation: none;
   }
 }
+
+.mkt-banner {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(43, 30, 22, 0.1);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(33, 35, 38, 0.16);
+  color: var(--text);
+}
+
+.mkt-banner__copy {
+  min-width: 0;
+}
+
+.mkt-banner__title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.35rem;
+  color: #3b5bdb;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.mkt-banner__icon {
+  display: inline-flex;
+  color: #3b5bdb;
+}
+
+.mkt-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.mkt-banner__more {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #3b5bdb;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mkt-banner__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.mkt-banner__ghost,
+.mkt-banner__accept {
+  height: 2.6rem;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mkt-banner__ghost {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+}
+
+.mkt-banner__accept {
+  border: none;
+  background: #c96a45;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .mkt-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mkt-banner__actions {
+    width: 100%;
+  }
+
+  .mkt-banner__ghost,
+  .mkt-banner__accept {
+    flex: 1;
+  }
+}
