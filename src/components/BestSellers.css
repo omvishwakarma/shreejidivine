@@ -292,9 +292,9 @@
   }
 
   .ss-card {
-    flex: 0 0 min(72vw, 280px);
+    flex: 0 0 min(72vw, 260px);
     scroll-snap-align: start;
-    max-width: 280px;
+    max-width: 260px;
   }
 
   .ss-card:hover {
@@ -307,6 +307,13 @@
   }
 }
 
+@media (max-width: 700px) {
+  .ss-card {
+    flex: 0 0 min(46vw, 180px);
+    max-width: 220px;
+  }
+}
+
 @media (max-width: 640px) {
   .ss-card__quick {
     display: none;
@@ -314,10 +321,6 @@
 
   .ss-card__img-wrap {
     padding: 0.85rem;
-  }
-
-  .ss-card {
-    flex-basis: min(78vw, 300px);
   }
 }
 
