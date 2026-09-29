@@ -54,6 +54,8 @@ export default function InstagramShop({ compact = false }) {
   const [looks, setLooks] = useState([])
   const [copy, setCopy] = useState(DEFAULT_COPY)
   const [loading, setLoading] = useState(true)
+  const [canPrev, setCanPrev] = useState(false)
+  const [canNext, setCanNext] = useState(false)
   const railRef = useRef(null)
 
   useEffect(() => {
@@ -84,10 +86,35 @@ export default function InstagramShop({ compact = false }) {
     }
   }, [])
 
+  useEffect(() => {
+    const el = railRef.current
+    if (!el) return undefined
+    const sync = () => {
+      const cards = el.querySelectorAll('.ig-shop__card')
+      const rail = el.getBoundingClientRect()
+      const first = cards[0]?.getBoundingClientRect()
+      const last = cards[cards.length - 1]?.getBoundingClientRect()
+      setCanPrev(Boolean(first && first.left < rail.left - 12))
+      setCanNext(Boolean(last && last.right > rail.right + 12))
+    }
+    sync()
+    const frame = requestAnimationFrame(sync)
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    el.addEventListener('scroll', sync, { passive: true })
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      el.removeEventListener('scroll', sync)
+    }
+  }, [looks, loading])
+
   function scrollBy(dir) {
     const el = railRef.current
     if (!el) return
-    const amount = Math.min(340, el.clientWidth * 0.75)
+    const card = el.querySelector('.ig-shop__card')
+    const gap = parseFloat(getComputedStyle(el).columnGap || getComputedStyle(el).gap) || 0
+    const amount = card ? card.getBoundingClientRect().width + gap : el.clientWidth * 0.8
     el.scrollBy({ left: dir * amount, behavior: 'smooth' })
   }
 
@@ -113,12 +140,13 @@ export default function InstagramShop({ compact = false }) {
                 {subtitle}
               </h2>
             ) : null}
-            {looks.length > 2 || loading ? (
+            {canPrev || canNext ? (
             <div className="ig-shop__compact-nav">
               <button
                 type="button"
                 className="ig-shop__compact-arrow"
                 aria-label="Previous"
+                disabled={!canPrev}
                 onClick={() => scrollBy(-1)}
               >
                 ‹
@@ -127,6 +155,7 @@ export default function InstagramShop({ compact = false }) {
                 type="button"
                 className="ig-shop__compact-arrow"
                 aria-label="Next"
+                disabled={!canNext}
                 onClick={() => scrollBy(1)}
               >
                 ›
@@ -162,17 +191,23 @@ export default function InstagramShop({ compact = false }) {
               type="button"
               className="ig-shop__nav ig-shop__nav--prev"
               aria-label="Previous"
+              disabled={!canPrev}
               onClick={() => scrollBy(-1)}
             >
-              ‹
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M10.2 3.2 5.4 8l4.8 4.8" />
+              </svg>
             </button>
             <button
               type="button"
               className="ig-shop__nav ig-shop__nav--next"
               aria-label="Next"
+              disabled={!canNext}
               onClick={() => scrollBy(1)}
             >
-              ›
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M5.8 3.2 10.6 8l-4.8 4.8" />
+              </svg>
             </button>
           </>
         ) : null}
@@ -187,29 +222,43 @@ export default function InstagramShop({ compact = false }) {
                 const label = `Instagram look featuring ${product?.name || SITE_NAME}`
                 return (
                   <article key={look.id} className="ig-shop__card">
-                    <a
-                      href={look.permalink}
-                      className="ig-shop__media"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                    >
-                      {look.badge ? <span className="ig-shop__badge">{look.badge}</span> : null}
-                      {look.videoUrl ? (
-                        <ShopVideo
-                          src={look.videoUrl}
-                          poster={look.thumbnail || product?.image}
-                          label={label}
-                        />
-                      ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={look.thumbnail || product?.image || '/images/aroma-variants.png'}
-                          alt=""
-                          loading="lazy"
-                        />
-                      )}
-                    </a>
+                    {product?.slug ? (
+                      <Link href={`/shop/${product.slug}`} className="ig-shop__media" aria-label={label}>
+                        {look.badge ? <span className="ig-shop__badge">{look.badge}</span> : null}
+                        {look.videoUrl ? (
+                          <ShopVideo
+                            src={look.videoUrl}
+                            poster={look.thumbnail || product?.image}
+                            label={label}
+                          />
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={look.thumbnail || product?.image || '/images/aroma-variants.png'}
+                            alt=""
+                            loading="lazy"
+                          />
+                        )}
+                      </Link>
+                    ) : (
+                      <div className="ig-shop__media">
+                        {look.badge ? <span className="ig-shop__badge">{look.badge}</span> : null}
+                        {look.videoUrl ? (
+                          <ShopVideo
+                            src={look.videoUrl}
+                            poster={look.thumbnail || product?.image}
+                            label={label}
+                          />
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={look.thumbnail || product?.image || '/images/aroma-variants.png'}
+                            alt=""
+                            loading="lazy"
+                          />
+                        )}
+                      </div>
+                    )}
 
                     {product ? (
                       <Link href={`/shop/${product.slug}`} className="ig-shop__product">

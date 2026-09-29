@@ -6,9 +6,9 @@ import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
-import AddToCartButton from '../../components/AddToCartButton'
+import ProductCard from '../../components/ProductCard'
 import { api } from '../../lib/api'
-import { formatINR, toTitleCase, discountPct } from '../../lib/products'
+import { formatINR, toTitleCase } from '../../lib/products'
 import '../ecom.css'
 
 export default function ShopClient() {
@@ -286,36 +286,9 @@ export default function ShopClient() {
             </div>
           ) : (
             <div className="ecom-grid">
-              {visible.map((p) => {
-                const off = discountPct(p.price, p.compareAt)
-                return (
-                <article key={p.id} className="product-card">
-                  <Link href={`/shop/${p.slug}`} className="product-card__media">
-                    {p.badge ? <span className="product-card__badge">{p.badge}</span> : null}
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      width={700}
-                      height={600}
-                      sizes="(max-width:560px) 50vw, (max-width:960px) 45vw, 360px"
-                    />
-                  </Link>
-                  <div className="product-card__body">
-                    <Link href={`/shop/${p.slug}`}>
-                      <h2 className="product-card__name">{toTitleCase(p.name)}</h2>
-                    </Link>
-                    <div className="product-card__price">
-                      <strong>{formatINR(p.price)}</strong>
-                      {p.compareAt ? <s>{formatINR(p.compareAt)}</s> : null}
-                      {off > 0 ? <span className="product-card__save">{off}% off</span> : null}
-                    </div>
-                    <div className="product-card__actions">
-                      <AddToCartButton product={p} />
-                    </div>
-                  </div>
-                </article>
-                )
-              })}
+              {visible.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
             </div>
           )
         ) : null}

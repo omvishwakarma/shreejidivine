@@ -1,24 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import AddToCartButton from './AddToCartButton'
+import ProductCard from './ProductCard'
 import { api } from '../lib/api'
-import { formatINR, toTitleCase } from '../lib/products'
-import { SITE_NAME } from '../lib/site'
-import { safePublicImage } from '../lib/media'
+import '../app/ecom.css'
 import './BestSellers.css'
-
-function discountPct(price, compareAt) {
-  if (!compareAt || compareAt <= price) return 0
-  return Math.round(((compareAt - price) / compareAt) * 100)
-}
 
 export default function BestSellers() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [canPrev, setCanPrev] = useState(false)
+  const [canNext, setCanNext] = useState(false)
+  const railRef = useRef(null)
   const [copy, setCopy] = useState({
     label: 'Customer favourites',
     title: 'Best Sellers',
@@ -41,6 +36,48 @@ export default function BestSellers() {
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    const el = railRef.current
+    if (!el) return undefined
+    const sync = () => {
+      const cards = el.querySelectorAll('.product-card')
+      const rail = el.getBoundingClientRect()
+      const first = cards[0]?.getBoundingClientRect()
+      const last = cards[cards.length - 1]?.getBoundingClientRect()
+      setCanPrev(Boolean(first && first.left < rail.left - 12))
+      setCanNext(Boolean(last && last.right > rail.right + 12))
+      const media = el.querySelector('.product-card__media')
+      const stage = el.parentElement
+      if (media && stage) {
+        const center =
+          media.getBoundingClientRect().top -
+          stage.getBoundingClientRect().top +
+          media.getBoundingClientRect().height / 2
+        stage.style.setProperty('--bs-arrow-top', `${center}px`)
+      }
+    }
+    sync()
+    const frame = requestAnimationFrame(sync)
+    const observer = new ResizeObserver(sync)
+    observer.observe(el)
+    el.addEventListener('scroll', sync, { passive: true })
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+      el.removeEventListener('scroll', sync)
+    }
+  }, [products, loading])
+
+  function scrollByDir(dir) {
+    const el = railRef.current
+    if (!el) return
+    const card = el.querySelector('.product-card')
+    const styles = getComputedStyle(el.querySelector('.best-sellers__grid') || el)
+    const gap = parseFloat(styles.columnGap || styles.gap) || 0
+    const amount = card ? card.getBoundingClientRect().width + gap : el.clientWidth * 0.8
+    el.scrollBy({ left: dir * amount, behavior: 'smooth' })
+  }
+
   return (
     <section className="best-sellers" id="products" aria-labelledby="best-sellers-heading">
       <div className="container">
@@ -55,56 +92,56 @@ export default function BestSellers() {
         {error ? (
           <p className="best-sellers__error">Could not load products.</p>
         ) : loading || products.length > 0 ? (
-          <div className="best-sellers__rail" role="region" aria-label="Best sellers products">
+          <div className="best-sellers__stage">
+            <button
+              type="button"
+              className="best-sellers__nav best-sellers__nav--prev"
+              aria-label="Previous"
+              disabled={!canPrev}
+              onClick={() => scrollByDir(-1)}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M10.2 3.2 5.4 8l4.8 4.8" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="best-sellers__nav best-sellers__nav--next"
+              aria-label="Next"
+              disabled={!canNext}
+              onClick={() => scrollByDir(1)}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M5.8 3.2 10.6 8l-4.8 4.8" />
+              </svg>
+            </button>
+            <div
+              className="best-sellers__rail"
+              ref={railRef}
+              role="region"
+              aria-label="Best sellers products"
+            >
             <div className="best-sellers__grid">
               {loading
-                ? Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="ss-card ss-card--skel" aria-hidden="true" />
+                ? Array.from({ length: 5 }).map((_, i) => (
+                    <article key={i} className="product-card product-card--skel" aria-hidden="true">
+                      <div className="product-card__media product-card__skel-block" />
+                      <div className="product-card__body">
+                        <span className="product-card__skel-line product-card__skel-line--name" />
+                        <span className="product-card__skel-line product-card__skel-line--price" />
+                        <span className="product-card__skel-line product-card__skel-line--btn" />
+                      </div>
+                    </article>
                   ))
-                : products.map((p, i) => {
-                    const off = discountPct(p.price, p.compareAt)
-                    return (
-                      <article
-                        key={p.id}
-                        className={`ss-card reveal reveal-delay-${(i % 4) + 1}`}
-                      >
-                        <Link href={`/shop/${p.slug}`} className="ss-card__media">
-                          {off > 0 ? (
-                            <span className="ss-card__off">−{off}%</span>
-                          ) : p.badge ? (
-                            <span className="ss-card__badge">{p.badge}</span>
-                          ) : null}
-                          <span className="ss-card__img-wrap">
-                            <Image
-                              src={safePublicImage(p.image, '/images/aroma-variants.png')}
-                              alt={p.name}
-                              width={700}
-                              height={700}
-                              sizes="(max-width:700px) 75vw, 280px"
-                            />
-                          </span>
-                          <span className="ss-card__quick">View product</span>
-                        </Link>
-
-                        <div className="ss-card__body">
-                          <p className="ss-card__vendor">{SITE_NAME}</p>
-                          <Link href={`/shop/${p.slug}`} className="ss-card__title-link">
-                            <h3 className="ss-card__name">{toTitleCase(p.name)}</h3>
-                          </Link>
-                          {p.tagline ? <p className="ss-card__tag">{p.tagline}</p> : null}
-
-                          <div className="ss-card__price money">
-                            <strong>{formatINR(p.price)}</strong>
-                            {p.compareAt ? <s>{formatINR(p.compareAt)}</s> : null}
-                          </div>
-
-                          <div className="ss-card__actions">
-                            <AddToCartButton product={p} className="ss-card__btn" />
-                          </div>
-                        </div>
-                      </article>
-                    )
-                  })}
+                : products.map((p, i) => (
+                    <ProductCard
+                      key={p.id}
+                      product={p}
+                      heading="h3"
+                      className={`reveal reveal-delay-${(i % 4) + 1}`}
+                    />
+                  ))}
+            </div>
             </div>
           </div>
         ) : null}

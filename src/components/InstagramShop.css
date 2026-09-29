@@ -223,28 +223,46 @@
 
 .ig-shop__nav {
   position: absolute;
-  top: 42%;
+  top: 50%;
   z-index: 5;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  transform: translateY(-50%);
   border: none;
   border-radius: 50%;
-  background: #111;
+  background: rgba(17, 17, 17, 0.42);
   color: #fff;
-  font-size: 1.4rem;
-  line-height: 1;
   cursor: pointer;
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  padding: 0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+}
+
+.ig-shop__nav svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ig-shop__nav:disabled,
+.ig-shop__compact-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
 }
 
 .ig-shop__nav--prev {
-  left: max(0.35rem, calc((100% - 1180px) / 2 - 0.25rem));
+  left: 0.65rem;
 }
 
 .ig-shop__nav--next {
-  right: max(0.35rem, calc((100% - 1180px) / 2 - 0.25rem));
+  right: 0.65rem;
 }
 
 .ig-shop__foot {
@@ -259,7 +277,8 @@
 
 @media (max-width: 700px) {
   .ig-shop__nav {
-    display: none;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .ig-shop:not(.ig-shop--compact) .ig-shop__card {
