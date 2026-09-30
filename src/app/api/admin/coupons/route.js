@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Coupon } from '@/lib/mongo/Coupon'
+import { Order } from '@/lib/mongo/Order'
 import { normalizeCouponCode } from '@/lib/coupons'
 
 export async function GET(request) {
@@ -9,7 +10,41 @@ export async function GET(request) {
   if (gate.error) return gate.error
   await dbConnect()
   const coupons = await Coupon.find().sort({ createdAt: -1 })
-  return NextResponse.json({ coupons: coupons.map((c) => c.toJSONSafe()) })
+  const codes = coupons.map((c) => c.code).filter(Boolean)
+  const orders = codes.length
+    ? await Order.find({
+        couponCode: { $in: codes },
+        $or: [{ paymentMethod: 'COD' }, { paymentStatus: 'PAID' }],
+      })
+        .select('couponCode user shippingName orderNumber status createdAt')
+        .populate('user', 'name email')
+        .sort({ createdAt: -1 })
+        .lean()
+    : []
+
+  const usedByCode = new Map()
+  for (const order of orders) {
+    const code = normalizeCouponCode(order.couponCode)
+    if (!code) continue
+    const user = order.user && typeof order.user === 'object' ? order.user : null
+    const list = usedByCode.get(code) || []
+    list.push({
+      id: user?._id?.toString() || '',
+      name: user?.name || order.shippingName || 'Customer',
+      email: user?.email || '',
+      orderNumber: order.orderNumber || '',
+      orderId: order._id.toString(),
+      cancelled: order.status === 'CANCELLED',
+    })
+    usedByCode.set(code, list)
+  }
+
+  return NextResponse.json({
+    coupons: coupons.map((c) => ({
+      ...c.toJSONSafe(),
+      usedBy: usedByCode.get(c.code) || [],
+    })),
+  })
 }
 
 export async function POST(request) {

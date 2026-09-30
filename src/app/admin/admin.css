@@ -1074,6 +1074,29 @@
   font-weight: 500;
 }
 
+.admin-coupon-users {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.admin-coupon-users li {
+  display: grid;
+  gap: 0.05rem;
+}
+
+.admin-coupon-users strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.admin-coupon-users span {
+  font-size: 0.75rem;
+  color: var(--admin-muted);
+}
+
 .admin-btn {
   display: inline-flex;
   align-items: center;
@@ -1099,9 +1122,14 @@
 }
 
 .admin-btn-primary {
-  background: linear-gradient(135deg, #2b1e16, #3d2a1f);
-  color: #f0d78a;
-  box-shadow: 0 8px 18px rgba(43, 30, 22, 0.18);
+  background: #b45615;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(180, 86, 21, 0.22);
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: #9a4812;
+  color: #fff;
 }
 
 .admin-btn-ghost {

@@ -34,14 +34,22 @@ export default function AddToCartButton({
         type="button"
         className={`btn-sm btn-primary ${className}`.trim()}
         disabled={disabled}
-        onClick={() => {
-          const needsColour = (product.colours || []).length > 0 && !colour
-          const needsFragrance = (product.fragrances || []).length > 0 && !fragrance
-          if (requireVariants && (needsColour || needsFragrance)) {
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          const colours = product.colours || []
+          const fragrances = product.fragrances || []
+          const pickedColour = colour || (colours.length === 1 ? colours[0].name : '')
+          const pickedFragrance =
+            fragrance || (fragrances.length === 1 ? fragrances[0].name : '')
+          const needsChoice =
+            (colours.length > 1 && !pickedColour) ||
+            (fragrances.length > 1 && !pickedFragrance)
+          if (requireVariants && needsChoice) {
             router.push(`/shop/${product.slug}`)
             return
           }
-          addItem(product, qty, { colour, fragrance })
+          addItem(product, qty, { colour: pickedColour, fragrance: pickedFragrance })
           setToast(true)
         }}
       >

@@ -555,13 +555,15 @@
 }
 
 .btn-gold-sm {
-  background: var(--brown);
-  color: var(--text-on-dark);
-  box-shadow: 0 4px 16px rgba(31, 23, 18, 0.16);
+  background: #b45615;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(180, 86, 21, 0.2);
 }
 
 .btn-gold-sm:hover {
   transform: translateY(-1px);
+  background: #9a4812;
+  color: #fff;
 }
 
 .btn-full {

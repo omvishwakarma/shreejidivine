@@ -424,8 +424,8 @@
   padding: 0 1.1rem;
   border: none;
   border-radius: 999px;
-  background: var(--brown);
-  color: var(--gold-light);
+  background: #b45615;
+  color: #fff;
   font: inherit;
   font-size: 0.75rem;
   font-weight: 600;

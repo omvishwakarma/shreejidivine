@@ -129,7 +129,7 @@
 @media (max-width: 960px) {
   .best-sellers {
     --bs-gap: 0.75rem;
-    --bs-visible: 2.2;
+    --bs-visible: 2;
   }
 
   .best-sellers .container {

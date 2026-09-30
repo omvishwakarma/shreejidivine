@@ -355,15 +355,16 @@
   padding: 0.9rem 1.6rem;
   text-decoration: none;
   font-weight: 600;
-  background: var(--brown);
-  color: var(--gold-light);
-  box-shadow: 0 12px 28px rgba(43, 30, 22, 0.18);
+  background: #b45615;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(180, 86, 21, 0.22);
   transition: transform 0.25s var(--ease-out), background 0.2s;
 }
 
 .cart-empty__cta:hover {
   transform: translateY(-2px);
-  background: var(--brown-deep);
+  background: #9a4812;
+  color: #fff;
 }
 
 .cart-loading {

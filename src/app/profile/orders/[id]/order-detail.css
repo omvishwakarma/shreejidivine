@@ -532,14 +532,15 @@
 }
 
 .od-btn--primary {
-  background: var(--brown);
-  color: var(--gold-light);
-  box-shadow: 0 10px 24px rgba(43, 30, 22, 0.16);
+  background: #b45615;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(180, 86, 21, 0.22);
 }
 
 .od-btn--primary:hover {
   transform: translateY(-1px);
-  background: var(--brown-deep);
+  background: #9a4812;
+  color: #fff;
 }
 
 .od-btn--ghost {

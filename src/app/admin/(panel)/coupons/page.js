@@ -39,7 +39,8 @@ export default function AdminCouponsPage() {
     return coupons.filter((c) => {
       if (typeFilter !== 'all' && c.type !== typeFilter) return false
       if (!q) return true
-      return [c.code, c.description].filter(Boolean).join(' ').toLowerCase().includes(q)
+      const users = (c.usedBy || []).flatMap((u) => [u.name, u.email])
+      return [c.code, c.description, ...users].filter(Boolean).join(' ').toLowerCase().includes(q)
     })
   }, [coupons, search, typeFilter])
 
@@ -233,7 +234,7 @@ export default function AdminCouponsPage() {
         <input
           className="admin-search"
           type="search"
-          placeholder="Search code…"
+          placeholder="Search code or user…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -264,6 +265,7 @@ export default function AdminCouponsPage() {
                 <th>Code</th>
                 <th>Discount</th>
                 <th>Uses</th>
+                <th>Used by</th>
                 <th>Expires</th>
                 <th>Active</th>
                 <th />
@@ -291,6 +293,21 @@ export default function AdminCouponsPage() {
                   <td>
                     {c.usedCount}
                     {c.maxUses > 0 ? ` / ${c.maxUses}` : ' / ∞'}
+                  </td>
+                  <td>
+                    {c.usedBy?.length ? (
+                      <ul className="admin-coupon-users">
+                        {c.usedBy.map((u) => (
+                          <li key={u.orderId}>
+                            <strong>{u.name}</strong>
+                            {u.cancelled ? <span>Cancelled</span> : null}
+                            {u.email ? <span>{u.email}</span> : null}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      '—'
+                    )}
                   </td>
                   <td>
                     {c.expiresAt

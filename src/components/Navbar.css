@@ -49,13 +49,14 @@
 
 .nav__cta {
   padding: 0.55rem 1.1rem !important;
-  background: var(--brown) !important;
-  color: var(--gold-light) !important;
+  background: #b45615 !important;
+  color: #fff !important;
   border: none !important;
 }
 
 .nav__cta:hover {
-  background: var(--brown-deep) !important;
+  background: #9a4812 !important;
+  color: #fff !important;
 }
 
 .nav__toggle {

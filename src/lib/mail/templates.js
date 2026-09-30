@@ -74,7 +74,7 @@ export function buildWelcomeEmail({ name, email }) {
         Explore Mogra Royale, Rose Majesty, Lavender Bliss, Royal Chandan, and our Divine Ritual Kit.
       </p>
       <p style="margin:0 0 8px;text-align:center;">
-        <a href="${esc(shopUrl)}" style="display:inline-block;padding:14px 28px;background:#2b1e16;color:#e4c878;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
+        <a href="${esc(shopUrl)}" style="display:inline-block;padding:14px 28px;background:#b45615;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
           Browse the shop
         </a>
       </p>
@@ -102,7 +102,7 @@ export function buildPasswordResetEmail({ name, resetUrl }) {
         This link expires in 1 hour.
       </p>
       <p style="margin:0 0 8px;text-align:center;">
-        <a href="${esc(resetUrl)}" style="display:inline-block;padding:14px 28px;background:#2b1e16;color:#e4c878;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
+        <a href="${esc(resetUrl)}" style="display:inline-block;padding:14px 28px;background:#b45615;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
           Reset password
         </a>
       </p>
@@ -204,7 +204,7 @@ export function buildOrderEmail({ order, customer = {} }) {
       </p>
 
       <p style="margin:0 0 8px;text-align:center;">
-        <a href="${esc(orderUrl)}" style="display:inline-block;padding:14px 28px;background:#2b1e16;color:#e4c878;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
+        <a href="${esc(orderUrl)}" style="display:inline-block;padding:14px 28px;background:#b45615;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.04em;border-radius:999px;">
           View order
         </a>
       </p>
