@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import ShopNav from '../../components/ShopNav'
@@ -8,30 +8,67 @@ import Footer from '../../components/Footer'
 import AddToCartButton from '../../components/AddToCartButton'
 import { api } from '../../lib/api'
 import { formatINR, toTitleCase } from '../../lib/products'
-import { getRashiFromName, matchProductsForRashi } from '../../lib/rashi'
+import { RASHIS, matchProductsForRashi } from '../../lib/rashi'
 import '../ecom.css'
 import './know-bracelet.css'
 
-const empty = { name: '', dob: '', place: '' }
+const INTENTS = [
+  {
+    id: 'health',
+    emoji: '🌿',
+    title: 'Health & Vitality',
+    detail: 'Body, energy, healing',
+  },
+  {
+    id: 'wealth',
+    emoji: '💰',
+    title: 'Wealth & Abundance',
+    detail: 'Money, career, growth',
+  },
+  {
+    id: 'love',
+    emoji: '❤️',
+    title: 'Love & Relationships',
+    detail: 'Bond, harmony, soulmate',
+  },
+  {
+    id: 'protection',
+    emoji: '🛡️',
+    title: 'Protection & Peace',
+    detail: 'Negativity, anxiety, stress',
+  },
+  {
+    id: 'spiritual',
+    emoji: '🕉️',
+    title: 'Spiritual Growth',
+    detail: 'Meditation, clarity, awakening',
+  },
+  {
+    id: 'confidence',
+    emoji: '🔥',
+    title: 'Confidence & Power',
+    detail: 'Self-worth, leadership',
+  },
+]
 
 export default function KnowYourBraceletClient() {
-  const [form, setForm] = useState(empty)
+  const [rashiKey, setRashiKey] = useState('')
+  const [intentId, setIntentId] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
 
-  const canSubmit = useMemo(() => {
-    return form.name.trim().length >= 2 && form.dob && form.place.trim().length >= 2
-  }, [form])
+  const canSubmit = useMemo(() => Boolean(rashiKey && intentId), [rashiKey, intentId])
 
   async function onSubmit(e) {
     e.preventDefault()
     setError('')
     setResult(null)
 
-    const rashi = getRashiFromName(form.name)
-    if (!rashi) {
-      setError('Could not find Rashi for this name. Try the Hindi spelling or another form of your name.')
+    const rashi = RASHIS.find((r) => r.key === rashiKey)
+    const intent = INTENTS.find((item) => item.id === intentId)
+    if (!rashi || !intent) {
+      setError('Select your Rashi and what is on your mind.')
       return
     }
 
@@ -39,13 +76,7 @@ export default function KnowYourBraceletClient() {
     try {
       const data = await api('/api/products')
       const matches = matchProductsForRashi(data.products || [], rashi)
-      setResult({
-        name: form.name.trim(),
-        place: form.place.trim(),
-        dob: form.dob,
-        rashi,
-        products: matches,
-      })
+      setResult({ rashi, intent, products: matches })
     } catch (err) {
       setError(err.message || 'Could not load bracelets')
     } finally {
@@ -72,44 +103,51 @@ export default function KnowYourBraceletClient() {
           <p className="section-label">Rashi guide</p>
           <h1 className="ecom-title">Know Your Bracelet</h1>
           <p className="ecom-lead">
-            Your Rashi is read from the first sound of your name (naam rashi), date of birth and place then we show the matching  bracelet.
+            Select your Rashi and what is on your mind. We show the bracelet that matches your Rashi and your mind.
           </p>
         </header>
 
         {!result ? (
           <form className="kyb-form" onSubmit={onSubmit}>
-            <label className="kyb-field">
-              <span>Name</span>
-              <input
-                required
-                minLength={2}
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Your full name"
-                autoComplete="name"
-              />
-            </label>
-            <label className="kyb-field">
-              <span>Date of Birth</span>
-              <input
-                required
-                type="date"
-                value={form.dob}
-                max={new Date().toISOString().slice(0, 10)}
-                onChange={(e) => setForm((f) => ({ ...f, dob: e.target.value }))}
-              />
-            </label>
-            <label className="kyb-field">
-              <span>Place</span>
-              <input
-                required
-                minLength={2}
-                value={form.place}
-                onChange={(e) => setForm((f) => ({ ...f, place: e.target.value }))}
-                placeholder="City / town of birth"
-                autoComplete="address-level2"
-              />
-            </label>
+            <div className="kyb-field">
+              <span id="kyb-rashi-label">Your Rashi</span>
+              <RashiSelect value={rashiKey} onChange={setRashiKey} />
+            </div>
+
+            <fieldset className="kyb-intent">
+              <legend>
+                <span className="kyb-intent__title">
+                  What is your <em>mann</em> seeking?
+                </span>
+                <span className="kyb-intent__lead">
+                  Choose the wish that feels closest today. We match your bracelet to this and your Rashi.
+                </span>
+              </legend>
+              <div className="kyb-intent__grid">
+                {INTENTS.map((item) => (
+                  <label
+                    key={item.id}
+                    className={`kyb-intent__card${intentId === item.id ? ' is-on' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="intent"
+                      value={item.id}
+                      checked={intentId === item.id}
+                      onChange={() => setIntentId(item.id)}
+                    />
+                    <span className="kyb-intent__radio" aria-hidden="true" />
+                    <span className="kyb-intent__emoji" aria-hidden="true">
+                      {item.emoji}
+                    </span>
+                    <span className="kyb-intent__copy">
+                      <strong>{item.title}</strong>
+                      <span>{item.detail}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             {error ? <p className="kyb-error">{error}</p> : null}
 
@@ -118,26 +156,12 @@ export default function KnowYourBraceletClient() {
               className="btn-sm btn-primary btn-full"
               disabled={!canSubmit || loading}
             >
-              {loading ? 'Finding your bracelet…' : 'Reveal my Rashi'}
+              {loading ? 'Finding your bracelet…' : 'Find my bracelet'}
             </button>
           </form>
         ) : (
           <div className="kyb-result">
             <div className="kyb-result__card">
-              <p className="kyb-result__hello">
-                Namaste, <strong>{toTitleCase(result.name)}</strong>
-              </p>
-              <p className="kyb-result__meta">
-                Born in {toTitleCase(result.place)} ·{' '}
-                {(() => {
-                  const [y, m, d] = result.dob.split('-').map(Number)
-                  return new Date(y, m - 1, d).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                  })
-                })()}
-              </p>
               <div className="kyb-result__rashi">
                 <span className="kyb-result__symbol" aria-hidden="true">
                   {result.rashi.symbol}
@@ -148,7 +172,7 @@ export default function KnowYourBraceletClient() {
                     <span> · {result.rashi.english}</span>
                   </h2>
                   <p>
-                    From your name · Element: {result.rashi.element}. {result.rashi.traits}
+                    For {result.intent.title}. Element: {result.rashi.element}. {result.rashi.traits}
                   </p>
                 </div>
               </div>
@@ -199,12 +223,88 @@ export default function KnowYourBraceletClient() {
             </div>
 
             <button type="button" className="btn-sm btn-ghost kyb-again" onClick={reset}>
-              Try another name
+              Choose again
             </button>
           </div>
         )}
       </div>
       <Footer />
+    </div>
+  )
+}
+
+function RashiSelect({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef(null)
+  const selected = RASHIS.find((r) => r.key === value)
+
+  useEffect(() => {
+    if (!open) return undefined
+    function onDoc(e) {
+      if (!rootRef.current?.contains(e.target)) setOpen(false)
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div className={`kyb-select${open ? ' is-open' : ''}`} ref={rootRef}>
+      <button
+        type="button"
+        className="kyb-select__btn"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby="kyb-rashi-label"
+        onClick={() => setOpen((current) => !current)}
+      >
+        {selected ? (
+          <>
+            <span className="kyb-select__icon" aria-hidden="true">
+              {selected.symbol}
+            </span>
+            <span className="kyb-select__label">
+              {selected.name}
+              <em>{selected.english}</em>
+            </span>
+          </>
+        ) : (
+          <span className="kyb-select__placeholder">Select your Rashi</span>
+        )}
+        <span className="kyb-select__chev" aria-hidden="true" />
+      </button>
+      {open ? (
+        <ul className="kyb-select__list" role="listbox" aria-labelledby="kyb-rashi-label">
+          {RASHIS.map((rashi) => (
+            <li key={rashi.key}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={value === rashi.key}
+                className={value === rashi.key ? 'is-on' : undefined}
+                onClick={() => {
+                  onChange(rashi.key)
+                  setOpen(false)
+                }}
+              >
+                <span className="kyb-select__icon" aria-hidden="true">
+                  {rashi.symbol}
+                </span>
+                <span className="kyb-select__label">
+                  {rashi.name}
+                  <em>{rashi.english}</em>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   )
 }
