@@ -5,6 +5,7 @@ import { Order } from '@/lib/mongo/Order'
 import { getRazorpayClient, getRazorpayKeyId, razorpayErrorMessage } from '@/lib/razorpay'
 import { validateCoupon, redeemCoupon } from '@/lib/coupons'
 import { sendOrderEmail } from '@/lib/mail'
+import { applyCartRewards } from '@/lib/cartRewards'
 import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
 import {
   buildOrderLineItems,
@@ -73,8 +74,14 @@ export async function POST(request) {
     }
 
     const settings = await getStoreSettings()
+    const rewards = applyCartRewards(subtotal, settings.cartRewards, Math.max(0, subtotal - discount))
     const shippingFee = calcShippingFee(subtotal, settings)
-    const total = orderTotal({ subtotal, shipping: shippingFee, discount })
+    const total = orderTotal({
+      subtotal,
+      shipping: shippingFee,
+      discount,
+      rewardDiscount: rewards.discount,
+    })
 
     await maybeSaveAddress(
       gate.auth.sub,
@@ -95,6 +102,8 @@ export async function POST(request) {
           total: 0,
           shippingFee,
           discount,
+          rewardDiscount: rewards.discount,
+          rewardLabel: rewards.label,
           couponCode,
           couponType,
           couponValue,
@@ -125,6 +134,8 @@ export async function POST(request) {
         total,
         shippingFee,
         discount,
+        rewardDiscount: rewards.discount,
+        rewardLabel: rewards.label,
         couponCode,
         couponType,
         couponValue,

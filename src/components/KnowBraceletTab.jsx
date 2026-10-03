@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import './KnowBraceletTab.css'
 
-const HIDDEN_PREFIXES = ['/know-your-bracelet', '/admin']
+const HIDDEN_PREFIXES = ['/know-your-bracelet', '/admin', '/cart']
 
 export default function KnowBraceletTab() {
   const pathname = usePathname() || '/'

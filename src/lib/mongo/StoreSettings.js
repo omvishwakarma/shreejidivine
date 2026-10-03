@@ -11,6 +11,7 @@ import {
   INSTAGRAM_STRIP_DEFAULTS,
   normalizeInstagramStripPosts,
 } from '@/lib/instagramStrip'
+import { resolveCartRewards } from '@/lib/cartRewards'
 
 const DEFAULTS = {
   shippingFee: 0,
@@ -93,6 +94,19 @@ const instagramStripPostSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const cartRewardSchema = new mongoose.Schema(
+  {
+    amount: { type: Number, required: true, min: 1 },
+    label: { type: String, required: true, trim: true },
+    icon: {
+      type: String,
+      enum: ['shipping', 'discount', 'gift', 'rupee'],
+      default: 'gift',
+    },
+  },
+  { _id: false }
+)
+
 const storeSettingsSchema = new mongoose.Schema(
   {
     key: { type: String, unique: true, default: 'default' },
@@ -102,6 +116,7 @@ const storeSettingsSchema = new mongoose.Schema(
       default: DEFAULTS.freeShippingMinOrder,
       min: 0,
     },
+    cartRewards: { type: [cartRewardSchema], default: [] },
     heroVideoDesktop: { type: String, default: DEFAULTS.heroVideoDesktop },
     heroVideoMobile: { type: String, default: DEFAULTS.heroVideoMobile },
     heroPoster: { type: String, default: DEFAULTS.heroPoster },
@@ -159,6 +174,7 @@ storeSettingsSchema.methods.toJSONSafe = function () {
   return {
     shippingFee: this.shippingFee ?? DEFAULTS.shippingFee,
     freeShippingMinOrder: this.freeShippingMinOrder ?? DEFAULTS.freeShippingMinOrder,
+    cartRewards: resolveCartRewards(this.cartRewards),
     heroVideoDesktop: this.heroVideoDesktop || DEFAULTS.heroVideoDesktop,
     heroVideoMobile: this.heroVideoMobile || DEFAULTS.heroVideoMobile,
     heroPoster: this.heroPoster || DEFAULTS.heroPoster,

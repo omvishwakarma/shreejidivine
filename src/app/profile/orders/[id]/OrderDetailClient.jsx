@@ -299,6 +299,12 @@ export default function OrderDetailClient() {
                         <span>−{formatINR(order.discount)}</span>
                       </div>
                     ) : null}
+                    {order.rewardDiscount > 0 ? (
+                      <div>
+                        <span>{order.rewardLabel || 'Offer'}</span>
+                        <span>−{formatINR(order.rewardDiscount)}</span>
+                      </div>
+                    ) : null}
                     <div className="od-rows__total">
                       <span>Total paid / due</span>
                       <span>{formatINR(order.total)}</span>

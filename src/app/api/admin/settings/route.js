@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { StoreSettings, STORE_SETTINGS_DEFAULTS } from '@/lib/mongo/StoreSettings'
 import { shippingNote } from '@/lib/shipping'
+import { normalizeCartRewards } from '@/lib/cartRewards'
 import { isSafePublicImage } from '@/lib/media'
 
 export async function GET(request) {
@@ -26,6 +27,16 @@ export async function PATCH(request) {
     const schema = z.object({
       shippingFee: z.number().min(0).optional(),
       freeShippingMinOrder: z.number().min(0).optional(),
+      cartRewards: z
+        .array(
+          z.object({
+            amount: z.number().min(1),
+            label: z.string().min(1).max(40),
+            icon: z.enum(['shipping', 'discount', 'gift', 'rupee']).optional(),
+          })
+        )
+        .max(6)
+        .optional(),
       heroVideoDesktop: z.string().min(1).max(500).optional(),
       heroVideoMobile: z.string().min(1).max(500).optional(),
       heroPoster: z.string().max(800).optional(),
@@ -71,6 +82,8 @@ export async function PATCH(request) {
         )
       }
     }
+
+    if (data.cartRewards) data.cartRewards = normalizeCartRewards(data.cartRewards)
 
     const $set = {}
     for (const key of Object.keys(data)) {

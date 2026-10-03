@@ -15,14 +15,7 @@ import { api } from '../../lib/api'
 import '../ecom.css'
 import './checkout.css'
 import { checkoutFieldErrors } from './checkoutValidation'
-
-function calcFee(subtotal, settings) {
-  const fee = Math.max(0, Number(settings?.shippingFee) || 0)
-  const minFree = Math.max(0, Number(settings?.freeShippingMinOrder) || 0)
-  if (fee === 0) return 0
-  if (minFree > 0 && subtotal >= minFree) return 0
-  return fee
-}
+import { applyCartRewards, shippingFeeFor } from '../../lib/cartRewards'
 
 function CheckoutSkeleton({ mobileOnly = false }) {
   const mobile = (
@@ -399,8 +392,13 @@ export default function CheckoutPage() {
   }
 
   const discount = coupon?.discount || 0
-  const shippingFee = calcFee(subtotal, shipSettings)
-  const total = Math.max(0, subtotal - discount) + shippingFee
+  const rewards = applyCartRewards(
+    subtotal,
+    shipSettings.cartRewards,
+    Math.max(0, subtotal - discount)
+  )
+  const shippingFee = shippingFeeFor(subtotal, shipSettings)
+  const total = Math.max(0, subtotal - discount - rewards.discount) + shippingFee
 
   if (isMobile && !addressesReady) {
     return <CheckoutSkeleton mobileOnly />
@@ -441,6 +439,7 @@ export default function CheckoutPage() {
           submitting={submitting}
           subtotal={subtotal}
           discount={discount}
+          rewardOffers={rewards.offers}
           shippingFee={shippingFee}
           total={total}
           placeOrder={placeOrder}
@@ -765,6 +764,12 @@ export default function CheckoutPage() {
                     <span>−{formatINR(discount)}</span>
                   </div>
                 ) : null}
+                {rewards.offers.map((offer) => (
+                  <div key={offer.label} className="ck-discount">
+                    <span>{offer.label}</span>
+                    <span>−{formatINR(offer.off)}</span>
+                  </div>
+                ))}
                 <div className="ck-total">
                   <span>Total</span>
                   <span>{formatINR(total)}</span>

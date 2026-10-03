@@ -184,6 +184,11 @@ export function buildInvoiceHtml(order, customer = {}, { logoSrc } = {}) {
           ? `<div><span>Coupon${order.couponCode ? ` (${esc(order.couponCode)})` : ''}</span><span>−${esc(formatINR(order.discount))}</span></div>`
           : ''
       }
+      ${
+        order.rewardDiscount > 0
+          ? `<div><span>${esc(order.rewardLabel || 'Offer')}</span><span>−${esc(formatINR(order.rewardDiscount))}</span></div>`
+          : ''
+      }
       <div class="grand"><span>Total</span><span>${esc(formatINR(order.total))}</span></div>
     </div>
 

@@ -7,19 +7,13 @@ import ShopNav from '../../components/ShopNav'
 import Footer from '../../components/Footer'
 import { useCart } from '../../context/CartContext'
 import { formatINR, FREE_SHIPPING_NOTE } from '../../lib/products'
+import CartRewards from '../../components/CartRewards'
+import { applyCartRewards, shippingFeeFor } from '../../lib/cartRewards'
 import '../ecom.css'
 import './cart.css'
 
-function calcFee(subtotal, settings) {
-  const fee = Math.max(0, Number(settings?.shippingFee) || 0)
-  const minFree = Math.max(0, Number(settings?.freeShippingMinOrder) || 0)
-  if (fee === 0) return 0
-  if (minFree > 0 && subtotal >= minFree) return 0
-  return fee
-}
-
 export default function CartPage() {
-  const { items, updateQty, removeItem, subtotal, ready, count } = useCart()
+  const { items, updateQty, removeItem, subtotal, ready } = useCart()
   const [settings, setSettings] = useState({
     shippingFee: 0,
     freeShippingMinOrder: 0,
@@ -33,8 +27,9 @@ export default function CartPage() {
       .catch(() => {})
   }, [])
 
-  const shippingFee = calcFee(subtotal, settings)
-  const total = subtotal + shippingFee
+  const rewards = applyCartRewards(subtotal, settings.cartRewards)
+  const shippingFee = shippingFeeFor(subtotal, settings)
+  const total = Math.max(0, subtotal - rewards.discount) + shippingFee
 
   return (
     <div className="ecom-page cart-page">
@@ -42,10 +37,6 @@ export default function CartPage() {
       <div className="cart-shell">
         {!ready ? (
           <div className="cart-skel" aria-busy="true" aria-label="Loading cart">
-            <div className="cart-skel__top">
-              <span className="skel cart-skel__title" />
-              <span className="skel cart-skel__meta" />
-            </div>
             <div className="cart-board">
               <div>
                 {Array.from({ length: 2 }).map((_, i) => (
@@ -78,22 +69,8 @@ export default function CartPage() {
           </div>
         ) : (
           <>
-            <header className="cart-top">
-              <div className="cart-top__left">
-                <Link href="/shop" className="cart-back" aria-label="Back to shop">
-                  ←
-                </Link>
-                <div>
-                  <h1>Cart</h1>
-                  <p className="cart-top__meta">
-                    {count} item{count === 1 ? '' : 's'} · {settings.note || FREE_SHIPPING_NOTE}
-                  </p>
-                </div>
-              </div>
-              <Link href="/shop" className="cart-top__shop">
-                Continue shopping
-              </Link>
-            </header>
+            <h1 className="sr-only">Cart</h1>
+            <CartRewards subtotal={subtotal} rewards={settings.cartRewards} />
 
             <div className="cart-board">
               <div className="cart-list">
@@ -173,6 +150,12 @@ export default function CartPage() {
                       <span>Shipping</span>
                       <span>{shippingFee === 0 ? 'Free' : formatINR(shippingFee)}</span>
                     </div>
+                    {rewards.offers.map((offer) => (
+                      <div key={offer.label} className="is-offer">
+                        <span>{offer.label}</span>
+                        <span>−{formatINR(offer.off)}</span>
+                      </div>
+                    ))}
                     <div className="is-total">
                       <span>Total</span>
                       <span>{formatINR(total)}</span>

@@ -48,6 +48,7 @@ export default function CheckoutMobile({
   submitting,
   subtotal,
   discount,
+  rewardOffers = [],
   shippingFee,
   total,
   placeOrder,
@@ -103,7 +104,8 @@ export default function CheckoutMobile({
     const unit = compareAt > item.price ? compareAt : item.price
     return sum + unit * item.quantity
   }, 0)
-  const saveAmount = Math.max(0, mrpTotal - subtotal) + discount
+  const rewardDiscount = rewardOffers.reduce((sum, offer) => sum + offer.off, 0)
+  const saveAmount = Math.max(0, mrpTotal - subtotal) + discount + rewardDiscount
   const title = STEPS[currentIndex]?.label || 'Checkout'
 
   function clearField(key) {
@@ -427,8 +429,8 @@ export default function CheckoutMobile({
             <h2 className="ck-m__h">Price details</h2>
             <div className="ck-m__rows">
               <div>
-                <span>{mrpTotal > subtotal ? 'MRP (incl. of all taxes)' : 'Price (incl. of all taxes)'}</span>
-                <span>{formatINR(mrpTotal > subtotal ? mrpTotal : subtotal)}</span>
+                <span>Price (incl. of all taxes)</span>
+                <span>{formatINR(subtotal)}</span>
               </div>
               {discount > 0 ? (
                 <div className="is-save">
@@ -436,6 +438,12 @@ export default function CheckoutMobile({
                   <span>−{formatINR(discount)}</span>
                 </div>
               ) : null}
+              {rewardOffers.map((offer) => (
+                <div key={offer.label} className="is-save">
+                  <span>{offer.label}</span>
+                  <span>−{formatINR(offer.off)}</span>
+                </div>
+              ))}
               <div>
                 <span>Shipping</span>
                 <span className={shippingFee === 0 ? 'is-free' : ''}>
@@ -528,7 +536,6 @@ export default function CheckoutMobile({
 
       <div className="ck-m__dock">
         <div className="ck-m__due">
-          {mrpTotal > total ? <s>{formatINR(mrpTotal)}</s> : null}
           <strong>{formatINR(total)}</strong>
         </div>
         <button type="button" className="ck-m__go" disabled={submitting} onClick={onContinue}>

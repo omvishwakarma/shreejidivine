@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getStoreSettings, shippingNote } from '@/lib/shipping'
+import { DEFAULT_CART_REWARDS } from '@/lib/cartRewards'
 
 export async function GET() {
   try {
@@ -14,6 +15,7 @@ export async function GET() {
       {
         shippingFee: 0,
         freeShippingMinOrder: 0,
+        cartRewards: DEFAULT_CART_REWARDS,
         note: 'Pan-India free shipping on all orders',
       },
       { status: 200 }

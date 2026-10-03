@@ -184,6 +184,14 @@ export function buildOrderEmail({ order, customer = {} }) {
         </tr>`
             : ''
         }
+        ${
+          order.rewardDiscount > 0
+            ? `<tr>
+          <td style="padding:4px 0;color:#1b4332;">${esc(order.rewardLabel || 'Offer')}</td>
+          <td style="padding:4px 0;text-align:right;color:#1b4332;">−${esc(formatINR(order.rewardDiscount))}</td>
+        </tr>`
+            : ''
+        }
         <tr>
           <td style="padding:10px 0 0;border-top:2px solid #c9a84c;font-family:Georgia,serif;font-size:18px;font-weight:600;">Total</td>
           <td style="padding:10px 0 0;border-top:2px solid #c9a84c;text-align:right;font-family:system-ui,sans-serif;font-size:18px;font-weight:700;">${esc(formatINR(order.total))}</td>

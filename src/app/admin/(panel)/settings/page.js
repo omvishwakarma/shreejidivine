@@ -7,6 +7,7 @@ import { useAdminToasts } from '../../../../components/admin/adminToast'
 const EMPTY = {
   shippingFee: 0,
   freeShippingMinOrder: 0,
+  cartRewards: [],
   heroVideoDesktop: '/videos/home.mp4',
   heroVideoMobile: '/videos/home.mp4',
   heroPoster: '/images/banners/royal-chandan.png',
@@ -157,6 +158,7 @@ export default function AdminSettingsPage() {
     setForm({
       shippingFee: data.settings?.shippingFee ?? 0,
       freeShippingMinOrder: data.settings?.freeShippingMinOrder ?? 0,
+      cartRewards: data.settings?.cartRewards || [],
       heroVideoDesktop: data.settings?.heroVideoDesktop || EMPTY.heroVideoDesktop,
       heroVideoMobile: data.settings?.heroVideoMobile || EMPTY.heroVideoMobile,
       heroPoster: data.settings?.heroPoster || EMPTY.heroPoster,
@@ -199,6 +201,13 @@ export default function AdminSettingsPage() {
         body: JSON.stringify({
           shippingFee: Number(form.shippingFee) || 0,
           freeShippingMinOrder: Number(form.freeShippingMinOrder) || 0,
+          cartRewards: (form.cartRewards || [])
+            .map((reward) => ({
+              amount: Number(reward.amount) || 0,
+              label: String(reward.label || '').trim(),
+              icon: reward.icon || 'gift',
+            }))
+            .filter((reward) => reward.amount > 0 && reward.label),
           heroVideoDesktop: form.heroVideoDesktop.trim(),
           heroVideoMobile: form.heroVideoMobile.trim(),
           heroPoster: form.heroPoster.trim(),
@@ -225,6 +234,7 @@ export default function AdminSettingsPage() {
       setForm({
         shippingFee: data.settings.shippingFee,
         freeShippingMinOrder: data.settings.freeShippingMinOrder,
+        cartRewards: data.settings.cartRewards || [],
         heroVideoDesktop: data.settings.heroVideoDesktop,
         heroVideoMobile: data.settings.heroVideoMobile,
         heroPoster: data.settings.heroPoster,
@@ -589,6 +599,101 @@ export default function AdminSettingsPage() {
               />
               <small>Set 0 to disable the free-shipping threshold</small>
             </label>
+          </div>
+
+          <div className="admin-rewards">
+            <div className="admin-variant-block__head">
+              <strong>Cart reward bar</strong>
+              <button
+                type="button"
+                className="admin-btn admin-btn-ghost"
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    cartRewards: [
+                      ...(current.cartRewards || []),
+                      { amount: '', label: '', icon: 'shipping' },
+                    ].slice(0, 6),
+                  }))
+                }
+              >
+                + Add reward
+              </button>
+            </div>
+            <p className="admin-page-sub" style={{ marginTop: 0 }}>
+              Shown on the cart, and applied at checkout. A label like ₹99 off comes off the bill once the cart reaches that amount. The truck icon makes shipping free.
+            </p>
+            {(form.cartRewards || []).length === 0 ? (
+              <p className="admin-page-sub" style={{ margin: 0 }}>
+                No custom rewards saved yet. The cart still shows the default milestones until you add your own and save.
+              </p>
+            ) : (
+              <div className="admin-rewards__list">
+                {(form.cartRewards || []).map((reward, index) => (
+                  <div key={index} className="admin-rewards__row">
+                    <label className="admin-field">
+                      <span>Cart amount (₹)</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={reward.amount}
+                        onChange={(e) =>
+                          setForm((current) => {
+                            const cartRewards = [...(current.cartRewards || [])]
+                            cartRewards[index] = { ...cartRewards[index], amount: e.target.value }
+                            return { ...current, cartRewards }
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Reward</span>
+                      <input
+                        value={reward.label}
+                        placeholder="Free Shipping"
+                        onChange={(e) =>
+                          setForm((current) => {
+                            const cartRewards = [...(current.cartRewards || [])]
+                            cartRewards[index] = { ...cartRewards[index], label: e.target.value }
+                            return { ...current, cartRewards }
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="admin-field">
+                      <span>Icon</span>
+                      <select
+                        value={reward.icon || 'gift'}
+                        onChange={(e) =>
+                          setForm((current) => {
+                            const cartRewards = [...(current.cartRewards || [])]
+                            cartRewards[index] = { ...cartRewards[index], icon: e.target.value }
+                            return { ...current, cartRewards }
+                          })
+                        }
+                      >
+                        <option value="shipping">Truck</option>
+                        <option value="discount">Rupee</option>
+                        <option value="gift">Gift</option>
+                        <option value="rupee">Offer</option>
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-danger"
+                      onClick={() =>
+                        setForm((current) => ({
+                          ...current,
+                          cartRewards: (current.cartRewards || []).filter((_, i) => i !== index),
+                        }))
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {note ? (

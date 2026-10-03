@@ -211,6 +211,12 @@ export default function AdminOrderDetailPage() {
                 <span>−{formatINR(order.discount)}</span>
               </div>
             ) : null}
+            {order.rewardDiscount > 0 ? (
+              <div>
+                <span>{order.rewardLabel || 'Offer'}</span>
+                <span>−{formatINR(order.rewardDiscount)}</span>
+              </div>
+            ) : null}
             <div className="is-total">
               <span>Total</span>
               <span>{formatINR(order.total)}</span>
@@ -240,7 +246,7 @@ export default function AdminOrderDetailPage() {
               </button>
             </div>
             <p className="admin-page-sub" style={{ margin: '0.5rem 0 0' }}>
-              Total recalculates as subtotal − discount + shipping
+              Total recalculates as subtotal − coupon − offer + shipping
             </p>
           </form>
         </div>

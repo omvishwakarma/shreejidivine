@@ -26,6 +26,7 @@ export async function PATCH(request, { params }) {
       subtotal: order.subtotal,
       shipping,
       discount: order.discount || 0,
+      rewardDiscount: order.rewardDiscount || 0,
     })
     await order.save()
     await order.populate('user', 'name email')

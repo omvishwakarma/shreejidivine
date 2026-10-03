@@ -1,5 +1,6 @@
 import { dbConnect } from '@/lib/mongo/db'
 import { StoreSettings, STORE_SETTINGS_DEFAULTS } from '@/lib/mongo/StoreSettings'
+import { shippingFeeFor } from '@/lib/cartRewards'
 
 export async function getStoreSettings() {
   await dbConnect()
@@ -15,12 +16,7 @@ export async function getStoreSettings() {
  * Free when shippingFee is 0, or when freeShippingMinOrder > 0 and subtotal meets it.
  */
 export function calcShippingFee(subtotal, settings) {
-  const fee = Math.max(0, Number(settings?.shippingFee) || 0)
-  const minFree = Math.max(0, Number(settings?.freeShippingMinOrder) || 0)
-  const base = Math.max(0, Number(subtotal) || 0)
-  if (fee === 0) return 0
-  if (minFree > 0 && base >= minFree) return 0
-  return fee
+  return shippingFeeFor(subtotal, settings)
 }
 
 export function shippingNote(settings) {
@@ -33,7 +29,11 @@ export function shippingNote(settings) {
   return `Shipping ₹${Math.round(fee).toLocaleString('en-IN')}`
 }
 
-export function orderTotal({ subtotal, shipping, discount = 0 }) {
-  return Math.max(0, Math.max(0, Number(subtotal) || 0) - Math.max(0, Number(discount) || 0)) +
-    Math.max(0, Number(shipping) || 0)
+export function orderTotal({ subtotal, shipping, discount = 0, rewardDiscount = 0 }) {
+  const base = Math.max(0, Number(subtotal) || 0)
+  const off = Math.min(
+    base,
+    Math.max(0, Number(discount) || 0) + Math.max(0, Number(rewardDiscount) || 0)
+  )
+  return Math.max(0, base - off) + Math.max(0, Number(shipping) || 0)
 }
