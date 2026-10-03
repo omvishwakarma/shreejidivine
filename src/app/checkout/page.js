@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,6 +16,7 @@ import '../ecom.css'
 import './checkout.css'
 import { checkoutFieldErrors } from './checkoutValidation'
 import { applyCartRewards, shippingFeeFor } from '../../lib/cartRewards'
+import { trackMeta } from '../../lib/meta'
 
 function CheckoutSkeleton({ mobileOnly = false }) {
   const mobile = (
@@ -130,6 +131,7 @@ export default function CheckoutPage() {
   const [coupon, setCoupon] = useState(null)
   const [couponError, setCouponError] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
+  const checkoutTracked = useRef(false)
   const [shipSettings, setShipSettings] = useState({
     shippingFee: 0,
     freeShippingMinOrder: 0,
@@ -196,6 +198,18 @@ export default function CheckoutPage() {
     setCouponError('')
   }, [subtotal])
 
+  useEffect(() => {
+    if (!ready || !items.length || checkoutTracked.current) return
+    checkoutTracked.current = true
+    trackMeta('InitiateCheckout', {
+      content_ids: items.map((item) => String(item.productId)),
+      content_type: 'product',
+      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      value: subtotal,
+      currency: 'INR',
+    })
+  }, [ready, items, subtotal])
+
   async function applyCoupon() {
     setCouponError('')
     setCouponLoading(true)
@@ -237,6 +251,13 @@ export default function CheckoutPage() {
         couponCode: coupon?.code || '',
       }),
     })
+    trackMeta('Purchase', {
+      content_ids: items.map((item) => String(item.productId)),
+      content_type: 'product',
+      value: Number(data.order?.total) || 0,
+      currency: 'INR',
+      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+    })
     clearCart()
     router.push(`/profile/orders/${data.order.id}?placed=1`)
   }
@@ -260,6 +281,13 @@ export default function CheckoutPage() {
     })
 
     if (payload.freeOrder) {
+      trackMeta('Purchase', {
+        content_ids: items.map((item) => String(item.productId)),
+        content_type: 'product',
+        value: Number(payload.order?.total) || 0,
+        currency: 'INR',
+        num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      })
       clearCart()
       router.push(`/profile/orders/${payload.orderId}?placed=1`)
       return
@@ -293,6 +321,13 @@ export default function CheckoutPage() {
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpaySignature: response.razorpay_signature,
               }),
+            })
+            trackMeta('Purchase', {
+              content_ids: items.map((item) => String(item.productId)),
+              content_type: 'product',
+              value: Number(verified.order?.total) || 0,
+              currency: 'INR',
+              num_items: items.reduce((sum, item) => sum + item.quantity, 0),
             })
             clearCart()
             router.push(`/profile/orders/${verified.order.id}?placed=1`)

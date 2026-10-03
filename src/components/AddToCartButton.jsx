@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { useCart } from '../context/CartContext'
+import { trackMeta } from '../lib/meta'
 
 export default function AddToCartButton({
   product,
@@ -50,6 +51,14 @@ export default function AddToCartButton({
             return
           }
           addItem(product, qty, { colour: pickedColour, fragrance: pickedFragrance })
+          const unit = Number(product.price) || 0
+          trackMeta('AddToCart', {
+            content_ids: [String(product.id || product.slug || '')],
+            content_name: product.name,
+            content_type: 'product',
+            value: unit * qty,
+            currency: 'INR',
+          })
           setToast(true)
         }}
       >

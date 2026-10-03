@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import ShopNav from '../../../components/ShopNav'
 import Footer from '../../../components/Footer'
 import AddToCartButton from '../../../components/AddToCartButton'
+import { trackMeta } from '../../../lib/meta'
 import BuyNowButton from '../../../components/BuyNowButton'
 import InstagramShop from '../../../components/InstagramShop'
 import { api, getToken } from '../../../lib/api'
@@ -82,6 +83,17 @@ export default function ProductClient() {
       })
       .catch((err) => setError(err.message))
   }, [slug])
+
+  useEffect(() => {
+    if (!product?.id) return
+    trackMeta('ViewContent', {
+      content_ids: [String(product.id)],
+      content_name: product.name,
+      content_type: 'product',
+      value: Number(product.price) || 0,
+      currency: 'INR',
+    })
+  }, [product?.id, product?.name, product?.price])
 
   useEffect(() => {
     if (!product?.id) return
