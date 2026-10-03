@@ -9,7 +9,8 @@ import Footer from '../../../components/Footer'
 import AddToCartButton from '../../../components/AddToCartButton'
 import BuyNowButton from '../../../components/BuyNowButton'
 import InstagramShop from '../../../components/InstagramShop'
-import { api } from '../../../lib/api'
+import { api, getToken } from '../../../lib/api'
+import { useAuth } from '../../../context/AuthContext'
 import { formatINR, toTitleCase } from '../../../lib/products'
 import { safePublicImage, safePublicMedia } from '../../../lib/media'
 import {
@@ -21,8 +22,40 @@ import { resolveVariantImage, resolveVariantPrice } from '../../../lib/productVa
 import '../../ecom.css'
 import './product.css'
 
+function reviewAverage(reviews) {
+  if (!reviews?.length) return 0
+  const total = reviews.reduce((sum, review) => sum + (Number(review.stars) || 0), 0)
+  return total / reviews.length
+}
+
+function Stars({ value }) {
+  const filled = Math.round(Number(value) || 0)
+  return (
+    <span className="product-reviews__stars" aria-label={`${filled} out of 5 stars`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <span key={n} className={n <= filled ? 'is-on' : undefined} aria-hidden="true">
+          ★
+        </span>
+      ))}
+    </span>
+  )
+}
+
 export default function ProductClient() {
   const { slug } = useParams()
+  const { user } = useAuth()
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [reviewSending, setReviewSending] = useState(false)
+  const [reviewNote, setReviewNote] = useState('')
+  const [reviewError, setReviewError] = useState('')
+  const [reviewDraft, setReviewDraft] = useState({
+    name: '',
+    stars: 5,
+    text: '',
+    instagram: '',
+    images: [],
+    video: null,
+  })
   const [product, setProduct] = useState(null)
   const [related, setRelated] = useState([])
   const [error, setError] = useState('')
@@ -81,6 +114,42 @@ export default function ProductClient() {
     if (!el) return
     const step = Math.min(320, el.clientWidth * 0.75)
     el.scrollBy({ left: dir * step, behavior: 'smooth' })
+  }
+
+  async function submitReview(e) {
+    e.preventDefault()
+    if (!slug) return
+    setReviewError('')
+    setReviewNote('')
+    setReviewSending(true)
+    try {
+      const body = new FormData()
+      body.append('name', reviewDraft.name || user?.name || '')
+      body.append('stars', String(reviewDraft.stars || 5))
+      body.append('text', reviewDraft.text || '')
+      body.append('instagram', reviewDraft.instagram || '')
+      for (const file of reviewDraft.images || []) body.append('images', file)
+      if (reviewDraft.video) body.append('video', reviewDraft.video)
+      const headers = {}
+      const token = getToken()
+      if (token) headers.Authorization = `Bearer ${token}`
+      const res = await fetch(`/api/products/${slug}/reviews`, { method: 'POST', headers, body })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Could not save review')
+      setReviewNote('Thanks. Your review will show on the site after we approve it.')
+      setReviewDraft({
+        name: user?.name || '',
+        stars: 5,
+        text: '',
+        instagram: '',
+        images: [],
+        video: null,
+      })
+    } catch (err) {
+      setReviewError(err.message || 'Could not save review')
+    } finally {
+      setReviewSending(false)
+    }
   }
 
   const gallery = useMemo(() => {
@@ -399,6 +468,153 @@ export default function ProductClient() {
                   <li key={h}>{h}</li>
                 ))}
               </ul>
+              <section className="product-reviews" aria-label="Reviews">
+                <div className="product-reviews__head">
+                  <h2>Reviews</h2>
+                  {(product.reviews || []).length ? (
+                    <p>
+                      <Stars value={reviewAverage(product.reviews)} />
+                      <span>
+                        {reviewAverage(product.reviews).toFixed(1)} · {product.reviews.length}{' '}
+                        {product.reviews.length === 1 ? 'review' : 'reviews'}
+                      </span>
+                    </p>
+                  ) : (
+                    <p>No reviews yet.</p>
+                  )}
+                  {user ? (
+                    <button
+                      type="button"
+                      className="btn-sm btn-primary product-reviews__write"
+                      onClick={() => {
+                        setReviewOpen((open) => !open)
+                        setReviewDraft((draft) => ({
+                          ...draft,
+                          name: draft.name || user.name || '',
+                        }))
+                        setReviewNote('')
+                        setReviewError('')
+                      }}
+                    >
+                      Write a review
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/login?next=${encodeURIComponent(`/shop/${slug}`)}`}
+                      className="btn-sm btn-primary product-reviews__write"
+                    >
+                      Write a review
+                    </Link>
+                  )}
+                </div>
+                {reviewOpen && user ? (
+                  <form className="product-reviews__form" onSubmit={submitReview}>
+                    <label>
+                      <span>Name</span>
+                      <input
+                        value={reviewDraft.name}
+                        onChange={(e) => setReviewDraft((draft) => ({ ...draft, name: e.target.value }))}
+                      />
+                    </label>
+                    <div className="product-reviews__pick">
+                      <span>Stars</span>
+                      <span className="product-reviews__stars">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            className={n <= reviewDraft.stars ? 'is-on' : undefined}
+                            onClick={() => setReviewDraft((draft) => ({ ...draft, stars: n }))}
+                            aria-label={`${n} stars`}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </span>
+                    </div>
+                    <label>
+                      <span>Review</span>
+                      <textarea
+                        rows={4}
+                        value={reviewDraft.text}
+                        onChange={(e) => setReviewDraft((draft) => ({ ...draft, text: e.target.value }))}
+                        placeholder="How was the bracelet?"
+                      />
+                    </label>
+                    <label>
+                      <span>Instagram link</span>
+                      <input
+                        value={reviewDraft.instagram}
+                        onChange={(e) => setReviewDraft((draft) => ({ ...draft, instagram: e.target.value }))}
+                        placeholder="https://www.instagram.com/reel/..."
+                      />
+                    </label>
+                    <label>
+                      <span>Photos</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        multiple
+                        onChange={(e) =>
+                          setReviewDraft((draft) => ({
+                            ...draft,
+                            images: Array.from(e.target.files || []).slice(0, 4),
+                          }))
+                        }
+                      />
+                    </label>
+                    <label>
+                      <span>Video</span>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={(e) =>
+                          setReviewDraft((draft) => ({ ...draft, video: e.target.files?.[0] || null }))
+                        }
+                      />
+                    </label>
+                    {reviewError ? <p className="product-reviews__error">{reviewError}</p> : null}
+                    {reviewNote ? <p className="product-reviews__note">{reviewNote}</p> : null}
+                    <button type="submit" className="btn-sm btn-primary" disabled={reviewSending}>
+                      {reviewSending ? 'Sending…' : 'Submit review'}
+                    </button>
+                  </form>
+                ) : null}
+                {(product.reviews || []).length ? (
+                  <ul className="product-reviews__list">
+                    {product.reviews.map((review, index) => (
+                      <li key={review.id || `${review.name}-${index}`}>
+                        <div className="product-reviews__top">
+                          <strong>{review.name || 'Customer'}</strong>
+                          <Stars value={review.stars} />
+                        </div>
+                        {review.text ? <p>{review.text}</p> : null}
+                        {review.images?.length ? (
+                          <div className="product-reviews__photos">
+                            {review.images.map((src) => (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img key={src} src={src} alt="" />
+                            ))}
+                          </div>
+                        ) : null}
+                        {review.video ? (
+                          <video className="product-reviews__video" src={review.video} controls playsInline />
+                        ) : null}
+                        {review.instagram ? (
+                          <a
+                            className="product-reviews__ig"
+                            href={review.instagram}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View on Instagram
+                          </a>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
               <p className="product-detail__note">
                 Free pan-India shipping · Cash on delivery available
               </p>

@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Product } from '@/lib/mongo/Product'
 import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
+import { normalizeTags } from '@/lib/rashi'
+import { reviewsForStorage } from '@/lib/productReviews'
 
 const colourSchema = z.object({
   name: z.string().min(1),
@@ -56,6 +58,7 @@ export async function POST(request) {
       gallery: z.array(z.string()).max(12).optional(),
       video: z.string().optional(),
       badge: z.string().nullable().optional(),
+      tags: z.array(z.string()).max(20).optional(),
       category: z.string().optional(),
       categorySlug: z.string().optional(),
       subcategorySlug: z.string().optional(),
@@ -63,6 +66,16 @@ export async function POST(request) {
       stone: z.string().optional(),
       description: z.string().optional(),
       highlights: z.array(z.string()).optional(),
+      reviews: z.array(z.object({
+        name: z.string().optional(),
+        stars: z.number().min(1).max(5).optional(),
+        text: z.string().optional(),
+        images: z.array(z.string()).max(8).optional(),
+        video: z.string().optional(),
+        instagram: z.string().optional(),
+        status: z.enum(['pending', 'approved']).optional(),
+        id: z.string().optional(),
+      })).max(40).optional(),
       colours: z.array(colourSchema).max(20).optional(),
       fragrances: z.array(fragranceSchema).max(30).optional(),
       active: z.boolean().optional(),
@@ -71,6 +84,8 @@ export async function POST(request) {
     const data = schema.parse(await request.json())
     data.colours = normalizeColours(data.colours)
     data.fragrances = normalizeFragrances(data.fragrances)
+    data.tags = normalizeTags(data.tags)
+    data.reviews = reviewsForStorage(data.reviews)
     const exists = await Product.findOne({ slug: data.slug })
     if (exists) {
       return NextResponse.json({ error: 'Slug already exists' }, { status: 409 })

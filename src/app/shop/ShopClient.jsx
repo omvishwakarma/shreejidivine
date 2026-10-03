@@ -9,6 +9,7 @@ import Footer from '../../components/Footer'
 import ProductCard from '../../components/ProductCard'
 import { api } from '../../lib/api'
 import { formatINR, toTitleCase } from '../../lib/products'
+import { tagSearchText } from '../../lib/rashi'
 import '../ecom.css'
 
 export default function ShopClient() {
@@ -56,7 +57,9 @@ export default function ShopClient() {
     const q = query.trim().toLowerCase()
     if (q.length < 1) return []
     return products
-      .filter((p) => `${p.name || ''} ${p.tagline || ''}`.toLowerCase().includes(q))
+      .filter((p) =>
+        `${p.name || ''} ${p.tagline || ''} ${tagSearchText(p.tags)}`.toLowerCase().includes(q)
+      )
       .slice(0, 6)
   }, [products, query])
 
@@ -72,7 +75,7 @@ export default function ShopClient() {
     const q = query.trim().toLowerCase()
     let list = products.filter((p) => {
       if (q) {
-        const hay = `${p.name || ''} ${p.tagline || ''}`.toLowerCase()
+        const hay = `${p.name || ''} ${p.tagline || ''} ${tagSearchText(p.tags)}`.toLowerCase()
         if (!hay.includes(q)) return false
       }
       const price = Number(p.price) || 0

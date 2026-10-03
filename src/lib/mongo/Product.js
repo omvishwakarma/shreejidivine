@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import { safePublicImage, safePublicMedia } from '@/lib/media'
 import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
+import { adminReviews, publicReviews } from '@/lib/productReviews'
 
 const colourOptionSchema = new mongoose.Schema(
   {
@@ -20,6 +21,20 @@ const fragranceOptionSchema = new mongoose.Schema(
   { _id: false }
 )
 
+const reviewSchema = new mongoose.Schema(
+  {
+    name: { type: String, default: '', trim: true },
+    stars: { type: Number, default: 5, min: 1, max: 5 },
+    text: { type: String, default: '' },
+    images: [{ type: String }],
+    video: { type: String, default: '' },
+    instagram: { type: String, default: '' },
+    status: { type: String, enum: ['pending', 'approved'], default: 'approved' },
+    userId: { type: String, default: '' },
+  },
+  { _id: true }
+)
+
 const productSchema = new mongoose.Schema(
   {
     slug: { type: String, required: true, unique: true, trim: true },
@@ -32,6 +47,7 @@ const productSchema = new mongoose.Schema(
     gallery: [{ type: String }],
     video: { type: String, default: '' },
     badge: { type: String, default: null },
+    tags: [{ type: String, trim: true }],
     category: { type: String, default: 'singles' },
     categorySlug: { type: String, default: '', index: true },
     subcategorySlug: { type: String, default: '', index: true },
@@ -39,6 +55,7 @@ const productSchema = new mongoose.Schema(
     stone: { type: String, default: '' },
     description: { type: String, default: '' },
     highlights: [{ type: String }],
+    reviews: { type: [reviewSchema], default: [] },
     colours: { type: [colourOptionSchema], default: [] },
     fragrances: { type: [fragranceOptionSchema], default: [] },
     active: { type: Boolean, default: true },
@@ -65,6 +82,7 @@ productSchema.methods.toPublicJSON = function () {
     gallery: uniqueGallery,
     video: safePublicMedia(this.video, ''),
     badge: this.badge,
+    tags: (this.tags || []).map((tag) => String(tag || '').trim()).filter(Boolean),
     category: this.category,
     categorySlug: this.categorySlug || '',
     subcategorySlug: this.subcategorySlug || '',
@@ -72,6 +90,7 @@ productSchema.methods.toPublicJSON = function () {
     stone: this.stone,
     description: this.description,
     highlights: this.highlights,
+    reviews: publicReviews(this.reviews),
     colours: normalizeColours(this.colours),
     fragrances: normalizeFragrances(this.fragrances),
     active: this.active,
@@ -85,6 +104,7 @@ productSchema.methods.toAdminJSON = function () {
   return {
     ...this.toPublicJSON(),
     purchaseCost: Number(this.purchaseCost) || 0,
+    reviews: adminReviews(this.reviews),
   }
 }
 

@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
 import { useAdminToasts } from '../../../../components/admin/adminToast'
 import { plainTextToHtml } from '../../../../lib/productHtml'
+import { RASHIS } from '../../../../lib/rashi'
 
 const AdminRichTextEditor = dynamic(() => import('../../../../components/AdminRichTextEditor'), {
   ssr: false,
@@ -23,6 +24,7 @@ const empty = {
   gallery: [],
   video: '',
   badge: '',
+  tags: [],
   category: 'singles',
   categorySlug: '',
   subcategorySlug: '',
@@ -30,6 +32,7 @@ const empty = {
   stone: '',
   description: '',
   highlights: '',
+  reviews: [],
   colours: [],
   fragrances: [],
   active: true,
@@ -55,6 +58,7 @@ export default function AdminProductsPage() {
   const [uploading, setUploading] = useState('')
   const [saving, setSaving] = useState(false)
   const [addQty, setAddQty] = useState('')
+  const [tagDraft, setTagDraft] = useState('')
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [activeFilter, setActiveFilter] = useState('all')
@@ -103,6 +107,7 @@ export default function AdminProductsPage() {
         p.slug,
         p.tagline,
         p.badge,
+        ...(p.tags || []),
         p.description,
         p.categorySlug,
         p.subcategorySlug,
@@ -130,10 +135,59 @@ export default function AdminProductsPage() {
     }
   }, [products])
 
+  const knownTags = useMemo(() => {
+    const map = new Map()
+    for (const rashi of RASHIS) {
+      map.set(rashi.name.toLowerCase(), {
+        value: rashi.name,
+        hint: rashi.english,
+        symbol: rashi.symbol,
+      })
+    }
+    for (const product of products) {
+      for (const tag of product.tags || []) {
+        const value = String(tag || '').trim()
+        const key = value.toLowerCase()
+        if (!value || map.has(key)) continue
+        map.set(key, { value, hint: '', symbol: '' })
+      }
+    }
+    return [...map.values()]
+  }, [products])
+
+  const tagSuggestions = useMemo(() => {
+    const q = tagDraft.trim().toLowerCase()
+    const taken = new Set((form.tags || []).map((tag) => tag.toLowerCase()))
+    return knownTags.filter((item) => {
+      if (taken.has(item.value.toLowerCase())) return false
+      if (!q) return true
+      return item.value.toLowerCase().includes(q) || item.hint.toLowerCase().includes(q)
+    })
+  }, [tagDraft, form.tags, knownTags])
+
+  function addTag(value) {
+    const tag = String(value || '').trim().replace(/\s+/g, ' ')
+    if (!tag) return
+    setForm((current) => {
+      const tags = current.tags || []
+      if (tags.some((item) => item.toLowerCase() === tag.toLowerCase())) return current
+      return { ...current, tags: [...tags, tag].slice(0, 20) }
+    })
+    setTagDraft('')
+  }
+
+  function removeTag(tag) {
+    setForm((current) => ({
+      ...current,
+      tags: (current.tags || []).filter((item) => item.toLowerCase() !== tag.toLowerCase()),
+    }))
+  }
+
   function openAdd() {
     setEditingId(null)
     setForm(empty)
     setAddQty('')
+    setTagDraft('')
     slugTouched.current = false
     setError('')
     setMsg('')
@@ -143,6 +197,7 @@ export default function AdminProductsPage() {
 
   function openEdit(p) {
     setEditingId(p.id)
+    setTagDraft('')
     slugTouched.current = true
     const gallery = Array.isArray(p.gallery) && p.gallery.length
       ? p.gallery
@@ -160,6 +215,7 @@ export default function AdminProductsPage() {
       gallery,
       video: p.video || '',
       badge: p.badge || '',
+      tags: Array.isArray(p.tags) ? p.tags : [],
       category: p.category || 'singles',
       categorySlug: p.categorySlug || '',
       subcategorySlug: p.subcategorySlug || '',
@@ -167,6 +223,18 @@ export default function AdminProductsPage() {
       stone: p.stone || '',
       description: plainTextToHtml(p.description || ''),
       highlights: (p.highlights || []).join(', '),
+      reviews: Array.isArray(p.reviews)
+        ? p.reviews.map((review) => ({
+            id: review.id || '',
+            name: review.name || '',
+            stars: review.stars || 5,
+            text: review.text || '',
+            images: review.images || [],
+            video: review.video || '',
+            instagram: review.instagram || '',
+            status: review.status === 'pending' ? 'pending' : 'approved',
+          }))
+        : [],
       colours: Array.isArray(p.colours)
         ? p.colours.map((c) => ({
             name: c.name || '',
@@ -269,6 +337,66 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function approveReview(review, index) {
+    if (review?.id && editingId) {
+      try {
+        await adminApi(`/api/products/${editingId}/reviews`, {
+          method: 'PATCH',
+          body: JSON.stringify({ id: review.id, status: 'approved' }),
+        })
+        updateReview(index, { status: 'approved' })
+        setMsg('Review approved')
+      } catch (err) {
+        setError(err.message)
+      }
+      return
+    }
+    updateReview(index, { status: 'approved' })
+  }
+
+  function updateReview(index, patch) {
+    setForm((current) => {
+      const reviews = [...(current.reviews || [])]
+      reviews[index] = { ...reviews[index], ...patch }
+      return { ...current, reviews }
+    })
+  }
+
+  async function uploadReviewFiles(index, files, kind) {
+    const list = Array.from(files || []).filter(Boolean)
+    if (!list.length) return
+    const key = `review-${kind}-${index}`
+    setError('')
+    setMsg('')
+    setUploading(key)
+    try {
+      const urls = []
+      for (const file of list) {
+        const body = new FormData()
+        body.append('file', file)
+        body.append('kind', kind)
+        const data = await adminApi('/api/admin/upload', { method: 'POST', body })
+        urls.push(data.url)
+      }
+      if (kind === 'video') {
+        updateReview(index, { video: urls[0] || '' })
+        setMsg('Review video uploaded')
+      } else {
+        setForm((current) => {
+          const reviews = [...(current.reviews || [])]
+          const images = [...(reviews[index]?.images || []), ...urls].slice(0, 8)
+          reviews[index] = { ...reviews[index], images }
+          return { ...current, reviews }
+        })
+        setMsg(urls.length > 1 ? `${urls.length} review images uploaded` : 'Review image uploaded')
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading('')
+    }
+  }
+
   function removeGalleryImage(index) {
     setForm((f) => {
       const gallery = (f.gallery || []).filter((_, i) => i !== index)
@@ -340,6 +468,18 @@ export default function AdminProductsPage() {
           image: String(f.image || '').trim(),
         }))
         .filter((f) => f.name && Number.isFinite(f.price) && f.price >= 0),
+      reviews: (form.reviews || [])
+        .map((review) => ({
+          id: review.id || '',
+          name: String(review.name || '').trim(),
+          stars: Math.min(5, Math.max(1, Math.round(Number(review.stars) || 5))),
+          text: String(review.text || '').trim(),
+          images: (review.images || []).filter(Boolean).slice(0, 8),
+          video: String(review.video || '').trim(),
+          instagram: String(review.instagram || '').trim(),
+          status: review.status === 'pending' ? 'pending' : 'approved',
+        }))
+        .filter((review) => review.text || review.images.length || review.video || review.instagram),
     }
     try {
       if (editingId) {
@@ -476,6 +616,51 @@ export default function AdminProductsPage() {
                         placeholder="Short line under the product name"
                       />
                     </label>
+                    <div className="admin-field" style={{ gridColumn: '1 / -1' }}>
+                      <span>Tags</span>
+                      <div className="admin-tags">
+                        {(form.tags || []).map((tag) => (
+                          <button
+                            key={tag}
+                            type="button"
+                            className="admin-tags__chip"
+                            onClick={() => removeTag(tag)}
+                          >
+                            {tag}
+                            <span aria-hidden="true">×</span>
+                          </button>
+                        ))}
+                        <input
+                          value={tagDraft}
+                          onChange={(e) => setTagDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              addTag(tagDraft)
+                            }
+                          }}
+                          placeholder="Type a tag or pick a Rashi"
+                        />
+                      </div>
+                      {tagSuggestions.length ? (
+                        <div className="admin-tags__suggest" role="listbox" aria-label="Tag suggestions">
+                          {tagSuggestions.map((item) => (
+                            <button
+                              key={item.value.toLowerCase()}
+                              type="button"
+                              onClick={() => addTag(item.value)}
+                            >
+                              {item.symbol ? <span aria-hidden="true">{item.symbol}</span> : null}
+                              {item.value}
+                              {item.hint ? <em>{item.hint}</em> : null}
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
+                      <small>
+                        Rashi names and tags already used on products show here. A new tag is suggested next time after you save.
+                      </small>
+                    </div>
                   </div>
                 </div>
 
@@ -632,6 +817,176 @@ export default function AdminProductsPage() {
                       <small>Shown as short bullets on the product page</small>
                     </label>
                   </div>
+                </div>
+
+                <div className="admin-form-section">
+                  <div className="admin-variant-block__head">
+                    <h3>Reviews <span className="admin-optional">(optional)</span></h3>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-ghost"
+                      onClick={() =>
+                        setForm((current) => ({
+                          ...current,
+                          reviews: [
+                            ...(current.reviews || []),
+                            { name: '', stars: 5, text: '', images: [], video: '', instagram: '', status: 'approved' },
+                          ],
+                        }))
+                      }
+                    >
+                      + Add review
+                    </button>
+                  </div>
+                  <p className="admin-page-sub" style={{ marginTop: 0 }}>
+                    Customer reviews stay hidden until you approve them. Reviews you add here are shown on the product page after you save.
+                  </p>
+                  {(form.reviews || []).length === 0 ? (
+                    <p className="admin-page-sub" style={{ margin: 0 }}>
+                      No reviews yet.
+                    </p>
+                  ) : (
+                    <div className="admin-review-list">
+                      {(form.reviews || []).map((review, index) => (
+                        <div key={`review-${index}`} className="admin-review-card">
+                          <div className="admin-review-card__top">
+                            <label className="admin-field">
+                              <span>Name</span>
+                              <input
+                                value={review.name}
+                                onChange={(e) => updateReview(index, { name: e.target.value })}
+                                placeholder="Customer name"
+                              />
+                            </label>
+                            <label className="admin-field">
+                              <span>Stars</span>
+                              <select
+                                value={review.stars || 5}
+                                onChange={(e) => updateReview(index, { stars: Number(e.target.value) })}
+                              >
+                                {[5, 4, 3, 2, 1].map((n) => (
+                                  <option key={n} value={n}>
+                                    {n} star{n === 1 ? '' : 's'}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <div className="admin-review-card__actions">
+                              {review.status === 'pending' ? (
+                                <button
+                                  type="button"
+                                  className="admin-btn admin-btn-primary"
+                                  onClick={() => approveReview(review, index)}
+                                >
+                                  Approve
+                                </button>
+                              ) : (
+                                <span className="admin-chip">Approved</span>
+                              )}
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-danger"
+                                onClick={() =>
+                                  setForm((current) => ({
+                                    ...current,
+                                    reviews: (current.reviews || []).filter((_, i) => i !== index),
+                                  }))
+                                }
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                          <label className="admin-field">
+                            <span>Review text</span>
+                            <textarea
+                              rows={3}
+                              value={review.text}
+                              onChange={(e) => updateReview(index, { text: e.target.value })}
+                              placeholder="What the customer said"
+                            />
+                          </label>
+                          <label className="admin-field">
+                            <span>Instagram link</span>
+                            <input
+                              value={review.instagram}
+                              onChange={(e) => updateReview(index, { instagram: e.target.value })}
+                              placeholder="https://www.instagram.com/reel/..."
+                            />
+                          </label>
+                          <div className="admin-review-card__media">
+                            <div>
+                              <span>Photos</span>
+                              <div className="admin-review-thumbs">
+                                {(review.images || []).map((src, imageIndex) => (
+                                  <div key={src} className="admin-review-thumbs__item">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={src} alt="" />
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        updateReview(index, {
+                                          images: review.images.filter((_, i) => i !== imageIndex),
+                                        })
+                                      }
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <label className="admin-btn admin-btn-ghost">
+                                {uploading === `review-image-${index}` ? 'Uploading…' : 'Add photos'}
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp,image/gif"
+                                  multiple
+                                  disabled={!!uploading}
+                                  onChange={(e) => {
+                                    uploadReviewFiles(index, e.target.files, 'image')
+                                    e.target.value = ''
+                                  }}
+                                />
+                              </label>
+                            </div>
+                            <div>
+                              <span>Video</span>
+                              {review.video ? (
+                                <video src={review.video} controls playsInline />
+                              ) : (
+                                <p className="admin-page-sub" style={{ margin: 0 }}>
+                                  No video
+                                </p>
+                              )}
+                              <div className="admin-row-actions">
+                                <label className="admin-btn admin-btn-ghost">
+                                  {uploading === `review-video-${index}` ? 'Uploading…' : 'Upload video'}
+                                  <input
+                                    type="file"
+                                    accept="video/mp4,video/webm,video/quicktime"
+                                    disabled={!!uploading}
+                                    onChange={(e) => {
+                                      uploadReviewFiles(index, e.target.files, 'video')
+                                      e.target.value = ''
+                                    }}
+                                  />
+                                </label>
+                                {review.video ? (
+                                  <button
+                                    type="button"
+                                    className="admin-btn admin-btn-ghost"
+                                    onClick={() => updateReview(index, { video: '' })}
+                                  >
+                                    Remove video
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="admin-form-section">
@@ -1040,7 +1395,7 @@ export default function AdminProductsPage() {
         <input
           className="admin-search"
           type="search"
-          placeholder="Search name, slug, tagline…"
+          placeholder="Search name, slug, tag…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -1121,6 +1476,11 @@ export default function AdminProductsPage() {
                           <strong>{p.name}</strong>
                           <div className="admin-product-cell__meta">{p.slug}</div>
                           {p.badge ? <span className="admin-chip">{p.badge}</span> : null}
+                          {(p.tags || []).map((tag) => (
+                            <span key={tag} className="admin-chip">
+                              {tag}
+                            </span>
+                          ))}
                           {p.bestSeller ? <span className="admin-chip">Best seller</span> : null}
                         </div>
                       </div>

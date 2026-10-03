@@ -355,6 +355,58 @@ export function getRashiFromName(fullName) {
   return matchLatinSyllable(token)
 }
 
+export function normalizeTags(list) {
+  if (!Array.isArray(list)) return []
+  const seen = new Set()
+  const tags = []
+  for (const raw of list) {
+    const tag = String(raw || '').trim().replace(/\s+/g, ' ')
+    if (!tag || tag.length > 40) continue
+    const key = tag.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    tags.push(tag)
+    if (tags.length >= 20) break
+  }
+  return tags
+}
+
+function rashiForTag(tag) {
+  const value = String(tag || '').trim().toLowerCase()
+  if (!value) return null
+  return (
+    RASHIS.find(
+      (rashi) =>
+        rashi.name.toLowerCase() === value ||
+        rashi.english.toLowerCase() === value ||
+        rashi.key === value
+    ) || null
+  )
+}
+
+/** Tags plus rashi aliases, so a Mesh tag also matches “Aries”. */
+export function tagSearchText(tags) {
+  const parts = []
+  for (const tag of normalizeTags(tags)) {
+    parts.push(tag)
+    const rashi = rashiForTag(tag)
+    if (rashi) parts.push(rashi.name, rashi.english, rashi.key)
+  }
+  return parts.join(' ')
+}
+
+function tagMatchesRashi(tags, rashi) {
+  const name = rashi.name.toLowerCase()
+  const english = rashi.english.toLowerCase()
+  const key = rashi.key.toLowerCase()
+  return normalizeTags(tags).some((tag) => {
+    const value = tag.toLowerCase()
+    if (value === name || value === english || value === key) return true
+    const linked = rashiForTag(tag)
+    return linked?.key === rashi.key
+  })
+}
+
 export function matchProductsForRashi(products, rashi) {
   if (!rashi || !Array.isArray(products)) return []
   const key = rashi.key.toLowerCase()
@@ -366,6 +418,7 @@ export function matchProductsForRashi(products, rashi) {
     .map((p) => {
       const hay = `${p.slug || ''} ${p.name || ''} ${p.tagline || ''}`.toLowerCase()
       let score = 0
+      if (tagMatchesRashi(p.tags, rashi)) score += 20
       if (hay.includes(slugPart)) score += 10
       if (hay.includes(`${key}-rashi`) || hay.includes(`${key} rashi`)) score += 8
       if (hay.includes(english)) score += 4

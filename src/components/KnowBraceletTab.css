@@ -1,0 +1,60 @@
+.kyb-tab {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .kyb-tab {
+    position: fixed;
+    right: 0;
+    top: 38%;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    width: 2.55rem;
+    padding: 0.7rem 0.28rem 0.8rem;
+    border: 1px solid #c6a15a;
+    border-right: none;
+    border-radius: 0.85rem 0 0 0.85rem;
+    background: #1c140f;
+    color: #e7c56a;
+    text-decoration: none;
+    box-shadow: -8px 10px 22px rgba(28, 20, 15, 0.22);
+  }
+
+  .kyb-tab__icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: grid;
+    place-items: center;
+  }
+
+  .kyb-tab__icon svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    fill: #e7c56a;
+  }
+
+  .kyb-tab__text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 0.62rem;
+    font-weight: 650;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .kyb-tab__text strong {
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+    color: #f0d78a;
+  }
+}

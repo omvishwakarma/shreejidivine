@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Product } from '@/lib/mongo/Product'
 import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
+import { normalizeTags } from '@/lib/rashi'
+import { reviewsForStorage } from '@/lib/productReviews'
 
 export async function GET(_request, { params }) {
   try {
@@ -36,6 +38,7 @@ export async function PATCH(request, { params }) {
       'gallery',
       'video',
       'badge',
+      'tags',
       'category',
       'categorySlug',
       'subcategorySlug',
@@ -43,6 +46,7 @@ export async function PATCH(request, { params }) {
       'stone',
       'description',
       'highlights',
+      'reviews',
       'colours',
       'fragrances',
       'active',
@@ -64,6 +68,12 @@ export async function PATCH(request, { params }) {
     }
     if (update.fragrances !== undefined) {
       update.fragrances = normalizeFragrances(update.fragrances)
+    }
+    if (update.tags !== undefined) {
+      update.tags = normalizeTags(update.tags)
+    }
+    if (update.reviews !== undefined) {
+      update.reviews = reviewsForStorage(update.reviews)
     }
     if (update.purchaseCost !== undefined) {
       const cost = Number(update.purchaseCost)
