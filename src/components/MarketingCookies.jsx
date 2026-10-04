@@ -7,7 +7,7 @@ const CONSENT_COOKIE = 'sj_consent'
 const VISITOR_COOKIE = 'sj_vid'
 const MAX_AGE = 60 * 60 * 24 * 180
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || ''
-const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || ''
+const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || 'G-9DBEZTWPJ5'
 
 function readCookie(name) {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`))
