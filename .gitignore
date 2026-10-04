@@ -35,6 +35,9 @@ pnpm-debug.log*
 .env
 .env*.local
 
+# Google service account keys
+shreejidivinearoma-*.json
+
 # server deps (must never be committed)
 /server/node_modules
 /admin/node_modules
