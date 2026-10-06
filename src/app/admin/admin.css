@@ -1142,6 +1142,38 @@
   text-decoration: line-through;
 }
 
+.admin-price-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 7.5rem;
+}
+
+.admin-price-edit label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.admin-price-edit span {
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  font-weight: 600;
+}
+
+.admin-price-edit input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--admin-ink);
+}
+
 .admin-stock {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -1891,6 +1923,12 @@
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
+}
+
+.admin-table--products .admin-row-actions {
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 6.5rem;
 }
 
 .admin-table__row--click {

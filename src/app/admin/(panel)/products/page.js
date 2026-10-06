@@ -64,6 +64,10 @@ export default function AdminProductsPage() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [catTree, setCatTree] = useState([])
   const [loading, setLoading] = useState(true)
+  const [priceMode, setPriceMode] = useState(false)
+  const [priceDrafts, setPriceDrafts] = useState({})
+  const [savingPrices, setSavingPrices] = useState(false)
+  const [savingPriceId, setSavingPriceId] = useState(null)
   const imageRef = useRef(null)
   const videoRef = useRef(null)
   const formRef = useRef(null)
@@ -498,6 +502,121 @@ export default function AdminProductsPage() {
       setError(err.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  function openPriceMode() {
+    const drafts = {}
+    for (const product of products) {
+      drafts[product.id] = {
+        price: product.price ?? '',
+        compareAt: product.compareAt ?? '',
+      }
+    }
+    setPriceDrafts(drafts)
+    setPriceMode(true)
+    setError('')
+    setMsg('')
+  }
+
+  function setPriceDraft(id, key, value) {
+    setPriceDrafts((current) => ({
+      ...current,
+      [id]: {
+        price: current[id]?.price ?? '',
+        compareAt: current[id]?.compareAt ?? '',
+        [key]: value,
+      },
+    }))
+  }
+
+  function readPriceDraft(product) {
+    const draft = priceDrafts[product.id]
+    if (!draft) return { error: `Enter a price for ${product.name}` }
+    const price = Number(draft.price)
+    const compareAt = draft.compareAt === '' ? null : Number(draft.compareAt)
+    if (!Number.isFinite(price) || price < 0) {
+      return { error: `Enter a valid price for ${product.name}` }
+    }
+    if (compareAt !== null && (!Number.isFinite(compareAt) || compareAt < 0)) {
+      return { error: `Enter a valid compare-at price for ${product.name}` }
+    }
+    const previousCompare =
+      product.compareAt == null || product.compareAt === '' ? null : Number(product.compareAt)
+    const changed = price !== Number(product.price) || compareAt !== previousCompare
+    return { price, compareAt, changed }
+  }
+
+  async function persistPrices(items) {
+    await Promise.all(
+      items.map((item) =>
+        adminApi(`/api/products/${item.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ price: item.price, compareAt: item.compareAt }),
+        })
+      )
+    )
+    const saved = new Map(items.map((item) => [item.id, item]))
+    setProducts((current) =>
+      current.map((product) => {
+        const next = saved.get(product.id)
+        if (!next) return product
+        return { ...product, price: next.price, compareAt: next.compareAt }
+      })
+    )
+  }
+
+  async function saveOnePrice(product) {
+    const parsed = readPriceDraft(product)
+    if (parsed.error) {
+      setError(parsed.error)
+      setMsg('')
+      return
+    }
+    if (!parsed.changed) {
+      setError('')
+      setMsg(`No price change for ${product.name}`)
+      return
+    }
+    setSavingPriceId(product.id)
+    setError('')
+    setMsg('')
+    try {
+      await persistPrices([{ id: product.id, price: parsed.price, compareAt: parsed.compareAt }])
+      setMsg(`Saved price for ${product.name}`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingPriceId(null)
+    }
+  }
+
+  async function savePrices() {
+    const changed = []
+    for (const product of products) {
+      const parsed = readPriceDraft(product)
+      if (parsed.error) {
+        setError(parsed.error)
+        return
+      }
+      if (parsed.changed) changed.push({ id: product.id, price: parsed.price, compareAt: parsed.compareAt })
+    }
+    if (!changed.length) {
+      setPriceMode(false)
+      setMsg('No price changes')
+      return
+    }
+    setSavingPrices(true)
+    setError('')
+    setMsg('')
+    try {
+      await persistPrices(changed)
+      setPriceMode(false)
+      setMsg(`Updated prices for ${changed.length} product${changed.length === 1 ? '' : 's'}`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingPrices(false)
     }
   }
 
@@ -1424,9 +1543,39 @@ export default function AdminProductsPage() {
           <div>
             <h2>Catalog</h2>
             <p>
-              {filtered.length} of {products.length} products
+              {priceMode
+                ? 'Edit selling price and compare-at price, then save.'
+                : `${filtered.length} of ${products.length} products`}
             </p>
           </div>
+          {products.length > 0 ? (
+            <div className="admin-row-actions">
+              {priceMode ? (
+                <>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-ghost"
+                    onClick={() => setPriceMode(false)}
+                    disabled={savingPrices}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-primary"
+                    onClick={savePrices}
+                    disabled={savingPrices}
+                  >
+                    {savingPrices ? 'Saving…' : 'Save prices'}
+                  </button>
+                </>
+              ) : (
+                <button type="button" className="admin-btn admin-btn-primary" onClick={openPriceMode}>
+                  Update price
+                </button>
+              )}
+            </div>
+          ) : null}
         </div>
 
         {products.length === 0 ? (
@@ -1489,14 +1638,37 @@ export default function AdminProductsPage() {
                       <span className="admin-cat-pill">{categoryLabel(p)}</span>
                     </td>
                     <td>
-                      <div className="admin-price-cell">
-                        <strong>{formatINR(p.price)}</strong>
-                        {p.compareAt ? (
-                          <span className="admin-price-cell__compare">
-                            {formatINR(p.compareAt)}
-                          </span>
-                        ) : null}
-                      </div>
+                      {priceMode ? (
+                        <div className="admin-price-edit">
+                          <label>
+                            <span>Price</span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={priceDrafts[p.id]?.price ?? p.price ?? ''}
+                              onChange={(e) => setPriceDraft(p.id, 'price', e.target.value)}
+                            />
+                          </label>
+                          <label>
+                            <span>Compare at</span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={priceDrafts[p.id]?.compareAt ?? p.compareAt ?? ''}
+                              onChange={(e) => setPriceDraft(p.id, 'compareAt', e.target.value)}
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="admin-price-cell">
+                          <strong>{formatINR(p.price)}</strong>
+                          {p.compareAt ? (
+                            <span className="admin-price-cell__compare">
+                              {formatINR(p.compareAt)}
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
                     </td>
                     <td>{formatINR(Number(p.purchaseCost) || 0)}</td>
                     <td>
@@ -1519,6 +1691,16 @@ export default function AdminProductsPage() {
                     </td>
                     <td>
                       <div className="admin-row-actions">
+                        {priceMode ? (
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-primary"
+                            onClick={() => saveOnePrice(p)}
+                            disabled={savingPrices || savingPriceId === p.id}
+                          >
+                            {savingPriceId === p.id ? 'Saving…' : 'Save price'}
+                          </button>
+                        ) : null}
                         <button
                           type="button"
                           className="admin-btn admin-btn-ghost"
