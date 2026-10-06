@@ -30,6 +30,7 @@ export async function POST(request) {
       parent: z.string().nullable().optional(),
       description: z.string().optional(),
       image: z.string().optional(),
+      menuIcon: z.string().optional(),
       sortOrder: z.number().int().optional(),
       active: z.boolean().optional(),
       showInNav: z.boolean().optional(),
@@ -61,7 +62,8 @@ export async function POST(request) {
     }
 
     const image = String(data.image || '').trim()
-    if (image && !isSafePublicImage(image)) {
+    const menuIcon = String(data.menuIcon || '').trim()
+    if ((image && !isSafePublicImage(image)) || (menuIcon && !isSafePublicImage(menuIcon))) {
       return NextResponse.json(
         {
           error:
@@ -77,6 +79,7 @@ export async function POST(request) {
       parent,
       description: data.description || '',
       image: safePublicImage(image, ''),
+      menuIcon: safePublicImage(menuIcon, ''),
       sortOrder: data.sortOrder ?? 0,
       active: data.active !== false,
       showInNav: data.showInNav !== false,

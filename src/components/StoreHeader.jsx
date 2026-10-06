@@ -243,7 +243,7 @@ export default function StoreHeader({ promo = true }) {
               href="/know-your-bracelet"
               className={`store-header__kyb ${pathname.startsWith('/know-your-bracelet') ? 'is-active' : undefined}`}
             >
-              Know your Bracelet
+              Know your Product
             </Link>
             <Link href="/#products">Best Sellers</Link>
             <Link href="/#testimonials">About us</Link>
@@ -340,7 +340,7 @@ export default function StoreHeader({ promo = true }) {
                         className="menu-drawer__item menu-drawer__item--parent"
                         onClick={() => setSubmenu(cat)}
                       >
-                        <MenuMedia image={cat.image} icon="shop" />
+                        <MenuMedia image={cat.menuIcon || cat.image} icon="shop" />
                         <span className="menu-drawer__label">{cat.name}</span>
                         <ArrowIcon />
                       </button>
@@ -350,7 +350,7 @@ export default function StoreHeader({ promo = true }) {
                         className="menu-drawer__item"
                         onClick={closeDrawer}
                       >
-                        <MenuMedia image={cat.image} icon="shop" />
+                        <MenuMedia image={cat.menuIcon || cat.image} icon="shop" />
                         <span className="menu-drawer__label">{cat.name}</span>
                       </Link>
                     )}
@@ -363,7 +363,7 @@ export default function StoreHeader({ promo = true }) {
                     onClick={closeDrawer}
                   >
                     <MenuMedia image={menuIcons.bracelet} icon="bracelet" />
-                    <span className="menu-drawer__label">Know your Bracelet</span>
+                    <span className="menu-drawer__label">Know your Product</span>
                   </Link>
                 </li>
                 <li>
@@ -430,7 +430,7 @@ export default function StoreHeader({ promo = true }) {
                       className="menu-drawer__item"
                       onClick={closeDrawer}
                     >
-                      <MenuMedia image={submenu.image} icon="shop" />
+                      <MenuMedia image={submenu.menuIcon || submenu.image} icon="shop" />
                       <span className="menu-drawer__label">All {submenu.name}</span>
                     </Link>
                   </li>
@@ -441,7 +441,7 @@ export default function StoreHeader({ promo = true }) {
                         className="menu-drawer__item"
                         onClick={closeDrawer}
                       >
-                        <MenuMedia image={child.image} icon="shop" />
+                        <MenuMedia image={child.menuIcon || child.image} icon="shop" />
                         <span className="menu-drawer__label">{child.name}</span>
                       </Link>
                     </li>

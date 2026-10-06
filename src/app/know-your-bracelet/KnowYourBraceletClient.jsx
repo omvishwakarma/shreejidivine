@@ -78,7 +78,7 @@ export default function KnowYourBraceletClient() {
       const matches = matchProductsForRashi(data.products || [], rashi)
       setResult({ rashi, intent, products: matches })
     } catch (err) {
-      setError(err.message || 'Could not load bracelets')
+      setError(err.message || 'Could not load products')
     } finally {
       setLoading(false)
     }
@@ -96,14 +96,14 @@ export default function KnowYourBraceletClient() {
         <p className="breadcrumb">
           <Link href="/">Home</Link>
           <span aria-hidden="true"> / </span>
-          <span>Know Your Bracelet</span>
+          <span>Know Your Product</span>
         </p>
 
         <header className="kyb__head">
           <p className="section-label">Rashi guide</p>
-          <h1 className="ecom-title">Know Your Bracelet</h1>
+          <h1 className="ecom-title">Know Your Product</h1>
           <p className="ecom-lead">
-            Select your Rashi and what is on your mind. We show the bracelet that matches your Rashi and your mind.
+            Select your Rashi and what is on your mind. We show the product that matches your Rashi and your mind.
           </p>
         </header>
 
@@ -120,7 +120,7 @@ export default function KnowYourBraceletClient() {
                   What is your <em>mann</em> seeking?
                 </span>
                 <span className="kyb-intent__lead">
-                  Choose the wish that feels closest today. We match your bracelet to this and your Rashi.
+                  Choose the wish that feels closest today. We match a product to this and your Rashi.
                 </span>
               </legend>
               <div className="kyb-intent__grid">
@@ -156,7 +156,7 @@ export default function KnowYourBraceletClient() {
               className="btn-sm btn-primary btn-full"
               disabled={!canSubmit || loading}
             >
-              {loading ? 'Finding your bracelet…' : 'Find my bracelet'}
+              {loading ? 'Finding your product…' : 'Find my product'}
             </button>
           </form>
         ) : (
@@ -179,10 +179,10 @@ export default function KnowYourBraceletClient() {
             </div>
 
             <div className="kyb-result__products">
-              <h3 className="kyb-result__products-title">Your matching bracelet</h3>
+              <h3 className="kyb-result__products-title">Your matching product</h3>
               {result.products.length === 0 ? (
                 <div className="empty-state">
-                  <p>No bracelet found for this Rashi yet.</p>
+                  <p>No product found for this Rashi yet.</p>
                   <Link href="/shop" className="btn-sm btn-primary">
                     Browse shop
                   </Link>

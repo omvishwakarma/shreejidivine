@@ -14,13 +14,13 @@
     gap: 0.45rem;
     width: 2.55rem;
     padding: 0.7rem 0.28rem 0.8rem;
-    border: 1px solid #c6a15a;
+    border: 1px solid #9a4812;
     border-right: none;
     border-radius: 0.85rem 0 0 0.85rem;
-    background: #1c140f;
-    color: #e7c56a;
+    background: #b45615;
+    color: #f3ebe0;
     text-decoration: none;
-    box-shadow: -8px 10px 22px rgba(28, 20, 15, 0.22);
+    box-shadow: -8px 10px 22px rgba(154, 72, 18, 0.28);
   }
 
   .kyb-tab__icon {
@@ -33,7 +33,7 @@
   .kyb-tab__icon svg {
     width: 1.05rem;
     height: 1.05rem;
-    fill: #e7c56a;
+    fill: #f3ebe0;
   }
 
   .kyb-tab__text {
@@ -55,6 +55,6 @@
     font-size: 0.72rem;
     font-weight: 750;
     letter-spacing: 0.14em;
-    color: #f0d78a;
+    color: #fff;
   }
 }

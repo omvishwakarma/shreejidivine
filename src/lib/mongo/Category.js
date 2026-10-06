@@ -9,6 +9,8 @@ const categorySchema = new mongoose.Schema(
     parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     description: { type: String, default: '' },
     image: { type: String, default: '' },
+    /** Square icon for the mobile side menu. Homepage still uses `image`. */
+    menuIcon: { type: String, default: '' },
     sortOrder: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
     showInNav: { type: Boolean, default: true },
@@ -27,6 +29,7 @@ categorySchema.methods.toJSONSafe = function () {
     parent: this.parent ? this.parent.toString() : null,
     description: this.description || '',
     image: safePublicImage(this.image, ''),
+    menuIcon: safePublicImage(this.menuIcon, ''),
     sortOrder: this.sortOrder ?? 0,
     active: this.active !== false,
     showInNav: this.showInNav !== false,
@@ -36,8 +39,11 @@ categorySchema.methods.toJSONSafe = function () {
   }
 }
 
-export const Category =
-  mongoose.models.Category || mongoose.model('Category', categorySchema)
+if (mongoose.models.Category) {
+  delete mongoose.models.Category
+}
+
+export const Category = mongoose.model('Category', categorySchema)
 
 export function slugifyCategory(name) {
   return String(name || '')

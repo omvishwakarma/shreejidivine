@@ -75,10 +75,10 @@ export const metadata = {
   },
   icons: {
     icon: [
+      { url: '/images/logo.png', type: 'image/png', sizes: '512x512' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/images/logo.png', type: 'image/png', sizes: '1024x1024' },
     ],
-    apple: [{ url: '/images/logo.png' }],
+    apple: [{ url: '/images/logo.png', sizes: '180x180' }],
   },
   other: {
     'geo.region': 'IN',

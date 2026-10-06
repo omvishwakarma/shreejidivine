@@ -18,6 +18,7 @@ export async function PATCH(request, { params }) {
       parent: z.string().nullable().optional(),
       description: z.string().optional(),
       image: z.string().optional(),
+      menuIcon: z.string().optional(),
       sortOrder: z.number().int().optional(),
       active: z.boolean().optional(),
       showInNav: z.boolean().optional(),
@@ -72,6 +73,19 @@ export async function PATCH(request, { params }) {
         )
       }
       category.image = safePublicImage(image, '')
+    }
+    if (data.menuIcon !== undefined) {
+      const menuIcon = String(data.menuIcon || '').trim()
+      if (menuIcon && !isSafePublicImage(menuIcon)) {
+        return NextResponse.json(
+          {
+            error:
+              'Invalid image path. Upload via admin or use a path like /images/uploads/... — desktop file paths are not allowed.',
+          },
+          { status: 400 }
+        )
+      }
+      category.menuIcon = safePublicImage(menuIcon, '')
     }
     if (data.sortOrder !== undefined) category.sortOrder = data.sortOrder
     if (data.active !== undefined) category.active = data.active

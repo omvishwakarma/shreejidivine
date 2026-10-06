@@ -284,7 +284,7 @@ export default function AdminSettingsPage() {
         heroPosterMobile: 'Mobile poster',
         menuIconHome: 'Home icon',
         menuIconShop: 'Shop icon',
-        menuIconBracelet: 'Know your Bracelet icon',
+        menuIconBracelet: 'Know your Product icon',
         menuIconBest: 'Best Sellers icon',
         menuIconAbout: 'About us icon',
         authBanner: 'Login banner',
@@ -426,7 +426,7 @@ export default function AdminSettingsPage() {
           <div className="admin-card__head">
             <div>
               <h2>Mobile menu icons</h2>
-              <p>Home, Shop, Know your Bracelet, Best Sellers, and About us. Clear the URL and save to keep the current icon.</p>
+              <p>Home, Shop, Know your Product, Best Sellers, and About us. Clear the URL and save to keep the current icon.</p>
             </div>
           </div>
           <div className="admin-media-grid">
@@ -451,7 +451,7 @@ export default function AdminSettingsPage() {
               onPathChange={(v) => setForm((f) => ({ ...f, menuIconShop: v }))}
             />
             <PosterSlot
-              title="Know your Bracelet"
+              title="Know your Product"
               badge="Menu"
               hint="Square image · JPG, PNG, or WebP"
               value={form.menuIconBracelet}

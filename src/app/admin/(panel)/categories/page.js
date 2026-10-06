@@ -10,6 +10,7 @@ const empty = {
   parent: '',
   description: '',
   image: '',
+  menuIcon: '',
   sortOrder: 0,
   active: true,
   showInNav: true,
@@ -25,8 +26,9 @@ export default function AdminCategoriesPage() {
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
   useAdminToasts(msg, error)
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState('')
   const imageInputId = useId()
+  const menuIconInputId = useId()
 
   async function load() {
     const data = await adminApi('/api/admin/categories')
@@ -65,6 +67,7 @@ export default function AdminCategoriesPage() {
       parent: c.parent || '',
       description: c.description || '',
       image: c.image || '',
+      menuIcon: c.menuIcon || '',
       sortOrder: c.sortOrder || 0,
       active: c.active !== false,
       showInNav: c.showInNav !== false,
@@ -79,24 +82,28 @@ export default function AdminCategoriesPage() {
     setFormOpen(false)
     setEditingId(null)
     setForm(empty)
-    setUploading(false)
+    setUploading('')
   }
 
-  async function uploadImage(file) {
+  async function uploadImage(file, field) {
     if (!file) return
-    setUploading(true)
+    setUploading(field)
     setError('')
     try {
       const body = new FormData()
       body.append('file', file)
       body.append('kind', 'image')
       const data = await adminApi('/api/admin/upload', { method: 'POST', body })
-      setForm((f) => ({ ...f, image: data.url }))
-      setMsg('Image uploaded — save the category to apply')
+      setForm((f) => ({ ...f, [field]: data.url }))
+      setMsg(
+        field === 'menuIcon'
+          ? 'Menu icon uploaded — save the category to apply'
+          : 'Image uploaded — save the category to apply'
+      )
     } catch (err) {
       setError(err.message || 'Upload failed')
     } finally {
-      setUploading(false)
+      setUploading('')
     }
   }
 
@@ -110,6 +117,7 @@ export default function AdminCategoriesPage() {
       parent: form.parent || null,
       description: form.description,
       image: form.image,
+      menuIcon: form.menuIcon,
       sortOrder: Number(form.sortOrder) || 0,
       active: form.active,
       showInNav: form.showInNav,
@@ -234,21 +242,21 @@ export default function AdminCategoriesPage() {
                 <div className="admin-cat-upload__actions">
                   <label
                     htmlFor={imageInputId}
-                    className={`admin-dropzone admin-dropzone--sm ${uploading ? 'is-busy' : ''}`}
+                    className={`admin-dropzone admin-dropzone--sm ${uploading === 'image' ? 'is-busy' : ''}`}
                   >
                     <input
                       id={imageInputId}
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/gif"
-                      disabled={uploading}
+                      disabled={!!uploading}
                       onChange={(e) => {
                         const file = e.target.files?.[0]
                         e.target.value = ''
-                        uploadImage(file)
+                        uploadImage(file, 'image')
                       }}
                     />
                     <span className="admin-dropzone__title">
-                      {uploading ? 'Uploading…' : form.image ? 'Change' : 'Upload'}
+                      {uploading === 'image' ? 'Uploading…' : form.image ? 'Change' : 'Upload'}
                     </span>
                   </label>
                   <input
@@ -262,6 +270,64 @@ export default function AdminCategoriesPage() {
                       type="button"
                       className="admin-btn admin-btn-ghost"
                       onClick={() => setForm((f) => ({ ...f, image: '' }))}
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-media-card admin-media-card--compact">
+              <div className="admin-media-card__head">
+                <div>
+                  <p className="admin-media-card__badge">Mobile menu</p>
+                  <h3>Menu icon</h3>
+                  <p className="admin-page-sub" style={{ margin: '0.25rem 0 0' }}>
+                    Square icon for the side menu. The category image above stays on the homepage.
+                  </p>
+                </div>
+              </div>
+              <div className="admin-cat-upload">
+                <div className="admin-cat-upload__preview">
+                  {form.menuIcon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={form.menuIcon} alt="" />
+                  ) : (
+                    <span>No icon</span>
+                  )}
+                </div>
+                <div className="admin-cat-upload__actions">
+                  <label
+                    htmlFor={menuIconInputId}
+                    className={`admin-dropzone admin-dropzone--sm ${uploading === 'menuIcon' ? 'is-busy' : ''}`}
+                  >
+                    <input
+                      id={menuIconInputId}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={!!uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        e.target.value = ''
+                        uploadImage(file, 'menuIcon')
+                      }}
+                    />
+                    <span className="admin-dropzone__title">
+                      {uploading === 'menuIcon' ? 'Uploading…' : form.menuIcon ? 'Change' : 'Upload'}
+                    </span>
+                  </label>
+                  <input
+                    value={form.menuIcon}
+                    onChange={(e) => setForm((f) => ({ ...f, menuIcon: e.target.value }))}
+                    placeholder="Menu icon URL (optional)"
+                    aria-label="Menu icon URL"
+                  />
+                  {form.menuIcon ? (
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-ghost"
+                      onClick={() => setForm((f) => ({ ...f, menuIcon: '' }))}
                     >
                       Remove
                     </button>

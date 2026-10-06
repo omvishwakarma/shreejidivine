@@ -17,6 +17,7 @@ const links = [
   { href: '/admin/instagram-feed', label: 'Instagram Feed' },
   { href: '/admin/testimonials', label: 'Testimonials' },
   { href: '/admin/users', label: 'Customers' },
+  { href: '/admin/notifications', label: 'Notifications' },
   { href: '/admin/settings', label: 'Settings' },
 ]
 

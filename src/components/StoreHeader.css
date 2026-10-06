@@ -345,10 +345,11 @@
   border-bottom: 1px solid var(--line, #d2d5d9);
   background: none;
   font-family: var(--font-display), Cabin, sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  line-height: 1.3;
+  text-transform: none;
   color: #212326;
   text-align: left;
   cursor: pointer;
@@ -476,8 +477,10 @@
   align-items: center;
   padding: 0 1.15rem;
   font-family: var(--font-display), Cabin, sans-serif;
-  font-size: 1.05rem;
-  text-transform: uppercase;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
   color: #212326;
   text-decoration: none;
 }
@@ -489,9 +492,23 @@
 .menu-drawer__submenu .menu-drawer__item {
   opacity: 1;
   transform: none;
-  text-transform: none;
-  font-size: 1rem;
+}
+
+.menu-drawer__utils a,
+.menu-drawer__utils button {
+  font-size: 1.1rem;
   letter-spacing: 0;
+  text-transform: none;
+}
+
+@media (max-width: 560px) {
+  .menu-drawer__item,
+  .menu-drawer__topbar-title,
+  .menu-drawer__utils a,
+  .menu-drawer__utils button {
+    font-size: 0.92rem;
+    line-height: 1.25;
+  }
 }
 
 .menu-drawer__utils {

@@ -1,9 +1,9 @@
 import KnowYourBraceletClient from './KnowYourBraceletClient'
 
 export const metadata = {
-  title: 'Know Your Bracelet',
+  title: 'Know Your Product',
   description:
-    'Select your Rashi and what is on your mind to find the matching Shreeji Divine aroma bracelet.',
+    'Select your Rashi and what is on your mind to find a matching Shreeji Divine product.',
 }
 
 export default function KnowYourBraceletPage() {
