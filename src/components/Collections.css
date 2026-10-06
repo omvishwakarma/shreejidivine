@@ -20,6 +20,7 @@
 }
 
 .collections__card {
+  --frame: clamp(4px, 1.85%, 9px);
   position: relative;
   display: block;
   overflow: hidden;
@@ -54,7 +55,7 @@
   inset: 0;
   z-index: 4;
   border-radius: inherit;
-  padding: 11px;
+  padding: var(--frame);
   background:
     linear-gradient(180deg, rgba(255, 252, 232, 0.95) 0%, rgba(255, 252, 232, 0) 34%, rgba(72, 42, 8, 0.28) 100%),
     linear-gradient(90deg, rgba(255, 248, 214, 0.8) 0%, rgba(255, 248, 214, 0) 28%, rgba(64, 36, 6, 0.22) 100%),
@@ -78,7 +79,7 @@
 .collections__card::after {
   content: '';
   position: absolute;
-  inset: 11px;
+  inset: var(--frame);
   z-index: 1;
   border-radius: 10%;
   background: linear-gradient(180deg, transparent 45%, rgba(12, 9, 7, 0.72) 100%);
@@ -91,9 +92,9 @@
 
 .collections__name {
   position: absolute;
-  left: 11px;
-  right: 11px;
-  bottom: 11px;
+  left: var(--frame);
+  right: var(--frame);
+  bottom: var(--frame);
   z-index: 2;
   padding: 1rem 0.85rem 1.05rem;
   font-family: var(--font-display), Cabin, sans-serif;
