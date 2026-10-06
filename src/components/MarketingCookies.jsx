@@ -133,11 +133,11 @@ export default function MarketingCookies() {
         ) : null}
       </div>
       <div className="mkt-banner__actions">
-        <button type="button" className="mkt-banner__ghost" onClick={() => choose('essential')}>
-          Only essential
-        </button>
         <button type="button" className="mkt-banner__accept" onClick={() => choose('marketing')}>
-          Accept all
+          Okay
+        </button>
+        <button type="button" className="mkt-banner__ghost" onClick={() => choose('essential')}>
+          Reject
         </button>
       </div>
     </div>
