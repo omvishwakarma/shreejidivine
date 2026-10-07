@@ -42,8 +42,8 @@ export function applyCartRewards(subtotal, rewards, maxDiscount = Infinity) {
   const cap = Math.min(spent, Math.max(0, Number(maxDiscount) || 0))
   const tiers = Array.isArray(rewards) ? rewards : []
   const offers = []
-  let room = cap
   let freeShipping = false
+  let best = null
 
   for (const tier of tiers) {
     if (!tier || spent < Number(tier.amount)) continue
@@ -51,10 +51,12 @@ export function applyCartRewards(subtotal, rewards, maxDiscount = Infinity) {
       freeShipping = true
     }
     const off = moneyOff(tier)
-    if (off <= 0 || room <= 0) continue
-    const applied = Math.min(off, room)
-    room -= applied
-    offers.push({ label: tier.label, off: applied })
+    if (off <= 0) continue
+    if (!best || off > best.off) best = { label: tier.label, off }
+  }
+
+  if (best && cap > 0) {
+    offers.push({ label: best.label, off: Math.min(best.off, cap) })
   }
 
   const discount = offers.reduce((sum, offer) => sum + offer.off, 0)
