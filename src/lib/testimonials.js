@@ -125,6 +125,7 @@ export function normalizeTestimonial(raw, index = 0) {
     name: String(raw?.name || '').trim() || 'Customer',
     handle,
     photo: String(raw?.photo || '').trim(),
+    video: String(raw?.video || '').trim(),
     instagram,
     active: raw?.active !== false,
     sortOrder: Number.isFinite(Number(raw?.sortOrder)) ? Number(raw.sortOrder) : index,
@@ -136,6 +137,6 @@ export function normalizeTestimonials(list) {
   const source = arr.length ? arr : DEFAULT_TESTIMONIALS
   return source
     .map((item, i) => normalizeTestimonial(item, i))
-    .filter((item) => item.quote && item.name)
+    .filter((item) => item.name && (item.video || item.quote || item.instagram))
     .sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id))
 }

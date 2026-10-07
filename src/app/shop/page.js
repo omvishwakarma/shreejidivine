@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
 import ShopClient from './ShopClient'
+import { SITE_DESCRIPTION } from '../../lib/site'
 
 export const metadata = {
   title: 'Shop',
-  description:
-    'Shop Shreeji Divine Aroma Stones — Divine Ritual Kit, Mogra Royale, Rose Majesty, Lavender Bliss & Royal Chandan.',
+  description: SITE_DESCRIPTION,
 }
 
 export default function ShopPage() {

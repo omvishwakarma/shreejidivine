@@ -4,7 +4,7 @@ import {
   SITE_NAME,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
-  SITE_TAGLINE,
+  SEO_TITLE,
 } from '../lib/site'
 import Providers from '../components/Providers'
 import './globals.css'
@@ -27,7 +27,7 @@ const body = Outfit({
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} Aroma Stone | ${SITE_TAGLINE}`,
+    default: SEO_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -36,7 +36,7 @@ export const metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   applicationName: SITE_NAME,
-  category: 'Home Fragrance',
+  category: 'Spiritual Wearables',
   alternates: {
     canonical: '/',
   },
@@ -45,22 +45,22 @@ export const metadata = {
     locale: 'en_IN',
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} Aroma Stone | ${SITE_TAGLINE}`,
+    title: SEO_TITLE,
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: '/images/hero-banner.png',
-        width: 1200,
-        height: 630,
-        alt: 'Shreeji Divine Aroma Stone — premium fragrance gift set',
+        url: '/images/logo.png',
+        width: 1024,
+        height: 1024,
+        alt: SEO_TITLE,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_NAME} Aroma Stone | ${SITE_TAGLINE}`,
+    title: SEO_TITLE,
     description: SITE_DESCRIPTION,
-    images: ['/images/hero-banner.png'],
+    images: ['/images/logo.png'],
   },
   robots: {
     index: true,
@@ -75,8 +75,8 @@ export const metadata = {
   },
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
       { url: '/images/logo.png', type: 'image/png', sizes: '512x512' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
     ],
     apple: [{ url: '/images/logo.png', sizes: '180x180' }],
   },

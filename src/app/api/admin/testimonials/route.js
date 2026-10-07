@@ -11,10 +11,11 @@ import {
 const reviewSchema = z.object({
   id: z.string().max(80).optional(),
   title: z.string().max(120).optional().default(''),
-  quote: z.string().min(8).max(1200),
+  quote: z.string().max(1200).optional().default(''),
   name: z.string().min(2).max(120),
   handle: z.string().max(80).optional().default(''),
   photo: z.string().max(500).optional().default(''),
+  video: z.string().max(500).optional().default(''),
   instagram: z.string().max(400).optional().default(''),
   active: z.boolean().optional().default(true),
   sortOrder: z.number().int().min(0).max(999).optional(),
@@ -79,6 +80,7 @@ export async function PUT(request) {
           ...review,
           id: review.id || handle.replace(/^@/, '') || `review-${index}`,
           handle,
+          video: String(review.video || '').trim(),
           instagram,
           sortOrder: review.sortOrder ?? index,
         }

@@ -1,4 +1,4 @@
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_TAGLINE, CONTACT_EMAIL } from '../lib/site'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_TAGLINE, SEO_TITLE, CONTACT_EMAIL } from '../lib/site'
 
 export default function JsonLd() {
   const organization = {
@@ -36,83 +36,39 @@ export default function JsonLd() {
     '@type': 'WebSite',
     '@id': `${SITE_URL}/#website`,
     url: SITE_URL,
-    name: `${SITE_NAME} Aroma Stone`,
+    name: 'Shreeji Divine Spiritual Wearables',
     description: SITE_DESCRIPTION,
     publisher: { '@id': `${SITE_URL}/#organization` },
     inLanguage: 'en-IN',
   }
 
   const products = [
-    {
-      name: 'Mogra Royale Aroma Stone',
-      description:
-        'Traditional temple mogra (jasmine) fragrance with handcrafted Ganesh Ji aroma stone. Long-lasting, reusable & gift-ready.',
-      image: `${SITE_URL}/images/aroma-variants.png`,
-      sku: 'SD-MOGRA',
-      color: 'Green',
-    },
-    {
-      name: 'Rose Majesty Aroma Stone',
-      description:
-        'Royal rose fragrance with handcrafted lotus/Om aroma stone. Premium floral aroma for home and pooja room.',
-      image: `${SITE_URL}/images/aroma-variants.png`,
-      sku: 'SD-ROSE',
-      color: 'Red',
-    },
-    {
-      name: 'Lavender Bliss Aroma Stone',
-      description:
-        'Calming lavender fragrance with Charan Paduka aroma stone. Perfect for meditation and peaceful spaces.',
-      image: `${SITE_URL}/images/aroma-variants.png`,
-      sku: 'SD-LAVENDER',
-      color: 'Purple',
-    },
-    {
-      name: 'Royal Chandan Aroma Stone',
-      description:
-        'Sacred sandalwood fragrance with Kalash aroma stone. Purity, positivity and traditional divine aroma.',
-      image: `${SITE_URL}/images/aroma-variants.png`,
-      sku: 'SD-CHANDAN',
-      color: 'Gold',
-    },
+    'Rudraksha bracelets',
+    'Rudraksha malas',
+    'Karungali malas',
+    'Pyrite bands',
+    'Nepali Rudraksha',
   ]
 
   const productList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Shreeji Divine Aroma Stone Collection',
-    description:
-      'Four premium aroma stone & fragrance oil gift sets by Shreeji Divine.',
+    name: 'Certified Rudraksha Wearables',
+    description: SITE_DESCRIPTION,
     numberOfItems: products.length,
-    itemListElement: products.map((p, i) => ({
+    itemListElement: products.map((name, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       item: {
         '@type': 'Product',
-        name: p.name,
-        description: p.description,
-        image: p.image,
-        sku: p.sku,
+        name,
+        description: SITE_DESCRIPTION,
+        image: `${SITE_URL}/images/logo.png`,
         brand: {
           '@type': 'Brand',
           name: SITE_NAME,
         },
-        color: p.color,
-        material: 'Natural gypsum and clay',
-        countryOfOrigin: {
-          '@type': 'Country',
-          name: 'India',
-        },
-        offers: {
-          '@type': 'Offer',
-          url: `${SITE_URL}/#products`,
-          availability: 'https://schema.org/InStock',
-          priceCurrency: 'INR',
-          seller: {
-            '@type': 'Organization',
-            name: SITE_NAME,
-          },
-        },
+        url: `${SITE_URL}/shop`,
       },
     })),
   }
@@ -122,7 +78,7 @@ export default function JsonLd() {
     '@type': 'WebPage',
     '@id': `${SITE_URL}/#webpage`,
     url: SITE_URL,
-    name: `${SITE_NAME} Aroma Stone | ${SITE_TAGLINE}`,
+    name: SEO_TITLE,
     description: SITE_DESCRIPTION,
     isPartOf: { '@id': `${SITE_URL}/#website` },
     about: { '@id': `${SITE_URL}/#organization` },
@@ -139,34 +95,26 @@ export default function JsonLd() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'What is Shreeji Divine Aroma Stone?',
+        name: 'What does Shreeji Divine sell?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Shreeji Divine Aroma Stone is a premium fragrance diffuser stone made from natural gypsum and clay. Add a few drops of signature fragrance oil to enjoy a long-lasting, smoke-free divine aroma at home, pooja room or office.',
+          text: 'Shreeji Divine sells certified spiritual wearables: Rudraksha bracelets, malas, Karungali malas, Pyrite bands, and Nepali Rudraksha.',
         },
       },
       {
         '@type': 'Question',
-        name: 'How do I use an aroma stone?',
+        name: 'How do I find the right spiritual wearable?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Place the aroma stone on a clean dry surface, add 3–5 drops of Shreeji Divine fragrance oil, enjoy the aroma, and refill with 2–3 drops when the fragrance fades. The stone is reusable.',
+          text: 'Japam helps you to find the right spiritual wearables for your needs.',
         },
       },
       {
         '@type': 'Question',
-        name: 'What fragrances are available?',
+        name: 'Do you offer delivery and cash on delivery?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Four signature fragrances: Mogra Royale, Rose Majesty, Lavender Bliss, and Royal Chandan (sandalwood).',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'What is included in the Divine Ritual Kit?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'The kit includes 4 divine aroma stones, 4 signature fragrance oils (10ml each), a ritual guide, a blessing card, and a premium magnetic gift box (24 × 20 × 4.5 cm).',
+          text: 'Yes. Next Day Dispatch, Free Delivery, and COD are available.',
         },
       },
     ],

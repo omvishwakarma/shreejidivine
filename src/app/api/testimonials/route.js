@@ -2,6 +2,33 @@ import { NextResponse } from 'next/server'
 import { dbConnect } from '@/lib/mongo/db'
 import { StoreSettings, STORE_SETTINGS_DEFAULTS } from '@/lib/mongo/StoreSettings'
 import { DEFAULT_TESTIMONIALS, normalizeTestimonials } from '@/lib/testimonials'
+import { fetchEmbedMedia } from '@/lib/instagramEmbed'
+import { instagramShortcode } from '@/lib/instagramShop'
+
+function directVideo(url) {
+  return /^(https?:\/\/|\/)/.test(url) && /\.(mp4|webm|mov)(\?|$)/i.test(url)
+}
+
+async function withPlayback(reviews) {
+  return Promise.all(
+    reviews.map(async (review) => {
+      const video = String(review.video || '').trim()
+      if (!video) return { ...review, playback: '', poster: '', embed: '' }
+      if (directVideo(video) || video.startsWith('/')) {
+        return { ...review, playback: video, poster: '', embed: '' }
+      }
+      const code = instagramShortcode(video)
+      if (!code) return { ...review, playback: '', poster: '', embed: '' }
+      const media = await fetchEmbedMedia(video).catch(() => ({ thumbnail: '', videoUrl: '' }))
+      return {
+        ...review,
+        playback: media.videoUrl || '',
+        poster: media.thumbnail || '',
+        embed: media.videoUrl ? '' : `https://www.instagram.com/reel/${code}/embed/`,
+      }
+    })
+  )
+}
 
 export const revalidate = 60
 
@@ -32,17 +59,18 @@ export async function GET() {
       )
     }
 
-    const reviews = (settings.testimonials || [])
-      .filter((r) => r.active !== false)
-      .map((r) => ({
-        id: r.id,
-        title: r.title,
-        quote: r.quote,
-        name: r.name,
-        handle: r.handle,
-        photo: r.photo,
-        instagram: r.instagram,
-      }))
+    const reviews = await withPlayback(
+      (settings.testimonials || [])
+        .filter((r) => r.active !== false)
+        .map((r) => ({
+          id: r.id,
+          name: r.name,
+          handle: r.handle,
+          photo: r.photo,
+          video: r.video || '',
+          instagram: r.instagram,
+        }))
+    )
 
     return NextResponse.json(
       { enabled: true, reviews },

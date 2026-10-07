@@ -71,10 +71,11 @@ const testimonialSchema = new mongoose.Schema(
   {
     id: { type: String, default: '' },
     title: { type: String, default: '' },
-    quote: { type: String, required: true },
+    quote: { type: String, default: '' },
     name: { type: String, required: true },
     handle: { type: String, default: '' },
     photo: { type: String, default: '' },
+    video: { type: String, default: '' },
     instagram: { type: String, default: '' },
     active: { type: Boolean, default: true },
     sortOrder: { type: Number, default: 0 },

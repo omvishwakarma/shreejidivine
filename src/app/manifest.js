@@ -2,7 +2,7 @@ import { SITE_NAME, SITE_DESCRIPTION } from '../lib/site'
 
 export default function manifest() {
   return {
-    name: `${SITE_NAME} Aroma Stone`,
+    name: 'Shreeji Divine Spiritual Wearables',
     short_name: SITE_NAME,
     description: SITE_DESCRIPTION,
     start_url: '/',

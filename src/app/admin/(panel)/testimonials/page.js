@@ -13,6 +13,7 @@ function emptyReview(index = 0) {
     name: '',
     handle: '',
     photo: '',
+    video: '',
     instagram: '',
     active: true,
     sortOrder: index,
@@ -80,11 +81,12 @@ export default function AdminTestimonialsPage() {
           name: String(review.name || '').trim(),
           handle: String(review.handle || '').trim(),
           photo: String(review.photo || '').trim(),
+          video: String(review.video || '').trim(),
           instagram: String(review.instagram || '').trim(),
           active: review.active !== false,
           sortOrder: i,
         }))
-        .filter((review) => review.quote && review.name),
+        .filter((review) => review.name && (review.video || review.quote || review.instagram)),
     }
 
     const data = await adminApi('/api/admin/testimonials', {
@@ -117,20 +119,21 @@ export default function AdminTestimonialsPage() {
     setMsg('')
     try {
       const instagram = form.instagram.trim()
-      const handle = form.handle.trim() || instagramHandleFromUrl(instagram)
+      const video = form.video.trim()
+      const handle = instagramHandleFromUrl(instagram)
       const nextReview = {
         ...form,
-        title: form.title.trim() || 'Customer review',
-        quote: form.quote.trim(),
+        title: '',
+        quote: '',
         name: form.name.trim(),
         handle,
         photo: form.photo.trim(),
+        video,
         instagram,
         id: form.id || handle.replace(/^@/, '') || `review-${Date.now()}`,
       }
-      if (!nextReview.quote || !nextReview.name) {
-        throw new Error('Name and review text are required')
-      }
+      if (!nextReview.name) throw new Error('Name is required')
+      if (!nextReview.video) throw new Error('Review video link is required')
 
       const nextReviews = [...reviews]
       if (editingIndex === null) nextReviews.push(nextReview)
@@ -228,7 +231,7 @@ export default function AdminTestimonialsPage() {
           <p className="admin-kicker">Homepage</p>
           <h1 className="admin-page-title">Testimonials</h1>
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            Manage customer reviews, photos, and Instagram links
+            Name, review video, and Instagram profile for the homepage
           </p>
         </div>
         <button type="button" className="admin-btn admin-btn-primary" onClick={openAdd}>
@@ -265,7 +268,7 @@ export default function AdminTestimonialsPage() {
         <div className="admin-card__head">
           <div>
             <h2>Reviews list</h2>
-            <p>Edit name, quote, photo, and Instagram profile URL.</p>
+            <p>Name, review video link, and profile link.</p>
           </div>
         </div>
 
@@ -283,8 +286,8 @@ export default function AdminTestimonialsPage() {
                 <tr>
                   <th style={{ width: 48 }}>#</th>
                   <th>Customer</th>
-                  <th>Review</th>
-                  <th>Instagram</th>
+                  <th>Video</th>
+                  <th>Profile</th>
                   <th>Status</th>
                   <th style={{ width: 220 }}>Actions</th>
                 </tr>
@@ -310,13 +313,18 @@ export default function AdminTestimonialsPage() {
                       </div>
                     </td>
                     <td>
-                      <div>
-                        <strong style={{ fontSize: '0.88rem' }}>{review.title}</strong>
-                        <div className="admin-muted" style={{ marginTop: 4, maxWidth: 280 }}>
-                          {review.quote.slice(0, 90)}
-                          {review.quote.length > 90 ? '…' : ''}
-                        </div>
-                      </div>
+                      {review.video ? (
+                        <a
+                          href={review.video}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="admin-ig-look-cell__link"
+                        >
+                          Video
+                        </a>
+                      ) : (
+                        <span className="admin-muted">—</span>
+                      )}
                     </td>
                     <td>
                       {review.instagram ? (
@@ -409,7 +417,7 @@ function ReviewForm({ form, setForm, uploading, saving, isEdit, onClose, onSubmi
       <div className="admin-card__head">
         <div>
           <h2>{isEdit ? 'Edit review' : 'Add review'}</h2>
-          <p>Customer name, quote, optional photo and Instagram URL.</p>
+          <p>Name, the review video link, and the Instagram profile link.</p>
         </div>
         <button type="button" className="admin-btn admin-btn-ghost" onClick={onClose}>
           Close
@@ -426,26 +434,18 @@ function ReviewForm({ form, setForm, uploading, saving, isEdit, onClose, onSubmi
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
         </label>
-        <label className="admin-field">
-          <span>Title</span>
+        <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
+          <span>Review video link</span>
           <input
-            type="text"
-            value={form.title}
-            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            placeholder="Short headline"
+            type="url"
+            required
+            placeholder="https://www.instagram.com/reel/…"
+            value={form.video}
+            onChange={(e) => setForm((f) => ({ ...f, video: e.target.value }))}
           />
         </label>
         <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
-          <span>Review text</span>
-          <textarea
-            required
-            rows={4}
-            value={form.quote}
-            onChange={(e) => setForm((f) => ({ ...f, quote: e.target.value }))}
-          />
-        </label>
-        <label className="admin-field">
-          <span>Instagram profile URL</span>
+          <span>Profile link</span>
           <input
             type="url"
             placeholder="https://www.instagram.com/username/"
@@ -455,18 +455,9 @@ function ReviewForm({ form, setForm, uploading, saving, isEdit, onClose, onSubmi
               setForm((f) => ({
                 ...f,
                 instagram,
-                handle: f.handle || instagramHandleFromUrl(instagram),
+                handle: instagramHandleFromUrl(instagram),
               }))
             }}
-          />
-        </label>
-        <label className="admin-field">
-          <span>Handle</span>
-          <input
-            type="text"
-            placeholder="@username"
-            value={form.handle}
-            onChange={(e) => setForm((f) => ({ ...f, handle: e.target.value }))}
           />
         </label>
         <label className="admin-toggle" style={{ gridColumn: '1 / -1' }}>

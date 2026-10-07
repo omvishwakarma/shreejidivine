@@ -4,26 +4,24 @@ export const SITE_NAME = 'Shreeji Divine'
 
 export const SITE_TAGLINE = 'A FRAGRANCE OF DIVINITY'
 
+export const SEO_TITLE = 'Shreeji Divine Spiritual Wearables | Certified Rudraksha Wearables'
+
 export const SITE_DESCRIPTION =
-  'Buy Shreeji Divine Aroma Stone — premium handcrafted fragrance stones & oils. Mogra Royale, Rose Majesty, Lavender Bliss & Royal Chandan. Smoke-free divine aroma for home, pooja room, office & gifting. Made in India.'
+  'Rudraksha bracelets, malas, Karungali malas, Pyrite bands, Nepali Rudraksha. Japam helps you to find the right spiritual wearables for your needs. Next Day Dispatch. Free Delivery. COD Available.'
 
 export const SITE_KEYWORDS = [
   'Shreeji Divine',
-  'Aroma Stone',
-  'fragrance stone',
-  'aroma oil India',
-  'pooja room fragrance',
-  'divine fragrance',
-  'A FRAGRANCE OF DIVINITY',
-  'Mogra Royale',
-  'Rose Majesty',
-  'Lavender Bliss',
-  'Royal Chandan',
-  'sandalwood aroma',
-  'premium gift India',
-  'smoke free fragrance',
-  'handmade aroma stone',
-  'temple fragrance at home',
+  'Spiritual Wearables',
+  'Certified Rudraksha',
+  'Rudraksha bracelets',
+  'Rudraksha malas',
+  'Karungali malas',
+  'Pyrite bands',
+  'Nepali Rudraksha',
+  'Japam',
+  'Next Day Dispatch',
+  'Free Delivery',
+  'COD',
 ]
 
 export const CONTACT_EMAIL = 'hello@shreejidivinearoma.com'

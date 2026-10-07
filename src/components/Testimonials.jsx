@@ -1,7 +1,41 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Testimonials.css'
+
+function ReviewVideo({ src, poster, embed }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    return () => ref.current?.pause()
+  }, [src])
+
+  if (src) {
+    return (
+      <video
+        ref={ref}
+        className="testimonials__video"
+        src={src}
+        poster={poster || undefined}
+        controls
+        playsInline
+        preload="metadata"
+      />
+    )
+  }
+
+  if (!embed) return null
+
+  return (
+    <iframe
+      className="testimonials__embed"
+      src={embed}
+      title="Instagram review"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowFullScreen
+    />
+  )
+}
 
 export default function Testimonials() {
   const [reviews, setReviews] = useState([])
@@ -149,20 +183,22 @@ export default function Testimonials() {
               ))}
             </div>
 
-            <blockquote className="testimonials__quote reveal" key={review.id || review.handle}>
-              <h3>{review.title}</h3>
-              <p>{review.quote}</p>
-              <footer>
-                —{' '}
-                {review.instagram ? (
-                  <a href={review.instagram} target="_blank" rel="noopener noreferrer">
-                    {review.name}
-                  </a>
-                ) : (
-                  review.name
-                )}
-              </footer>
-            </blockquote>
+            {review.playback || review.embed ? (
+              <div className="testimonials__media" key={review.id || review.handle}>
+                <ReviewVideo src={review.playback} poster={review.poster} embed={review.embed} />
+              </div>
+            ) : null}
+
+            <p className="testimonials__name">
+              —{' '}
+              {review.instagram ? (
+                <a href={review.instagram} target="_blank" rel="noopener noreferrer">
+                  {review.name}
+                </a>
+              ) : (
+                review.name
+              )}
+            </p>
 
             {review.instagram ? (
               <p className="testimonials__ig">
