@@ -92,7 +92,7 @@ export default function Collections() {
                     alt={c.name}
                     width={480}
                     height={480}
-                    sizes="(max-width:700px) 45vw, 220px"
+                    sizes="(max-width:900px) 33vw, 16vw"
                   />
                 </span>
                 <span className="collections__name">{c.name}</span>

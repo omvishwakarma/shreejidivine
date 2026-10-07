@@ -29,6 +29,58 @@ function reviewAverage(reviews) {
   return total / reviews.length
 }
 
+function ShareProduct({ name, tagline }) {
+  const [note, setNote] = useState('')
+
+  async function onShare() {
+    const url = window.location.href.split('#')[0]
+    const title = toTitleCase(name)
+    const text = tagline ? `${title}. ${tagline}` : title
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title, text, url })
+        return
+      } catch (err) {
+        if (err?.name === 'AbortError') return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setNote('Link copied')
+      window.setTimeout(() => setNote(''), 2000)
+    } catch {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
+        '_blank',
+        'noopener,noreferrer'
+      )
+    }
+  }
+
+  return (
+    <button type="button" className="product-detail__share" onClick={onShare}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M12 3.5v10M8.5 7 12 3.5 15.5 7"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M7 11.5H6.2A2.2 2.2 0 0 0 4 13.7v5.6A2.2 2.2 0 0 0 6.2 21.5h11.6a2.2 2.2 0 0 0 2.2-2.2v-5.6a2.2 2.2 0 0 0-2.2-2.2H17"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+      {note || 'Share'}
+    </button>
+  )
+}
+
 function Stars({ value }) {
   const filled = Math.round(Number(value) || 0)
   return (
@@ -387,7 +439,10 @@ export default function ProductClient() {
 
             <div className="product-detail__info">
               <p className="product-card__tag">{product.tagline}</p>
-              <h1 className="ecom-title">{toTitleCase(product.name)}</h1>
+              <div className="product-detail__title-row">
+                <h1 className="ecom-title">{toTitleCase(product.name)}</h1>
+                <ShareProduct name={product.name} tagline={product.tagline} />
+              </div>
               <div className="product-detail__price">
                 <strong>{formatINR(unitPrice)}</strong>
                 {product.compareAt && !fragrances.length ? (
@@ -481,20 +536,17 @@ export default function ProductClient() {
                   <li key={h}>{h}</li>
                 ))}
               </ul>
+              {(product.reviews || []).length ? (
               <section className="product-reviews" aria-label="Reviews">
                 <div className="product-reviews__head">
                   <h2>Reviews</h2>
-                  {(product.reviews || []).length ? (
-                    <p>
-                      <Stars value={reviewAverage(product.reviews)} />
-                      <span>
-                        {reviewAverage(product.reviews).toFixed(1)} · {product.reviews.length}{' '}
-                        {product.reviews.length === 1 ? 'review' : 'reviews'}
-                      </span>
-                    </p>
-                  ) : (
-                    <p>No reviews yet.</p>
-                  )}
+                  <p>
+                    <Stars value={reviewAverage(product.reviews)} />
+                    <span>
+                      {reviewAverage(product.reviews).toFixed(1)} · {product.reviews.length}{' '}
+                      {product.reviews.length === 1 ? 'review' : 'reviews'}
+                    </span>
+                  </p>
                   {user ? (
                     <button
                       type="button"
@@ -628,6 +680,7 @@ export default function ProductClient() {
                   </ul>
                 ) : null}
               </section>
+              ) : null}
               <p className="product-detail__note">
                 Free pan-India shipping · Cash on delivery available
               </p>

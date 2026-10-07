@@ -3,6 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import './Testimonials.css'
 
+function ArrowIcon({ direction }) {
+  const d = direction === 'prev' ? 'M14.5 5.5 8 12l6.5 6.5' : 'M9.5 5.5 16 12l-6.5 6.5'
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d={d} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function SideReview({ item, onSelect }) {
   if (!item) return null
   const image = item.poster || item.photo
@@ -123,6 +132,8 @@ export default function Testimonials() {
 
   const total = reviews.length
   const review = reviews[active] || null
+  const touch = useRef(null)
+  const swiped = useRef(false)
 
   useEffect(() => {
     if (active >= total) setActive(0)
@@ -131,6 +142,46 @@ export default function Testimonials() {
   function at(offset) {
     if (!total) return null
     return reviews[(active + offset + total) % total]
+  }
+
+  function go(step) {
+    if (total < 2) return
+    setActive((index) => (index + step + total) % total)
+  }
+
+  function onTouchStart(event) {
+    const point = event.changedTouches[0]
+    const target = event.target
+    if (target instanceof HTMLVideoElement) {
+      const rect = target.getBoundingClientRect()
+      if (point.clientY > rect.top + rect.height * 0.78) {
+        touch.current = null
+        return
+      }
+    }
+    touch.current = { x: point.clientX, y: point.clientY }
+  }
+
+  function onTouchEnd(event) {
+    if (!touch.current || total < 2) return
+    const point = event.changedTouches[0]
+    const dx = point.clientX - touch.current.x
+    const dy = point.clientY - touch.current.y
+    touch.current = null
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return
+    swiped.current = true
+    window.setTimeout(() => {
+      swiped.current = false
+    }, 400)
+    go(dx < 0 ? 1 : -1)
+  }
+
+  function selectSide(step) {
+    if (swiped.current) {
+      swiped.current = false
+      return
+    }
+    go(step)
   }
 
   if (!loading && reviews.length === 0) return null
@@ -152,18 +203,42 @@ export default function Testimonials() {
           <div className="testimonials__skel" aria-hidden="true" />
         ) : (
           <>
-            <div className="testimonials__stage reveal">
-              {previous ? (
-                <SideReview item={previous} onSelect={() => setActive((active - 1 + total) % total)} />
-              ) : null}
+            <div
+              className="testimonials__stage reveal"
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
+              {previous ? <SideReview item={previous} onSelect={() => selectSide(-1)} /> : null}
 
-              <div className="testimonials__card is-current" key={review.id || review.handle}>
-                <ReviewVideo src={review.playback} poster={review.poster || review.photo} embed={review.embed} />
+              <div className="testimonials__current">
+                {total > 1 ? (
+                  <button
+                    type="button"
+                    className="testimonials__nav is-prev"
+                    aria-label="Previous review"
+                    onClick={() => go(-1)}
+                  >
+                    <ArrowIcon direction="prev" />
+                  </button>
+                ) : null}
+
+                <div className="testimonials__card is-current" key={review.id || review.handle}>
+                  <ReviewVideo src={review.playback} poster={review.poster || review.photo} embed={review.embed} />
+                </div>
+
+                {total > 1 ? (
+                  <button
+                    type="button"
+                    className="testimonials__nav is-next"
+                    aria-label="Next review"
+                    onClick={() => go(1)}
+                  >
+                    <ArrowIcon direction="next" />
+                  </button>
+                ) : null}
               </div>
 
-              {next ? (
-                <SideReview item={next} onSelect={() => setActive((active + 1) % total)} />
-              ) : null}
+              {next ? <SideReview item={next} onSelect={() => selectSide(1)} /> : null}
             </div>
 
             <div className="testimonials__stars" aria-label="5 out of 5 stars">

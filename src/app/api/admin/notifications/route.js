@@ -22,30 +22,52 @@ export async function GET(request) {
   })
 }
 
+function notificationPath(value) {
+  const raw = String(value || '').trim()
+  if (!raw) return '/'
+  if (raw.startsWith('/') && !raw.startsWith('//')) return raw.slice(0, 300)
+  try {
+    const parsed = new URL(raw)
+    const host = parsed.hostname.replace(/^www\./, '')
+    const allowed = host === 'shreejidivine.co' || host === 'shreejidivinearoma.com' || host === 'localhost'
+    if ((parsed.protocol === 'https:' || parsed.protocol === 'http:') && allowed) {
+      return `${parsed.pathname}${parsed.search}` || '/'
+    }
+  } catch {
+    /* keep the homepage path */
+  }
+  return '/'
+}
+
 export async function POST(request) {
   const gate = await requireAdmin(request)
   if (gate.error) return gate.error
-  if (!configureWebPush()) {
-    return NextResponse.json(
-      { error: 'Push keys are missing. Add VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY on the server, then redeploy.' },
-      { status: 400 }
-    )
-  }
 
   try {
+    const push = configureWebPush()
+    if (!push.ok) {
+      return NextResponse.json({ error: push.error }, { status: 400 })
+    }
     const schema = z.object({
       title: z.string().trim().min(2).max(80),
       body: z.string().trim().min(2).max(180),
       url: z.string().trim().max(300).optional(),
     })
     const data = schema.parse(await request.json())
-    const url = data.url && data.url.startsWith('/') ? data.url : '/'
+    const url = notificationPath(data.url)
     await dbConnect()
-    const devices = await PwaDevice.find({ pushEndpoint: { $ne: '' } })
+    const devices = await PwaDevice.find({
+      pushEndpoint: { $ne: '' },
+      pushP256dh: { $ne: '' },
+      pushAuth: { $ne: '' },
+    })
     let sent = 0
     let failed = 0
-    await Promise.all(
-      devices.map(async (device) => {
+    const queue = [...devices]
+    const workers = Array.from({ length: Math.min(8, queue.length) }, async () => {
+      while (queue.length) {
+        const device = queue.shift()
+        if (!device) return
         try {
           await sendWebPush(
             {
@@ -62,11 +84,16 @@ export async function POST(request) {
             device.pushEndpoint = ''
             device.pushP256dh = ''
             device.pushAuth = ''
-            await device.save()
+            try {
+              await device.save()
+            } catch (saveErr) {
+              console.error(saveErr)
+            }
           }
         }
-      })
-    )
+      }
+    })
+    await Promise.all(workers)
     const message = await PushMessage.create({
       title: data.title,
       body: data.body,

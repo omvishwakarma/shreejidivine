@@ -28,7 +28,11 @@ export default function AdminNotificationsPage() {
         method: 'POST',
         body: JSON.stringify(form),
       })
-      setMsg(`Sent to ${result.message.sent} of ${result.message.targeted} phones`)
+      setMsg(
+        result.message.targeted
+          ? `Sent to ${result.message.sent} of ${result.message.targeted} phones`
+          : 'No phone has notifications turned on. Open the installed app and allow notifications, then send again.'
+      )
       setForm({ title: '', body: '', url: '/' })
       await load()
     } catch (err) {
