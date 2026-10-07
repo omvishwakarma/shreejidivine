@@ -88,8 +88,9 @@ export default function ProductClient() {
     if (!product?.id) return
     trackMeta('ViewContent', {
       content_ids: [String(product.id)],
-      content_name: product.name,
       content_type: 'product',
+      content_name: product.name,
+      contents: [{ id: String(product.id), quantity: 1 }],
       value: Number(product.price) || 0,
       currency: 'INR',
     })

@@ -334,6 +334,20 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
+      <section className="admin-card admin-card--lg">
+        <div className="admin-card__head">
+          <div>
+            <h2>Meta catalog feed</h2>
+            <p>
+              Paste this URL in Meta Commerce Manager as the catalog data feed. Product IDs match the
+              pixel events for Advantage+ catalog ads.
+            </p>
+          </div>
+        </div>
+        <p className="admin-page-sub" style={{ margin: 0 }}>
+          <strong>https://www.shreejidivine.co/feeds/meta-catalog.csv</strong>
+        </p>
+      </section>
 
       <form className="admin-settings__form" onSubmit={onSubmit}>
         <section className="admin-card admin-card--lg">

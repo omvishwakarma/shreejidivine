@@ -52,10 +52,12 @@ export default function AddToCartButton({
           }
           addItem(product, qty, { colour: pickedColour, fragrance: pickedFragrance })
           const unit = Number(product.price) || 0
+          const contentId = String(product.id || '')
           trackMeta('AddToCart', {
-            content_ids: [String(product.id || product.slug || '')],
+            content_ids: contentId ? [contentId] : [],
             content_name: product.name,
             content_type: 'product',
+            contents: contentId ? [{ id: contentId, quantity: qty }] : [],
             value: unit * qty,
             currency: 'INR',
           })
