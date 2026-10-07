@@ -58,6 +58,12 @@ export async function PATCH(request) {
       menuIconBest: z.string().max(800).optional(),
       menuIconAbout: z.string().max(800).optional(),
       authBanner: z.string().max(800).optional(),
+      giftTabText: z.string().max(80).optional(),
+      giftTabSlug: z
+        .string()
+        .max(120)
+        .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$|^$/, 'Pick a product from the list')
+        .optional(),
     })
     const data = schema.parse(await request.json())
 

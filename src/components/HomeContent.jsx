@@ -7,7 +7,6 @@ import TrustBar from './TrustBar'
 import Collections from './Collections'
 import BestSellers from './BestSellers'
 import Testimonials from './Testimonials'
-import HowToUse from './HowToUse'
 import InstagramShop from './InstagramShop'
 import InstagramStrip from './InstagramStrip'
 import Footer from './Footer'
@@ -63,7 +62,6 @@ export default function HomeContent() {
         <InstagramShop />
         <BestSellers />
         <Testimonials />
-        <HowToUse />
         <InstagramStrip />
       </main>
       <Footer />

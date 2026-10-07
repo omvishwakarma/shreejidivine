@@ -3,11 +3,54 @@
 import { useEffect, useRef, useState } from 'react'
 import './Testimonials.css'
 
+function SideReview({ item, onSelect }) {
+  if (!item) return null
+  const image = item.poster || item.photo
+  return (
+    <button type="button" className="testimonials__card is-side" onClick={onSelect} aria-label={`Show review by ${item.name}`}>
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt="" />
+      ) : (
+        <span>{item.name}</span>
+      )}
+    </button>
+  )
+}
+
 function ReviewVideo({ src, poster, embed }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    return () => ref.current?.pause()
+    const el = ref.current
+    if (!el || !src) return undefined
+
+    const play = async () => {
+      el.muted = false
+      try {
+        await el.play()
+      } catch {
+        el.muted = true
+        try {
+          await el.play()
+        } catch {
+          /* browser blocked playback */
+        }
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) play()
+        else el.pause()
+      },
+      { threshold: 0.45 }
+    )
+    observer.observe(el)
+    return () => {
+      observer.disconnect()
+      el.pause()
+    }
   }, [src])
 
   if (src) {
@@ -19,7 +62,7 @@ function ReviewVideo({ src, poster, embed }) {
         poster={poster || undefined}
         controls
         playsInline
-        preload="metadata"
+        preload="auto"
       />
     )
   }
@@ -82,29 +125,18 @@ export default function Testimonials() {
   const review = reviews[active] || null
 
   useEffect(() => {
-    if (total < 2) return undefined
-    const id = setInterval(() => {
-      setActive((i) => (i + 1) % total)
-    }, 6000)
-    return () => clearInterval(id)
-  }, [total])
-
-  useEffect(() => {
     if (active >= total) setActive(0)
   }, [active, total])
 
-  function go(dir) {
-    if (!total) return
-    setActive((i) => (i + dir + total) % total)
-  }
-
-  function avatarIndex(offset) {
-    return (active + offset + total) % total
+  function at(offset) {
+    if (!total) return null
+    return reviews[(active + offset + total) % total]
   }
 
   if (!loading && reviews.length === 0) return null
 
-  const slots = total >= 5 ? [-2, -1, 0, 1, 2] : total >= 3 ? [-1, 0, 1] : [0]
+  const previous = total > 1 ? at(-1) : null
+  const next = total > 2 ? at(1) : null
 
   return (
     <section className="testimonials" id="testimonials" aria-labelledby="testimonials-heading">
@@ -121,58 +153,17 @@ export default function Testimonials() {
         ) : (
           <>
             <div className="testimonials__stage reveal">
-              {total > 1 ? (
-                <button
-                  type="button"
-                  className="testimonials__nav"
-                  aria-label="Previous review"
-                  onClick={() => go(-1)}
-                >
-                  ←
-                </button>
-              ) : (
-                <span className="testimonials__nav-spacer" />
-              )}
+              {previous ? (
+                <SideReview item={previous} onSelect={() => setActive((active - 1 + total) % total)} />
+              ) : null}
 
-              <div className="testimonials__avatars" aria-hidden="true">
-                {slots.map((offset) => {
-                  const idx = avatarIndex(offset)
-                  const item = reviews[idx]
-                  const isCenter = offset === 0
-                  return (
-                    <button
-                      key={offset}
-                      type="button"
-                      className={`testimonials__avatar has-photo ${
-                        isCenter ? 'is-active' : ''
-                      } is-offset-${Math.abs(offset)}`}
-                      onClick={() => setActive(idx)}
-                      tabIndex={isCenter ? -1 : 0}
-                      aria-label={`Show review by ${item.name}`}
-                    >
-                      {item.photo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.photo} alt="" />
-                      ) : (
-                        <span>{(item.name || '?').slice(0, 2).toUpperCase()}</span>
-                      )}
-                    </button>
-                  )
-                })}
+              <div className="testimonials__card is-current" key={review.id || review.handle}>
+                <ReviewVideo src={review.playback} poster={review.poster || review.photo} embed={review.embed} />
               </div>
 
-              {total > 1 ? (
-                <button
-                  type="button"
-                  className="testimonials__nav"
-                  aria-label="Next review"
-                  onClick={() => go(1)}
-                >
-                  →
-                </button>
-              ) : (
-                <span className="testimonials__nav-spacer" />
-              )}
+              {next ? (
+                <SideReview item={next} onSelect={() => setActive((active + 1) % total)} />
+              ) : null}
             </div>
 
             <div className="testimonials__stars" aria-label="5 out of 5 stars">
@@ -182,12 +173,6 @@ export default function Testimonials() {
                 </span>
               ))}
             </div>
-
-            {review.playback || review.embed ? (
-              <div className="testimonials__media" key={review.id || review.handle}>
-                <ReviewVideo src={review.playback} poster={review.poster} embed={review.embed} />
-              </div>
-            ) : null}
 
             <p className="testimonials__name">
               —{' '}

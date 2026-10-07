@@ -51,6 +51,8 @@ const DEFAULTS = {
   instagramStripPosts: [],
   testimonialsEnabled: true,
   testimonials: DEFAULT_TESTIMONIALS,
+  giftTabText: 'Claim your Free Diwali Gift',
+  giftTabSlug: '',
 }
 
 const instagramShopLookSchema = new mongoose.Schema(
@@ -153,6 +155,8 @@ const storeSettingsSchema = new mongoose.Schema(
     instagramStripCta: { type: String, default: DEFAULTS.instagramStripCta },
     instagramStripPosts: { type: [instagramStripPostSchema], default: [] },
     testimonialsEnabled: { type: Boolean, default: DEFAULTS.testimonialsEnabled },
+    giftTabText: { type: String, default: DEFAULTS.giftTabText },
+    giftTabSlug: { type: String, default: '' },
     testimonials: {
       type: [testimonialSchema],
       default: () => DEFAULT_TESTIMONIALS.map((t) => ({ ...t })),
@@ -214,6 +218,8 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     instagramStripPosts: normalizeInstagramStripPosts(this.instagramStripPosts),
     testimonialsEnabled: this.testimonialsEnabled !== false,
     testimonials,
+    giftTabText: this.giftTabText == null ? DEFAULTS.giftTabText : this.giftTabText,
+    giftTabSlug: this.giftTabSlug || '',
     updatedAt: this.updatedAt,
   }
 }

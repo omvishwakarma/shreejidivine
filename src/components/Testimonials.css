@@ -1,5 +1,5 @@
 .testimonials {
-  padding: clamp(1.35rem, 3vw, 2.15rem) 0;
+  padding: clamp(1.35rem, 3vw, 2.15rem) 0 0.35rem;
   background: #fff;
   text-align: center;
 }
@@ -19,12 +19,12 @@
 }
 
 .testimonials__stage {
+  --side-w: 12.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.5rem, 2vw, 1.5rem);
-  margin: 0 auto 1.35rem;
-  max-width: 42rem;
+  gap: 0;
+  margin: 0 auto 0.55rem;
 }
 
 .testimonials__nav-spacer {
@@ -159,30 +159,86 @@
   display: flex;
   justify-content: center;
   gap: 0.2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.35rem;
   color: #e6b422;
   font-size: 1.15rem;
   letter-spacing: 0.08em;
 }
 
-.testimonials__media {
-  display: flex;
-  justify-content: center;
-  margin: 0 auto 0.4rem;
-  padding: 0 1rem;
+.testimonials__card {
+  border: 0;
+  padding: 0;
+  border-radius: 1.15rem;
+  overflow: hidden;
+  background: #111;
+  flex-shrink: 0;
+}
+
+.testimonials__card.is-side {
+  position: relative;
+  z-index: 1;
+  width: var(--side-w);
+  height: 22rem;
+  cursor: pointer;
+  opacity: 0.92;
+  box-shadow: 0 10px 24px rgba(33, 35, 38, 0.12);
+}
+
+.testimonials__card.is-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.testimonials__card.is-side span {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0.4rem;
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.testimonials__card.is-current {
+  position: relative;
+  z-index: 2;
+  width: min(16.5rem, 58vw);
+  margin-inline: calc(var(--side-w) * -0.3);
+  box-shadow: 0 18px 40px rgba(33, 35, 38, 0.18);
 }
 
 .testimonials__video,
 .testimonials__embed {
-  width: min(100%, 18rem);
-  height: 32rem;
+  display: block;
+  width: 100%;
+  height: 29rem;
   border: 0;
-  border-radius: 1rem;
   background: #111;
 }
 
+@media (max-width: 640px) {
+  .testimonials__stage {
+    --side-w: 7.4rem;
+  }
+
+  .testimonials__card.is-side {
+    height: 13rem;
+  }
+
+  .testimonials__card.is-current {
+    width: min(12.5rem, 62vw);
+  }
+
+  .testimonials__video,
+  .testimonials__embed {
+    height: 22rem;
+  }
+}
+
 .testimonials__name {
-  margin: 1.15rem 0 0;
+  margin: 0.35rem 0 0;
   font-size: 0.92rem;
   font-style: italic;
   color: var(--text-muted);
@@ -242,7 +298,7 @@
 }
 
 .testimonials__ig {
-  margin: 0.85rem 0 0;
+  margin: 0.3rem 0 0;
   font-size: 0.82rem;
 }
 
@@ -261,7 +317,7 @@
   display: flex;
   justify-content: center;
   gap: 0.45rem;
-  margin-top: 1.75rem;
+  margin-top: 0.65rem;
 }
 
 .testimonials__dots button {

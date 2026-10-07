@@ -30,6 +30,8 @@ const EMPTY = {
   menuIconBest: '',
   menuIconAbout: '',
   authBanner: '/images/hero-banner.png',
+  giftTabText: 'Claim your Free Diwali Gift',
+  giftTabSlug: '',
 }
 
 function VideoSlot({
@@ -152,6 +154,7 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState('')
+  const [products, setProducts] = useState([])
 
   async function load() {
     const data = await adminApi('/api/admin/settings')
@@ -180,12 +183,26 @@ export default function AdminSettingsPage() {
       menuIconBest: data.settings?.menuIconBest || '',
       menuIconAbout: data.settings?.menuIconAbout || '',
       authBanner: data.settings?.authBanner || EMPTY.authBanner,
+      giftTabText: data.settings?.giftTabText ?? EMPTY.giftTabText,
+      giftTabSlug: data.settings?.giftTabSlug || '',
     })
     setNote(data.note || '')
   }
 
   useEffect(() => {
-    load()
+    Promise.all([
+      load(),
+      adminApi('/api/products/all')
+        .then((data) => {
+          const list = Array.isArray(data.products) ? data.products : []
+          setProducts(
+            list
+              .filter((product) => product.slug && product.active !== false)
+              .sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')))
+          )
+        })
+        .catch(() => setProducts([])),
+    ])
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [])
@@ -229,6 +246,8 @@ export default function AdminSettingsPage() {
           menuIconBest: form.menuIconBest.trim(),
           menuIconAbout: form.menuIconAbout.trim(),
           authBanner: form.authBanner.trim() || EMPTY.authBanner,
+          giftTabText: form.giftTabText.trim(),
+          giftTabSlug: form.giftTabSlug.trim(),
         }),
       })
       setForm({
@@ -256,6 +275,8 @@ export default function AdminSettingsPage() {
         menuIconBest: data.settings.menuIconBest || '',
         menuIconAbout: data.settings.menuIconAbout || '',
         authBanner: data.settings.authBanner || EMPTY.authBanner,
+        giftTabText: data.settings.giftTabText ?? EMPTY.giftTabText,
+        giftTabSlug: data.settings.giftTabSlug || '',
       })
       setNote(data.note || '')
       setMsg('Settings saved successfully')
@@ -315,6 +336,45 @@ export default function AdminSettingsPage() {
 
 
       <form className="admin-settings__form" onSubmit={onSubmit}>
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>Free gift button</h2>
+              <p>
+                Left sticky button, same style as Know your Product. Leave the product empty to hide it.
+              </p>
+            </div>
+          </div>
+          <div className="admin-form-grid two">
+            <label className="admin-field">
+              <span>Button text</span>
+              <input
+                type="text"
+                maxLength={80}
+                value={form.giftTabText}
+                onChange={(e) => setForm((f) => ({ ...f, giftTabText: e.target.value }))}
+              />
+            </label>
+            <label className="admin-field">
+              <span>Linked product</span>
+              <select
+                value={form.giftTabSlug}
+                onChange={(e) => setForm((f) => ({ ...f, giftTabSlug: e.target.value }))}
+              >
+                <option value="">Hidden — no product</option>
+                {form.giftTabSlug && !products.some((product) => product.slug === form.giftTabSlug) ? (
+                  <option value={form.giftTabSlug}>{form.giftTabSlug}</option>
+                ) : null}
+                {products.map((product) => (
+                  <option key={product.id || product.slug} value={product.slug}>
+                    {product.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </section>
+
         <section className="admin-card admin-card--lg">
           <div className="admin-card__head">
             <div>

@@ -1,9 +1,8 @@
 'use client'
 
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { adminApi } from '../../../../lib/adminApi'
 import { useAdminToasts } from '../../../../components/admin/adminToast'
-import { instagramHandleFromUrl } from '../../../../lib/testimonials'
 
 function emptyReview(index = 0) {
   return {
@@ -25,11 +24,9 @@ export default function AdminTestimonialsPage() {
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
   useAdminToasts(msg, error)
-  const [formOpen, setFormOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState(null)
   const [form, setForm] = useState(emptyReview())
 
@@ -46,14 +43,6 @@ export default function AdminTestimonialsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  function openAdd() {
-    setEditingIndex(null)
-    setForm(emptyReview(reviews.length))
-    setError('')
-    setMsg('')
-    setFormOpen(true)
-  }
-
   function openEdit(index) {
     const review = reviews[index]
     if (!review) return
@@ -61,13 +50,12 @@ export default function AdminTestimonialsPage() {
     setForm({ ...emptyReview(index), ...review })
     setError('')
     setMsg('')
-    setFormOpen(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function closeForm() {
-    setFormOpen(false)
     setEditingIndex(null)
-    setForm(emptyReview())
+    setForm(emptyReview(reviews.length))
   }
 
   async function persist(nextEnabled, nextReviews) {
@@ -118,19 +106,14 @@ export default function AdminTestimonialsPage() {
     setError('')
     setMsg('')
     try {
-      const instagram = form.instagram.trim()
       const video = form.video.trim()
-      const handle = instagramHandleFromUrl(instagram)
       const nextReview = {
         ...form,
         title: '',
         quote: '',
         name: form.name.trim(),
-        handle,
-        photo: form.photo.trim(),
         video,
-        instagram,
-        id: form.id || handle.replace(/^@/, '') || `review-${Date.now()}`,
+        id: form.id || `review-${Date.now()}`,
       }
       if (!nextReview.name) throw new Error('Name is required')
       if (!nextReview.video) throw new Error('Review video link is required')
@@ -201,25 +184,6 @@ export default function AdminTestimonialsPage() {
     }
   }
 
-  async function uploadPhoto(file) {
-    if (!file) return
-    setUploading(true)
-    setError('')
-    setMsg('')
-    try {
-      const body = new FormData()
-      body.append('file', file)
-      body.append('kind', 'image')
-      const data = await adminApi('/api/admin/upload', { method: 'POST', body })
-      setForm((f) => ({ ...f, photo: data.url }))
-      setMsg('Photo uploaded — save the review to apply')
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setUploading(false)
-    }
-  }
-
   if (loading) {
     return <p className="admin-page-sub">Loading testimonials…</p>
   }
@@ -231,14 +195,10 @@ export default function AdminTestimonialsPage() {
           <p className="admin-kicker">Homepage</p>
           <h1 className="admin-page-title">Testimonials</h1>
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            Name, review video, and Instagram profile for the homepage
+            Add a name and review video link
           </p>
         </div>
-        <button type="button" className="admin-btn admin-btn-primary" onClick={openAdd}>
-          + Add review
-        </button>
       </div>
-
 
       <section className="admin-card admin-card--lg">
         <div className="admin-card__head">
@@ -264,20 +224,26 @@ export default function AdminTestimonialsPage() {
         </p>
       </section>
 
+      <ReviewForm
+        form={form}
+        setForm={setForm}
+        saving={saving}
+        isEdit={editingIndex !== null}
+        onClose={closeForm}
+        onSubmit={onSubmit}
+      />
+
       <section className="admin-card admin-card--lg">
         <div className="admin-card__head">
           <div>
             <h2>Reviews list</h2>
-            <p>Name, review video link, and profile link.</p>
+            <p>Saved reviews. Edit one to change the name or video link.</p>
           </div>
         </div>
 
         {reviews.length === 0 ? (
           <div className="admin-empty">
             <p>No reviews yet.</p>
-            <button type="button" className="admin-btn admin-btn-primary" onClick={openAdd}>
-              Add first review
-            </button>
           </div>
         ) : (
           <div className="admin-table-wrap">
@@ -287,7 +253,6 @@ export default function AdminTestimonialsPage() {
                   <th style={{ width: 48 }}>#</th>
                   <th>Customer</th>
                   <th>Video</th>
-                  <th>Profile</th>
                   <th>Status</th>
                   <th style={{ width: 220 }}>Actions</th>
                 </tr>
@@ -297,20 +262,7 @@ export default function AdminTestimonialsPage() {
                   <tr key={`${review.id}-${index}`}>
                     <td>{index + 1}</td>
                     <td>
-                      <div className="admin-ig-look-cell">
-                        <div className="admin-ig-look-cell__thumb" style={{ width: 44, height: 44 }}>
-                          {review.photo ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={review.photo} alt="" />
-                          ) : (
-                            <span>{(review.name || '?').slice(0, 2).toUpperCase()}</span>
-                          )}
-                        </div>
-                        <div className="admin-ig-look-cell__meta">
-                          <strong>{review.name}</strong>
-                          <span className="admin-muted">{review.handle || '—'}</span>
-                        </div>
-                      </div>
+                      <strong>{review.name}</strong>
                     </td>
                     <td>
                       {review.video ? (
@@ -321,20 +273,6 @@ export default function AdminTestimonialsPage() {
                           className="admin-ig-look-cell__link"
                         >
                           Video
-                        </a>
-                      ) : (
-                        <span className="admin-muted">—</span>
-                      )}
-                    </td>
-                    <td>
-                      {review.instagram ? (
-                        <a
-                          href={review.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="admin-ig-look-cell__link"
-                        >
-                          Open
                         </a>
                       ) : (
                         <span className="admin-muted">—</span>
@@ -393,35 +331,18 @@ export default function AdminTestimonialsPage() {
         )}
       </section>
 
-      {formOpen ? (
-        <ReviewForm
-          form={form}
-          setForm={setForm}
-          uploading={uploading}
-          saving={saving}
-          isEdit={editingIndex !== null}
-          onClose={closeForm}
-          onSubmit={onSubmit}
-          onUpload={uploadPhoto}
-        />
-      ) : null}
     </div>
   )
 }
 
-function ReviewForm({ form, setForm, uploading, saving, isEdit, onClose, onSubmit, onUpload }) {
-  const photoId = useId()
-
+function ReviewForm({ form, setForm, saving, isEdit, onClose, onSubmit }) {
   return (
     <form className="admin-card admin-card--lg" onSubmit={onSubmit}>
       <div className="admin-card__head">
         <div>
           <h2>{isEdit ? 'Edit review' : 'Add review'}</h2>
-          <p>Name, the review video link, and the Instagram profile link.</p>
+          <p>Name and review video link.</p>
         </div>
-        <button type="button" className="admin-btn admin-btn-ghost" onClick={onClose}>
-          Close
-        </button>
       </div>
 
       <div className="admin-form-grid two">
@@ -434,7 +355,7 @@ function ReviewForm({ form, setForm, uploading, saving, isEdit, onClose, onSubmi
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
         </label>
-        <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
+        <label className="admin-field">
           <span>Review video link</span>
           <input
             type="url"
@@ -444,87 +365,15 @@ function ReviewForm({ form, setForm, uploading, saving, isEdit, onClose, onSubmi
             onChange={(e) => setForm((f) => ({ ...f, video: e.target.value }))}
           />
         </label>
-        <label className="admin-field" style={{ gridColumn: '1 / -1' }}>
-          <span>Profile link</span>
-          <input
-            type="url"
-            placeholder="https://www.instagram.com/username/"
-            value={form.instagram}
-            onChange={(e) => {
-              const instagram = e.target.value
-              setForm((f) => ({
-                ...f,
-                instagram,
-                handle: instagramHandleFromUrl(instagram),
-              }))
-            }}
-          />
-        </label>
-        <label className="admin-toggle" style={{ gridColumn: '1 / -1' }}>
-          <input
-            type="checkbox"
-            checked={form.active !== false}
-            onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
-          />
-          <span>
-            <strong>Active on homepage</strong>
-            <small>Turn off to keep saved but hidden</small>
-          </span>
-        </label>
-      </div>
-
-      <div className="admin-card__divider" />
-
-      <div className="admin-media-card" style={{ maxWidth: 320 }}>
-        <div className="admin-media-card__head">
-          <div>
-            <p className="admin-media-card__badge">Photo</p>
-            <h3>Profile photo</h3>
-          </div>
-        </div>
-        <div className="admin-media-card__preview">
-          {form.photo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={form.photo} alt="" />
-          ) : (
-            <div className="admin-empty-preview">Upload a square photo</div>
-          )}
-        </div>
-        <label htmlFor={photoId} className={`admin-dropzone ${uploading ? 'is-busy' : ''}`}>
-          <input
-            id={photoId}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              e.target.value = ''
-              onUpload(file)
-            }}
-          />
-          <span className="admin-dropzone__title">
-            {uploading ? 'Uploading…' : 'Click to upload photo'}
-          </span>
-        </label>
-        <label className="admin-field">
-          <span>Photo path</span>
-          <input
-            type="text"
-            value={form.photo}
-            onChange={(e) => setForm((f) => ({ ...f, photo: e.target.value }))}
-          />
-        </label>
       </div>
 
       <div className="admin-sticky-actions">
-        <button type="button" className="admin-btn admin-btn-ghost" onClick={onClose}>
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="admin-btn admin-btn-primary"
-          disabled={saving || uploading}
-        >
+        {isEdit ? (
+          <button type="button" className="admin-btn admin-btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+        ) : null}
+        <button type="submit" className="admin-btn admin-btn-primary" disabled={saving}>
           {saving ? 'Saving…' : isEdit ? 'Save review' : 'Add review'}
         </button>
       </div>

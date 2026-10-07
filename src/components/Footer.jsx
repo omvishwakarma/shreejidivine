@@ -41,7 +41,6 @@ export default function Footer() {
           <Link href="/shop">Shop</Link>
           <Link href="/know-your-bracelet">Know your Product</Link>
           <Link href="/#testimonials">Our Story</Link>
-          <Link href="/#how-to-use">How to Use</Link>
           <Link href="/cart">Cart</Link>
           <Link href="/profile">My Account</Link>
         </nav>
