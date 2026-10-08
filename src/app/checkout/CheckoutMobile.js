@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { discountPct, formatINR } from '../../lib/products'
 import { checkoutFieldErrors } from './checkoutValidation'
 
@@ -530,8 +531,8 @@ export default function CheckoutMobile({
                 }}
               />
               <span>
-                By confirming the order, I accept the terms of sale and privacy policy of Shreeji
-                Divine.
+                By confirming the order, I accept the{' '}
+                <Link href="/refund-policy">Refund &amp; Replacement Policy</Link> of Shreeji Divine.
               </span>
             </label>
             {fieldErrors.terms ? <p className="ck-field__error">{fieldErrors.terms}</p> : null}

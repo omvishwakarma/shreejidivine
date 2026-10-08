@@ -1,0 +1,62 @@
+.policy {
+  padding: clamp(1.5rem, 4vw, 3rem) 0 clamp(2.5rem, 6vw, 4.5rem);
+  background: #fff;
+  color: var(--brown, #2b1e16);
+}
+
+.policy__wrap {
+  max-width: 46rem;
+}
+
+.policy__title {
+  margin: 0 0 1rem;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.policy p,
+.policy li {
+  font-size: 1rem;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.policy p {
+  margin: 0 0 0.85rem;
+}
+
+.policy section {
+  margin-top: 1.75rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid rgba(43, 30, 22, 0.1);
+}
+
+.policy h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display), Cabin, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.policy h3 {
+  margin: 1rem 0 0.4rem;
+  font-size: 1.02rem;
+  font-weight: 650;
+}
+
+.policy ul,
+.policy ol {
+  margin: 0 0 0.9rem;
+  padding-left: 1.2rem;
+}
+
+.policy li {
+  margin: 0.3rem 0;
+}
+
+.policy a {
+  color: #b45615;
+  font-weight: 650;
+}

@@ -43,6 +43,7 @@ export default function Footer() {
           <Link href="/#testimonials">Our Story</Link>
           <Link href="/cart">Cart</Link>
           <Link href="/profile">My Account</Link>
+          <Link href="/refund-policy">Refund &amp; Replacement</Link>
         </nav>
 
         <nav className="footer__links footer__products" aria-label="Policies">

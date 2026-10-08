@@ -204,6 +204,11 @@
 }
 
 .ck-check input,
+.ck-terms a {
+  color: #b45615;
+  font-weight: 650;
+}
+
 .ck-terms input {
   margin-top: 0.2rem;
   accent-color: var(--brown);
