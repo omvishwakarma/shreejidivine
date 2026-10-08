@@ -1,4 +1,4 @@
-import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SITE_URL } from '../site'
+import { MAIL_FROM_EMAIL, SITE_NAME, SITE_TAGLINE, SITE_URL } from '../site'
 import { formatINR } from '../products'
 
 function siteBase() {
@@ -47,7 +47,7 @@ function emailShell({ title, preheader, bodyHtml }) {
           <tr>
             <td style="padding:18px 28px 28px;border-top:1px solid rgba(43,30,22,0.08);font-family:system-ui,-apple-system,sans-serif;font-size:12px;line-height:1.55;color:#6b5648;text-align:center;">
               ${esc(SITE_NAME)} · <a href="${esc(siteBase())}" style="color:#5c4332;">${esc(siteBase().replace(/^https?:\/\//, ''))}</a><br/>
-              Support: <a href="mailto:${esc(CONTACT_EMAIL)}" style="color:#5c4332;">${esc(CONTACT_EMAIL)}</a>
+              Support: <a href="mailto:${esc(MAIL_FROM_EMAIL)}" style="color:#5c4332;">${esc(MAIL_FROM_EMAIL)}</a>
             </td>
           </tr>
         </table>
