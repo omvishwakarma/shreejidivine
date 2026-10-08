@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { CONTACT_EMAIL, SITE_NAME, SITE_TAGLINE, SOCIAL } from '../lib/site'
+import { POLICIES } from '../lib/policies'
 import { APP_VERSION } from '../lib/appVersion'
 import './Footer.css'
 
@@ -43,16 +44,15 @@ export default function Footer() {
           <Link href="/#testimonials">Our Story</Link>
           <Link href="/cart">Cart</Link>
           <Link href="/profile">My Account</Link>
-          <Link href="/refund-policy">Refund &amp; Replacement</Link>
         </nav>
 
         <nav className="footer__links footer__products" aria-label="Policies">
-          <h2 className="footer__nav-title">Shop</h2>
-          <Link href="/shop/divine-ritual-kit">Divine Ritual Kit</Link>
-          <Link href="/shop/mogra-royale">Mogra Royale</Link>
-          <Link href="/shop/rose-majesty">Rose Majesty</Link>
-          <Link href="/shop/lavender-bliss">Lavender Bliss</Link>
-          <Link href="/shop/royal-chandan">Royal Chandan</Link>
+          <h2 className="footer__nav-title">Policies</h2>
+          {POLICIES.map((item) => (
+            <Link key={item.href} href={item.href}>
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="footer__contact">

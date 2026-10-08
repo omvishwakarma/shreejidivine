@@ -8,6 +8,21 @@
   max-width: 46rem;
 }
 
+.policy__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  margin: 0.35rem 0 1.25rem;
+}
+
+.policy__nav a {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #b45615;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .policy__title {
   margin: 0 0 1rem;
   font-family: var(--font-display), Cabin, sans-serif;
@@ -59,4 +74,21 @@
 .policy a {
   color: #b45615;
   font-weight: 650;
+}
+
+.policy__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.policy__list li {
+  margin: 0;
+  border-top: 1px solid rgba(43, 30, 22, 0.1);
+}
+
+.policy__list a {
+  display: block;
+  padding: 0.9rem 0;
+  font-size: 1.05rem;
 }

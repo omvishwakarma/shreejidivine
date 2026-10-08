@@ -4,7 +4,20 @@ import { FALLBACK_PRODUCTS } from '../lib/products'
 export default function sitemap() {
   const lastModified = new Date()
 
-  const staticRoutes = ['', '/shop', '/cart', '/login', '/signup', '/refund-policy'].map((path) => ({
+  const staticRoutes = [
+    '',
+    '/shop',
+    '/cart',
+    '/login',
+    '/signup',
+    '/policies',
+    '/refund-policy',
+    '/shipping-policy',
+    '/privacy-policy',
+    '/terms',
+    '/cashback-policy',
+    '/cancellation-policy',
+  ].map((path) => ({
     url: `${SITE_URL}${path}`,
     lastModified,
     changeFrequency: path === '' || path === '/shop' ? 'weekly' : 'monthly',

@@ -1,24 +1,17 @@
 import Link from 'next/link'
-import StoreHeader from '../../components/StoreHeader'
-import Footer from '../../components/Footer'
+import PolicyFrame from '../../components/PolicyFrame'
 import { CONTACT_EMAIL, SITE_NAME } from '../../lib/site'
 import '../ecom.css'
-import './policy.css'
 
 export const metadata = {
-  title: 'Refund & Replacement Policy',
+  title: 'Refund & Return Policy',
   description:
     'Shreeji Divine 1-day replacement policy for wrong, damaged, or defective products. Unboxing video is required. Refunds are issued as store credit except in exceptional cases.',
 }
 
 export default function RefundPolicyPage() {
   return (
-    <div className="ecom-page">
-      <StoreHeader />
-      <main className="policy" id="main-content">
-        <div className="container policy__wrap">
-          <p className="section-label">Policies</p>
-          <h1 className="policy__title">Refund &amp; Replacement Policy</h1>
+    <PolicyFrame title="Refund & Return Policy">
           <p>
             At <strong>{SITE_NAME}</strong>, we carefully inspect and pack every order before
             dispatch. However, if you receive an incorrect, damaged, or defective product, we are
@@ -272,9 +265,6 @@ export default function RefundPolicyPage() {
               <Link href="/shop">Back to shop</Link>
             </p>
           </section>
-        </div>
-      </main>
-      <Footer />
-    </div>
+    </PolicyFrame>
   )
 }

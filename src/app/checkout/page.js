@@ -865,8 +865,7 @@ export default function CheckoutPage() {
                 />
                 <span>
                   By confirming the order, I accept the{' '}
-                  <Link href="/refund-policy">Refund &amp; Replacement Policy</Link> of Shreeji
-                  Divine.
+                  <Link href="/policies">policies</Link> of Shreeji Divine.
                 </span>
               </label>
               {fieldErrors.terms ? <p className="ck-field__error">{fieldErrors.terms}</p> : null}
