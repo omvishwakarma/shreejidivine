@@ -7,6 +7,7 @@ import { useAdminToasts } from '../../../../components/admin/adminToast'
 const EMPTY = {
   shippingFee: 0,
   freeShippingMinOrder: 0,
+  codEnabled: true,
   cartRewards: [],
   heroVideoDesktop: '/videos/home.mp4',
   heroVideoMobile: '/videos/home.mp4',
@@ -161,6 +162,7 @@ export default function AdminSettingsPage() {
     setForm({
       shippingFee: data.settings?.shippingFee ?? 0,
       freeShippingMinOrder: data.settings?.freeShippingMinOrder ?? 0,
+      codEnabled: data.settings?.codEnabled !== false,
       cartRewards: data.settings?.cartRewards || [],
       heroVideoDesktop: data.settings?.heroVideoDesktop || EMPTY.heroVideoDesktop,
       heroVideoMobile: data.settings?.heroVideoMobile || EMPTY.heroVideoMobile,
@@ -218,6 +220,7 @@ export default function AdminSettingsPage() {
         body: JSON.stringify({
           shippingFee: Number(form.shippingFee) || 0,
           freeShippingMinOrder: Number(form.freeShippingMinOrder) || 0,
+          codEnabled: form.codEnabled !== false,
           cartRewards: (form.cartRewards || [])
             .map((reward) => ({
               amount: Number(reward.amount) || 0,
@@ -253,6 +256,7 @@ export default function AdminSettingsPage() {
       setForm({
         shippingFee: data.settings.shippingFee,
         freeShippingMinOrder: data.settings.freeShippingMinOrder,
+        codEnabled: data.settings.codEnabled !== false,
         cartRewards: data.settings.cartRewards || [],
         heroVideoDesktop: data.settings.heroVideoDesktop,
         heroVideoMobile: data.settings.heroVideoMobile,
@@ -672,6 +676,17 @@ export default function AdminSettingsPage() {
                 required
               />
               <small>Set 0 to disable the free-shipping threshold</small>
+            </label>
+            <label className="admin-toggle" style={{ gridColumn: '1 / -1' }}>
+              <input
+                type="checkbox"
+                checked={form.codEnabled !== false}
+                onChange={(e) => setForm((f) => ({ ...f, codEnabled: e.target.checked }))}
+              />
+              <span>
+                <strong>{form.codEnabled === false ? 'COD off' : 'Cash on delivery'}</strong>
+                <small>Turn off to hide COD at checkout. Online payment stays available.</small>
+              </span>
             </label>
           </div>
 

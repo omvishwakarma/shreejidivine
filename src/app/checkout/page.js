@@ -155,6 +155,10 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
+    if (shipSettings?.codEnabled === false) setPaymentMethod('RAZORPAY')
+  }, [shipSettings])
+
+  useEffect(() => {
     if (!loading && !user) {
       router.replace('/login?next=/checkout')
     }
@@ -418,6 +422,7 @@ export default function CheckoutPage() {
     shipSettings.cartRewards,
     Math.max(0, subtotal - discount)
   )
+  const codEnabled = shipSettings?.codEnabled !== false
   const shippingFee = shippingFeeFor(subtotal, shipSettings)
   const total = Math.max(0, subtotal - discount - rewards.discount) + shippingFee
 
@@ -444,6 +449,7 @@ export default function CheckoutPage() {
           setNotes={setNotes}
           paymentMethod={paymentMethod}
           setPaymentMethod={setPaymentMethod}
+          codEnabled={codEnabled}
           couponInput={couponInput}
           setCouponInput={setCouponInput}
           coupon={coupon}
@@ -536,12 +542,16 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="ck-field">
-                  <label htmlFor="phone">Phone</label>
+                  <label htmlFor="phone">
+                    Phone <span className="ck-req">*</span>
+                  </label>
                   <div className={`ck-input-wrap${fieldErrors.phone ? ' is-invalid' : ''}`}>
                     <span className="ck-prefix">+91</span>
                     <input
                       id="phone"
                       value={shipping.phone}
+                      required
+                      aria-required="true"
                       aria-invalid={Boolean(fieldErrors.phone)}
                       onChange={(e) => {
                         setShipping((s) => ({ ...s, phone: e.target.value }))
@@ -693,14 +703,16 @@ export default function CheckoutPage() {
                   <strong>Online</strong>
                   <span>UPI / Card</span>
                 </button>
-                <button
-                  type="button"
-                  className={`ck-pay ${paymentMethod === 'COD' ? 'is-active' : ''}`}
-                  onClick={() => setPaymentMethod('COD')}
-                >
-                  <strong>COD</strong>
-                  <span>Pay on delivery</span>
-                </button>
+                {codEnabled ? (
+                  <button
+                    type="button"
+                    className={`ck-pay ${paymentMethod === 'COD' ? 'is-active' : ''}`}
+                    onClick={() => setPaymentMethod('COD')}
+                  >
+                    <strong>COD</strong>
+                    <span>Pay on delivery</span>
+                  </button>
+                ) : null}
               </div>
             </section>
           </div>

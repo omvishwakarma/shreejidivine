@@ -53,6 +53,7 @@ const DEFAULTS = {
   testimonials: DEFAULT_TESTIMONIALS,
   giftTabText: 'Claim your Free Diwali Gift',
   giftTabSlug: '',
+  codEnabled: true,
 }
 
 const instagramShopLookSchema = new mongoose.Schema(
@@ -157,6 +158,7 @@ const storeSettingsSchema = new mongoose.Schema(
     testimonialsEnabled: { type: Boolean, default: DEFAULTS.testimonialsEnabled },
     giftTabText: { type: String, default: DEFAULTS.giftTabText },
     giftTabSlug: { type: String, default: '' },
+    codEnabled: { type: Boolean, default: true },
     testimonials: {
       type: [testimonialSchema],
       default: () => DEFAULT_TESTIMONIALS.map((t) => ({ ...t })),
@@ -220,6 +222,7 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     testimonials,
     giftTabText: this.giftTabText == null ? DEFAULTS.giftTabText : this.giftTabText,
     giftTabSlug: this.giftTabSlug || '',
+    codEnabled: this.codEnabled !== false,
     updatedAt: this.updatedAt,
   }
 }

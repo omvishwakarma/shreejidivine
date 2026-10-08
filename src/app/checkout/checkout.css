@@ -111,6 +111,11 @@
   font-weight: 500;
 }
 
+.ck-req {
+  color: #b45615;
+  letter-spacing: 0;
+}
+
 .ck-field input,
 .ck-field select {
   width: 100%;

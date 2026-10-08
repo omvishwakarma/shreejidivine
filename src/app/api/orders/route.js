@@ -66,6 +66,16 @@ export async function POST(request) {
       )
     }
 
+    if (data.paymentMethod === 'COD') {
+      const settings = await getStoreSettings()
+      if (settings.codEnabled === false) {
+        return NextResponse.json(
+          { error: 'Cash on delivery is not available right now.' },
+          { status: 400 }
+        )
+      }
+    }
+
     const { lineItems, subtotal } = await buildOrderLineItems(data.items)
     let discount = 0
     let couponCode = ''

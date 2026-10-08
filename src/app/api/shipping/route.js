@@ -17,6 +17,7 @@ export async function GET() {
         freeShippingMinOrder: 0,
         cartRewards: DEFAULT_CART_REWARDS,
         note: 'Pan-India free shipping on all orders',
+        codEnabled: true,
       },
       { status: 200 }
     )

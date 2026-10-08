@@ -32,6 +32,7 @@ export default function CheckoutMobile({
   notes,
   setNotes,
   paymentMethod,
+  codEnabled = true,
   setPaymentMethod,
   couponInput,
   setCouponInput,
@@ -221,12 +222,16 @@ export default function CheckoutMobile({
                 />
               </div>
               <div className="ck-field">
-                <label htmlFor="m-phone">Phone</label>
+                <label htmlFor="m-phone">
+                  Phone <span className="ck-req">*</span>
+                </label>
                 <div className={`ck-input-wrap${fieldErrors.phone ? ' is-invalid' : ''}`}>
                   <span className="ck-prefix">+91</span>
                   <input
                     id="m-phone"
                     value={shipping.phone}
+                    required
+                    aria-required="true"
                     aria-invalid={Boolean(fieldErrors.phone)}
                     onChange={(e) => {
                       setShipping((s) => ({ ...s, phone: e.target.value }))
@@ -504,14 +509,16 @@ export default function CheckoutMobile({
                 <strong>Online</strong>
                 <span>UPI / Card</span>
               </button>
-              <button
-                type="button"
-                className={`ck-pay ${paymentMethod === 'COD' ? 'is-active' : ''}`}
-                onClick={() => setPaymentMethod('COD')}
-              >
-                <strong>Cash on delivery</strong>
-                <span>Pay when the order arrives</span>
-              </button>
+              {codEnabled ? (
+                <button
+                  type="button"
+                  className={`ck-pay ${paymentMethod === 'COD' ? 'is-active' : ''}`}
+                  onClick={() => setPaymentMethod('COD')}
+                >
+                  <strong>Cash on delivery</strong>
+                  <span>Pay when the order arrives</span>
+                </button>
+              ) : null}
             </div>
             <label className="ck-terms">
               <input
