@@ -33,6 +33,7 @@ const EMPTY = {
   authBanner: '/images/hero-banner.png',
   giftTabText: 'Claim your Free Diwali Gift',
   giftTabSlug: '',
+  whatsappNumber: '8882301900',
 }
 
 function VideoSlot({
@@ -187,6 +188,7 @@ export default function AdminSettingsPage() {
       authBanner: data.settings?.authBanner || EMPTY.authBanner,
       giftTabText: data.settings?.giftTabText ?? EMPTY.giftTabText,
       giftTabSlug: data.settings?.giftTabSlug || '',
+      whatsappNumber: data.settings?.whatsappNumber || '',
     })
     setNote(data.note || '')
   }
@@ -251,6 +253,7 @@ export default function AdminSettingsPage() {
           authBanner: form.authBanner.trim() || EMPTY.authBanner,
           giftTabText: form.giftTabText.trim(),
           giftTabSlug: form.giftTabSlug.trim(),
+          whatsappNumber: form.whatsappNumber.trim(),
         }),
       })
       setForm({
@@ -281,6 +284,7 @@ export default function AdminSettingsPage() {
         authBanner: data.settings.authBanner || EMPTY.authBanner,
         giftTabText: data.settings.giftTabText ?? EMPTY.giftTabText,
         giftTabSlug: data.settings.giftTabSlug || '',
+        whatsappNumber: data.settings.whatsappNumber || '',
       })
       setNote(data.note || '')
       setMsg('Settings saved successfully')
@@ -389,6 +393,29 @@ export default function AdminSettingsPage() {
                   </option>
                 ))}
               </select>
+            </label>
+          </div>
+        </section>
+
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>WhatsApp chat</h2>
+              <p>Sticky chat button on the store. Leave the number empty to hide it.</p>
+            </div>
+          </div>
+          <div className="admin-form-grid two">
+            <label className="admin-field">
+              <span>WhatsApp number</span>
+              <input
+                type="tel"
+                inputMode="tel"
+                maxLength={20}
+                placeholder="8882301900"
+                value={form.whatsappNumber}
+                onChange={(e) => setForm((f) => ({ ...f, whatsappNumber: e.target.value }))}
+              />
+              <small>10-digit mobile. Country code is added automatically.</small>
             </label>
           </div>
         </section>

@@ -4,6 +4,7 @@ import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { StoreSettings, STORE_SETTINGS_DEFAULTS } from '@/lib/mongo/StoreSettings'
 import { shippingNote } from '@/lib/shipping'
 import { normalizeCartRewards } from '@/lib/cartRewards'
+import { normalizeWhatsappNumber } from '@/lib/whatsapp'
 import { isSafePublicImage } from '@/lib/media'
 
 export async function GET(request) {
@@ -65,6 +66,7 @@ export async function PATCH(request) {
         .max(120)
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$|^$/, 'Pick a product from the list')
         .optional(),
+      whatsappNumber: z.string().max(20).optional(),
     })
     const data = schema.parse(await request.json())
 
@@ -91,6 +93,21 @@ export async function PATCH(request) {
     }
 
     if (data.cartRewards) data.cartRewards = normalizeCartRewards(data.cartRewards)
+    if (data.whatsappNumber !== undefined) {
+      const raw = String(data.whatsappNumber || '').trim()
+      if (!raw) {
+        data.whatsappNumber = ''
+      } else {
+        const number = normalizeWhatsappNumber(raw)
+        if (!number) {
+          return NextResponse.json(
+            { error: 'Enter a 10-digit WhatsApp number.' },
+            { status: 400 }
+          )
+        }
+        data.whatsappNumber = number
+      }
+    }
 
     const $set = {}
     for (const key of Object.keys(data)) {

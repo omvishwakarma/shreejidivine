@@ -1,0 +1,46 @@
+.wa-chat {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(1rem + var(--cart-dock-offset, 0px) + env(safe-area-inset-bottom));
+  z-index: 68;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 3.25rem;
+  padding: 0 1rem 0 0.85rem;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 12px 28px rgba(18, 140, 70, 0.32);
+}
+
+.wa-chat svg {
+  width: 1.45rem;
+  height: 1.45rem;
+  fill: #fff;
+}
+
+.wa-chat:hover {
+  background: #1ebe5d;
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .wa-chat {
+    width: 3.25rem;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .wa-chat span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}

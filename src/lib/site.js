@@ -32,3 +32,6 @@ export const SOCIAL = {
   instagram: 'https://www.instagram.com/shreeji.divine',
   instagramHandle: '@shreeji.divine',
 }
+
+export const WHATSAPP_NUMBER = '918882301900'
+export const WHATSAPP_MESSAGE = 'Hi Shreeji Divine, I need help with a product.'

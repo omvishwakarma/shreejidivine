@@ -53,6 +53,7 @@ const DEFAULTS = {
   testimonials: DEFAULT_TESTIMONIALS,
   giftTabText: 'Claim your Free Diwali Gift',
   giftTabSlug: '',
+  whatsappNumber: '918882301900',
   codEnabled: true,
 }
 
@@ -158,6 +159,7 @@ const storeSettingsSchema = new mongoose.Schema(
     testimonialsEnabled: { type: Boolean, default: DEFAULTS.testimonialsEnabled },
     giftTabText: { type: String, default: DEFAULTS.giftTabText },
     giftTabSlug: { type: String, default: '' },
+    whatsappNumber: { type: String, default: DEFAULTS.whatsappNumber },
     codEnabled: { type: Boolean, default: true },
     testimonials: {
       type: [testimonialSchema],
@@ -222,6 +224,7 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     testimonials,
     giftTabText: this.giftTabText == null ? DEFAULTS.giftTabText : this.giftTabText,
     giftTabSlug: this.giftTabSlug || '',
+    whatsappNumber: this.whatsappNumber == null ? DEFAULTS.whatsappNumber : this.whatsappNumber,
     codEnabled: this.codEnabled !== false,
     updatedAt: this.updatedAt,
   }
