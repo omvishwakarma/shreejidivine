@@ -188,7 +188,9 @@ export default function ProfileClient() {
                     <Link key={o.id} href={`/profile/orders/${o.id}`} className="order-card">
                       <div className="order-card__top">
                         <span className="order-card__id">{o.orderNumber}</span>
-                        <span className="order-status">{o.status}</span>
+                        <span className="order-status">
+                          {o.paymentStatus === 'FAILED' ? 'Payment failed' : o.status}
+                        </span>
                       </div>
                       <p className="cart-line__meta" style={{ marginTop: '0.55rem' }}>
                         {new Date(o.createdAt).toLocaleDateString('en-IN', {

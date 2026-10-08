@@ -540,7 +540,11 @@ export default function CheckoutMobile({
         </div>
       ) : null}
 
-      {error ? <p className="ck-m__error">{error}</p> : null}
+      {error ? (
+        <p className="ck-m__error" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="ck-m__dock">
         <div className="ck-m__due">

@@ -293,7 +293,18 @@ export default function CheckoutPage() {
       throw new Error('Razorpay checkout failed to load. Please refresh and try again.')
     }
 
+    const failedMessage =
+      'Payment failed. If money was deducted, it will return to your bank in 5–7 business days. Please try again.'
+
     await new Promise((resolve, reject) => {
+      let settled = false
+      let poll = 0
+      const finish = (fn) => {
+        if (settled) return
+        settled = true
+        window.clearInterval(poll)
+        fn()
+      }
       const rzp = new window.Razorpay({
         key: payload.keyId,
         amount: payload.amount,
@@ -301,6 +312,7 @@ export default function CheckoutPage() {
         name: 'Shreeji Divine',
         description: `Order ${payload.orderNumber}`,
         order_id: payload.razorpayOrderId,
+        retry: { enabled: false },
         prefill: {
           name: payload.customer?.name || '',
           email: payload.customer?.email || user?.email || '',
@@ -320,19 +332,49 @@ export default function CheckoutPage() {
             })
             trackMeta('Purchase', purchaseMeta(items, verified.order?.total))
             clearCart()
-            router.push(`/profile/orders/${verified.order.id}?placed=1`)
-            resolve()
+            finish(() => {
+              router.push(`/profile/orders/${verified.order.id}?placed=1`)
+              resolve()
+            })
           } catch (err) {
-            reject(err)
+            finish(() => reject(err))
           }
         },
         modal: {
-          ondismiss: () => reject(new Error('Payment cancelled')),
+          ondismiss: () => {
+            finish(() => {
+              api(`/api/payments/razorpay/status?orderId=${encodeURIComponent(payload.orderId)}`)
+                .then((status) => {
+                  if (status.status === 'failed') reject(new Error(status.message || failedMessage))
+                  else reject(new Error('Payment cancelled'))
+                })
+                .catch(() => reject(new Error('Payment cancelled')))
+            })
+          },
         },
       })
-      rzp.on('payment.failed', (resp) => {
-        reject(new Error(resp?.error?.description || 'Payment failed'))
-      })
+      const closeFailed = (message) => {
+        finish(() => {
+          try {
+            rzp.close()
+          } catch {
+            /* modal may already be gone */
+          }
+          reject(new Error(message || failedMessage))
+        })
+      }
+      rzp.on('payment.failed', () => closeFailed(failedMessage))
+      poll = window.setInterval(async () => {
+        if (settled) return
+        try {
+          const status = await api(
+            `/api/payments/razorpay/status?orderId=${encodeURIComponent(payload.orderId)}`
+          )
+          if (status.status === 'failed') closeFailed(status.message || failedMessage)
+        } catch {
+          /* keep the popup open until Razorpay reports a result */
+        }
+      }, 2500)
       rzp.open()
     })
   }
@@ -842,7 +884,11 @@ export default function CheckoutPage() {
                 {couponError ? <p className="ck-coupon__error">{couponError}</p> : null}
               </div>
 
-              {error ? <p className="ck-error">{error}</p> : null}
+              {error ? (
+                <p className="ck-error" role="alert">
+                  {error}
+                </p>
+              ) : null}
 
               <button type="submit" className="ck-submit" disabled={submitting}>
                 {submitting
