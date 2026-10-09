@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { discountPct, formatINR } from '../../lib/products'
 import { checkoutFieldErrors } from './checkoutValidation'
+import CheckoutOffers from '../../components/CheckoutOffers'
 
 const STEPS = [
   { id: 'address', label: 'Address' },
@@ -53,6 +54,7 @@ export default function CheckoutMobile({
   rewardOffers = [],
   shippingFee,
   total,
+  shipSettings,
   placeOrder,
   onLeave,
 }) {
@@ -461,6 +463,8 @@ export default function CheckoutMobile({
                 </span>
               </div>
             </div>
+
+            <CheckoutOffers subtotal={subtotal} settings={shipSettings} cartItems={items} />
 
             <div className="ck-coupon">
               {coupon ? (

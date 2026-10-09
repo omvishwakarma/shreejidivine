@@ -16,6 +16,7 @@ import '../ecom.css'
 import './checkout.css'
 import { checkoutFieldErrors } from './checkoutValidation'
 import { applyCartRewards, shippingFeeFor } from '../../lib/cartRewards'
+import CheckoutOffers from '../../components/CheckoutOffers'
 import { purchaseMeta, trackMeta } from '../../lib/meta'
 
 function CheckoutSkeleton({ mobileOnly = false }) {
@@ -511,6 +512,7 @@ export default function CheckoutPage() {
           rewardOffers={rewards.offers}
           shippingFee={shippingFee}
           total={total}
+          shipSettings={shipSettings}
           placeOrder={placeOrder}
           onLeave={() => router.push('/cart')}
         />
@@ -850,6 +852,8 @@ export default function CheckoutPage() {
                   <span>{formatINR(total)}</span>
                 </div>
               </div>
+
+              <CheckoutOffers subtotal={subtotal} settings={shipSettings} cartItems={items} />
 
               <div className="ck-coupon">
                 <label htmlFor="coupon">Coupon code</label>

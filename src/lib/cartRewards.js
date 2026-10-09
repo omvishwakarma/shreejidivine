@@ -68,6 +68,18 @@ export function applyCartRewards(subtotal, rewards, maxDiscount = Infinity) {
   }
 }
 
+export function freeShippingGoal(settings) {
+  const fee = Math.max(0, Number(settings?.shippingFee) || 0)
+  if (fee <= 0) return 0
+  const minFree = Math.max(0, Number(settings?.freeShippingMinOrder) || 0)
+  if (minFree > 0) return minFree
+  const tiers = Array.isArray(settings?.cartRewards) ? settings.cartRewards : []
+  const tier = tiers.find(
+    (item) => item?.icon === 'shipping' || /free\s*shipping/i.test(String(item?.label || ''))
+  )
+  return Math.max(0, Math.round(Number(tier?.amount) || 0))
+}
+
 export function shippingFeeFor(subtotal, settings) {
   const spent = Math.max(0, Number(subtotal) || 0)
   const fee = Math.max(0, Number(settings?.shippingFee) || 0)
