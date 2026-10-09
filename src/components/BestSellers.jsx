@@ -7,34 +7,70 @@ import { api } from '../lib/api'
 import '../app/ecom.css'
 import './BestSellers.css'
 
-export default function BestSellers() {
+function Diya({ flip = false }) {
+  return (
+    <span className={`diwali-offer__diya${flip ? ' diwali-offer__diya--flip' : ''}`} aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none">
+        <path d="M10 28c0-6 6.2-10 14-10s14 4 14 10c0 5.2-6 9-14 9s-14-3.8-14-9Z" fill="#f4a03c" />
+        <path
+          d="M14 29.5c.4 3.2 4.4 5.5 10 5.5s9.6-2.3 10-5.5"
+          stroke="#c45c1a"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 18c1.2-3.2 1-6.4-.2-9.2 2.6 1.2 4.4 3.6 4.8 6.4-1.2.6-2.8 1.6-4.6 2.8Z"
+          fill="#ffb020"
+        />
+        <path d="M24 17.2c-.2-2.6.6-5.2 2-7.4" stroke="#fff4d6" strokeWidth="1.2" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+}
+
+export default function BestSellers({
+  id = 'products',
+  headingId = 'best-sellers-heading',
+  endpoint = '/api/products?best=1',
+  copyKey = 'bestSellers',
+  ariaLabel = 'Best sellers products',
+  sectionClass = '',
+  festive = false,
+  sortProducts,
+  fallbackCopy = {
+    label: 'Customer favourites',
+    title: 'Best Sellers',
+    lead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
+  },
+}) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [canPrev, setCanPrev] = useState(false)
   const [canNext, setCanNext] = useState(false)
   const railRef = useRef(null)
-  const [copy, setCopy] = useState({
-    label: 'Customer favourites',
-    title: 'Best Sellers',
-    lead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
-  })
+  const [copy, setCopy] = useState(fallbackCopy)
 
   useEffect(() => {
+    if (!copyKey) return undefined
     fetch('/api/homepage')
       .then((r) => r.json())
       .then((d) => {
-        if (d?.bestSellers) setCopy(d.bestSellers)
+        if (d?.[copyKey]) setCopy(d[copyKey])
       })
       .catch(() => {})
-  }, [])
+    return undefined
+  }, [copyKey])
 
   useEffect(() => {
-    api('/api/products?best=1')
-      .then((d) => setProducts(d.products || []))
+    api(endpoint)
+      .then((d) => {
+        const list = d.products || []
+        setProducts(typeof sortProducts === 'function' ? sortProducts(list) : list)
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [])
+  }, [endpoint, sortProducts])
 
   useEffect(() => {
     const el = railRef.current
@@ -79,14 +115,20 @@ export default function BestSellers() {
   }
 
   return (
-    <section className="best-sellers" id="products" aria-labelledby="best-sellers-heading">
+    <section
+      className={`best-sellers${sectionClass ? ` ${sectionClass}` : ''}`}
+      id={id}
+      aria-labelledby={headingId}
+    >
       <div className="container">
         <div className="best-sellers__head reveal">
-          <p className="section-label">{copy.label}</p>
-          <h2 id="best-sellers-heading" className="section-title">
+          {copy.label ? <p className="section-label">{copy.label}</p> : null}
+          <h2 id={headingId} className="section-title">
+            {festive ? <Diya /> : null}
             {copy.title}
+            {festive ? <Diya flip /> : null}
           </h2>
-          <p className="section-lead">{copy.lead}</p>
+          {copy.lead ? <p className="section-lead">{copy.lead}</p> : null}
         </div>
 
         {error ? (
@@ -119,7 +161,7 @@ export default function BestSellers() {
               className="best-sellers__rail"
               ref={railRef}
               role="region"
-              aria-label="Best sellers products"
+              aria-label={ariaLabel}
             >
             <div className="best-sellers__grid">
               {loading

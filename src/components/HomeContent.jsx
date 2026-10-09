@@ -5,6 +5,7 @@ import StoreHeader from './StoreHeader'
 import Hero from './Hero'
 import TrustBar from './TrustBar'
 import Collections from './Collections'
+import DiwaliOfferSale from './DiwaliOfferSale'
 import BestSellers from './BestSellers'
 import Testimonials from './Testimonials'
 import InstagramShop from './InstagramShop'
@@ -59,6 +60,7 @@ export default function HomeContent() {
         <Hero />
         <TrustBar />
         <Collections />
+        <DiwaliOfferSale />
         <InstagramShop />
         <BestSellers />
         <Testimonials />
