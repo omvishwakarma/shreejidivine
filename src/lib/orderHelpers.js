@@ -46,13 +46,14 @@ export async function buildOrderLineItems(items) {
       fragrance
     )
 
-    subtotal += unitPrice * item.quantity
+    const quantity = unitPrice <= 0 ? 1 : item.quantity
+    subtotal += unitPrice * quantity
     lineItems.push({
       product: product._id,
       productName: product.name,
       productSlug: product.slug,
       price: unitPrice,
-      quantity: item.quantity,
+      quantity,
       image: product.image,
       colour: colour || '',
       fragrance: fragrance || '',

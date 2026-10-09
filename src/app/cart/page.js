@@ -99,27 +99,29 @@ export default function CartPage() {
                       ) : null}
                       <p className="cart-line__unit">{formatINR(item.price)} each</p>
                       <div className="cart-line__controls">
-                        <div className="cart-qty">
-                          <button
-                            type="button"
-                            aria-label="Decrease quantity"
-                            onClick={() =>
-                              updateQty(item.lineKey || item.productId, item.quantity - 1)
-                            }
-                          >
-                            −
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button
-                            type="button"
-                            aria-label="Increase quantity"
-                            onClick={() =>
-                              updateQty(item.lineKey || item.productId, item.quantity + 1)
-                            }
-                          >
-                            +
-                          </button>
-                        </div>
+                        {Number(item.price) > 0 ? (
+                          <div className="cart-qty">
+                            <button
+                              type="button"
+                              aria-label="Decrease quantity"
+                              onClick={() =>
+                                updateQty(item.lineKey || item.productId, item.quantity - 1)
+                              }
+                            >
+                              −
+                            </button>
+                            <span>{item.quantity}</span>
+                            <button
+                              type="button"
+                              aria-label="Increase quantity"
+                              onClick={() =>
+                                updateQty(item.lineKey || item.productId, item.quantity + 1)
+                              }
+                            >
+                              +
+                            </button>
+                          </div>
+                        ) : null}
                         <button
                           type="button"
                           className="cart-remove"

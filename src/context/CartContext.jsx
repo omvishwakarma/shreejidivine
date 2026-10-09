@@ -21,6 +21,7 @@ export function CartProvider({ children }) {
             colour: i.colour || '',
             fragrance: i.fragrance || '',
             lineKey: i.lineKey || cartLineKey(i.productId, i.colour, i.fragrance),
+            quantity: Number(i.price) <= 0 ? 1 : i.quantity,
           }))
         )
       }
@@ -40,6 +41,7 @@ export function CartProvider({ children }) {
     const fragrance = String(options.fragrance || '').trim()
     const lineKey = cartLineKey(product.id, colour, fragrance)
     const price = resolveVariantPrice(product, fragrance)
+    const free = Number(price) <= 0
     const image =
       resolveVariantImage(product, colour, fragrance) || product.image
 
@@ -48,7 +50,7 @@ export function CartProvider({ children }) {
       if (existing) {
         return prev.map((i) =>
           i.lineKey === lineKey
-            ? { ...i, quantity: Math.min(20, i.quantity + qty), price, image }
+            ? { ...i, quantity: free ? 1 : Math.min(20, i.quantity + qty), price, image }
             : i
         )
       }
@@ -61,7 +63,7 @@ export function CartProvider({ children }) {
           name: product.name,
           price,
           image,
-          quantity: qty,
+          quantity: free ? 1 : qty,
           colour,
           fragrance,
         },
@@ -74,7 +76,11 @@ export function CartProvider({ children }) {
       prev
         .map((i) =>
           (i.lineKey || i.productId) === lineKey
-            ? { ...i, quantity: Math.max(0, Math.min(20, quantity)) }
+            ? {
+                ...i,
+                quantity:
+                  Number(i.price) <= 0 ? 1 : Math.max(0, Math.min(20, quantity)),
+              }
             : i
         )
         .filter((i) => i.quantity > 0)

@@ -404,22 +404,26 @@ export default function CheckoutMobile({
                   <div>
                     <h2>{item.name}</h2>
                     {variant ? <p className="ck-m__variant">{variant}</p> : null}
-                    <label className="ck-m__qty">
-                      Qty:
-                      <select
-                        aria-label={`Quantity for ${item.name}`}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateQty(item.lineKey || item.productId, Number(e.target.value))
-                        }
-                      >
-                        {Array.from({ length: 20 }, (_, index) => index + 1).map((qty) => (
-                          <option key={qty} value={qty}>
-                            {qty}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                    {Number(item.price) > 0 ? (
+                      <label className="ck-m__qty">
+                        Qty:
+                        <select
+                          aria-label={`Quantity for ${item.name}`}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateQty(item.lineKey || item.productId, Number(e.target.value))
+                          }
+                        >
+                          {Array.from({ length: 20 }, (_, index) => index + 1).map((qty) => (
+                            <option key={qty} value={qty}>
+                              {qty}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : (
+                      <p className="ck-m__qty">Qty: 1</p>
+                    )}
                     <p className="ck-m__price">
                       {off > 0 ? <span className="ck-m__off">{off}% off</span> : null}
                       {off > 0 ? <s>{formatINR(compareAt)}</s> : null}
