@@ -8,21 +8,16 @@ import { api } from '../lib/api'
 import { formatINR, toTitleCase } from '../lib/products'
 import { freeShippingGoal } from '../lib/cartRewards'
 
-function pickOffers(products, cartIds) {
-  const available = (products || []).filter(
-    (product) => product?.id && !cartIds.has(product.id) && Number(product.price) > 0
-  )
-  const discounted = available.filter(
-    (product) => Number(product.compareAt) > Number(product.price)
-  )
-  const best = available.filter((product) => product.bestSeller)
-  const kind = discounted.length ? 'discount' : 'best'
-  const pool = discounted.length ? discounted : best.length ? best : available
-  const picks = [...pool].sort((a, b) => Number(a.price) - Number(b.price)).slice(0, 3)
-  return { picks, kind }
+function pickOffers(products) {
+  return (products || [])
+    .filter((product) => {
+      const price = Number(product?.price) || 0
+      return product?.id && price > 0 && price < 300
+    })
+    .sort((a, b) => Number(a.price) - Number(b.price) || String(a.name).localeCompare(String(b.name)))
 }
 
-export default function CheckoutOffers({ subtotal, settings, cartItems = [] }) {
+export default function CheckoutOffers({ subtotal, settings }) {
   const [products, setProducts] = useState([])
   const [focus, setFocus] = useState(false)
   const goal = freeShippingGoal(settings)
@@ -31,13 +26,8 @@ export default function CheckoutOffers({ subtotal, settings, cartItems = [] }) {
   const unlocked = goal > 0 && remaining === 0
   const progress = goal > 0 ? Math.min(100, Math.round((spent / goal) * 100)) : 0
 
-  const cartIds = useMemo(
-    () => new Set(cartItems.map((item) => item.productId).filter(Boolean)),
-    [cartItems]
-  )
-  const { picks, kind } = useMemo(() => pickOffers(products, cartIds), [products, cartIds])
-  const sectionTitle = kind === 'discount' ? 'Discount Products' : 'Best Sellers'
-  const seeAllHref = kind === 'discount' ? '/shop' : '/#products'
+  const picks = useMemo(() => pickOffers(products), [products])
+  const sectionTitle = 'Under ₹300'
   const fromPrice = picks.length ? Math.min(...picks.map((product) => Number(product.price) || 0)) : 0
 
   useEffect(() => {
@@ -56,10 +46,7 @@ export default function CheckoutOffers({ subtotal, settings, cartItems = [] }) {
 
   function openOffers() {
     const el = document.getElementById('checkout-offers')
-    if (!el) {
-      window.location.href = seeAllHref
-      return
-    }
+    if (!el) return
     setFocus(true)
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     window.setTimeout(() => setFocus(false), 1600)
@@ -130,7 +117,7 @@ export default function CheckoutOffers({ subtotal, settings, cartItems = [] }) {
         >
           <div className="ck-offers__head">
             <h3>{sectionTitle}</h3>
-            <Link href={seeAllHref}>See all</Link>
+            <span>{picks.length} products</span>
           </div>
           <div className="ck-offers__grid">
             {picks.map((product) => (

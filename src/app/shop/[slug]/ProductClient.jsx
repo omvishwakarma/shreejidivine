@@ -13,7 +13,7 @@ import BuyNowButton from '../../../components/BuyNowButton'
 import InstagramShop from '../../../components/InstagramShop'
 import { api, getToken } from '../../../lib/api'
 import { useAuth } from '../../../context/AuthContext'
-import { formatINR, toTitleCase } from '../../../lib/products'
+import { discountPct, formatINR, toTitleCase } from '../../../lib/products'
 import { safePublicImage, safePublicMedia } from '../../../lib/media'
 import {
   looksLikeHtml,
@@ -118,14 +118,19 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
   const [fragrance, setFragrance] = useState('')
   /** When true, gallery thumb wins over variant image */
   const [galleryFocus, setGalleryFocus] = useState(true)
+  const [descriptionOpen, setDescriptionOpen] = useState(false)
+  const [descriptionOverflows, setDescriptionOverflows] = useState(false)
   const touchStartX = useRef(null)
+  const descriptionRef = useRef(null)
 
   useEffect(() => {
     if (!slug) return
     setRelated([])
+    setDescriptionOpen(false)
     api(`/api/products/${slug}`)
       .then((d) => {
         setProduct(d.product)
+        setDescriptionOpen(false)
         setActiveKey('img-0')
         setGalleryFocus(true)
         const colours = d.product?.colours || []
@@ -147,6 +152,18 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
       currency: 'INR',
     })
   }, [product?.id, product?.name, product?.price])
+
+  useEffect(() => {
+    const el = descriptionRef.current
+    if (!el || descriptionOpen) return undefined
+    const measure = () => {
+      setDescriptionOverflows(el.scrollHeight > el.clientHeight + 4)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [product?.description, descriptionOpen])
 
   useEffect(() => {
     if (!showRelated || !product?.id) {
@@ -248,6 +265,7 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
   const colours = product?.colours || []
   const fragrances = product?.fragrances || []
   const unitPrice = product ? resolveVariantPrice(product, fragrance) : 0
+  const priceOff = discountPct(unitPrice, fragrances.length ? 0 : product?.compareAt)
   const variantImage = product ? resolveVariantImage(product, colour, fragrance) : ''
   const canAdd =
     (!colours.length || Boolean(colour)) && (!fragrances.length || Boolean(fragrance))
@@ -430,15 +448,16 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
 
             <div className="product-detail__info">
               <p className="product-card__tag">{product.tagline}</p>
-              <div className="product-detail__title-row">
-                <h1 className="ecom-title">{toTitleCase(product.name)}</h1>
-                <ShareProduct name={product.name} tagline={product.tagline} />
-              </div>
+              <h1 className="ecom-title product-detail__title">{toTitleCase(product.name)}</h1>
               <div className="product-detail__price">
-                <strong>{formatINR(unitPrice)}</strong>
-                {product.compareAt && !fragrances.length ? (
-                  <s>{formatINR(product.compareAt)}</s>
-                ) : null}
+                <span className="product-detail__price-main">
+                  <strong>{formatINR(unitPrice)}</strong>
+                  {product.compareAt && !fragrances.length ? (
+                    <s>{formatINR(product.compareAt)}</s>
+                  ) : null}
+                  {priceOff > 0 ? <span className="product-detail__save">{priceOff}% off</span> : null}
+                </span>
+                <ShareProduct name={product.name} tagline={product.tagline} />
               </div>
 
               {colours.length || fragrances.length ? (
@@ -511,22 +530,40 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
                 </div>
               ) : null}
 
-              <div
-                className="ecom-lead product-detail__description"
-                style={{ marginTop: '1rem' }}
-                dangerouslySetInnerHTML={{
-                  __html: sanitizeProductHtml(
-                    looksLikeHtml(product.description)
-                      ? product.description
-                      : plainTextToHtml(product.description)
-                  ),
-                }}
-              />
-              <ul className="product-detail__highlights">
-                {(product.highlights || []).map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
+              {String(product.description || '').trim() ? (
+                <div className="product-detail__description-wrap">
+                  <div
+                    ref={descriptionRef}
+                    className={`ecom-lead product-detail__description${
+                      descriptionOpen ? '' : ' is-clamped'
+                    }${!descriptionOpen && descriptionOverflows ? ' is-overflow' : ''}`}
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeProductHtml(
+                        looksLikeHtml(product.description)
+                          ? product.description
+                          : plainTextToHtml(product.description)
+                      ),
+                    }}
+                  />
+                  {descriptionOverflows || descriptionOpen ? (
+                    <button
+                      type="button"
+                      className="product-detail__read-more"
+                      aria-expanded={descriptionOpen}
+                      onClick={() => setDescriptionOpen((open) => !open)}
+                    >
+                      {descriptionOpen ? 'Read less' : 'Read More..'}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              {(product.highlights || []).length ? (
+                <ul className="product-detail__highlights">
+                  {product.highlights.map((h) => (
+                    <li key={h}>{h}</li>
+                  ))}
+                </ul>
+              ) : null}
               {(product.reviews || []).length ? (
               <section className="product-reviews" aria-label="Reviews">
                 <div className="product-reviews__head">
@@ -672,9 +709,6 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
                 ) : null}
               </section>
               ) : null}
-              <p className="product-detail__note">
-                Free pan-India shipping · Cash on delivery available
-              </p>
             </div>
           </div>
         ) : null}

@@ -536,16 +536,19 @@
   color: var(--brown);
 }
 
-.ck-offers__head a {
-  font-size: 0.78rem;
-  color: #c45c1a;
+.ck-offers__head span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .ck-offers__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.65rem;
+  max-height: 28rem;
+  overflow-y: auto;
+  padding-right: 0.15rem;
 }
 
 .ck-offer {
