@@ -1,7 +1,7 @@
 .wa-chat {
   position: fixed;
   right: 1rem;
-  bottom: calc(1rem + var(--cart-dock-offset, 0px) + env(safe-area-inset-bottom));
+  bottom: calc(20% + env(safe-area-inset-bottom));
   z-index: 68;
   display: inline-flex;
   align-items: center;
