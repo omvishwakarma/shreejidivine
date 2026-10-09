@@ -13,6 +13,8 @@ const EMPTY = {
   heroVideoMobile: '/videos/home.mp4',
   heroPoster: '/images/banners/royal-chandan.png',
   heroPosterMobile: '',
+  heroImagesDesktop: [],
+  heroImagesMobile: [],
   heroHeadline: '',
   heroCtaText: 'Shop Now',
   heroCtaHref: '/shop',
@@ -149,6 +151,64 @@ function PosterSlot({ title, badge, hint, value, field, uploading, onUpload, onP
   )
 }
 
+function HeroSlides({ title, hint, images, field, portrait, uploading, onUpload, onRemove, onMove }) {
+  const inputId = useId()
+  const busy = uploading === field
+
+  return (
+    <div className="admin-hero-slides">
+      <div className="admin-hero-slides__head">
+        <div>
+          <h3>{title}</h3>
+          <p>{hint}</p>
+        </div>
+        <label htmlFor={inputId} className={`admin-dropzone admin-dropzone--sm ${busy ? 'is-busy' : ''}`}>
+          <input
+            id={inputId}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            disabled={!!uploading || images.length >= 8}
+            onChange={(e) => {
+              const files = Array.from(e.target.files || [])
+              e.target.value = ''
+              onUpload(field, files)
+            }}
+          />
+          <span className="admin-dropzone__title">{busy ? 'Uploading…' : 'Add images'}</span>
+        </label>
+      </div>
+      {images.length ? (
+        <div className={`admin-hero-slides__row${portrait ? ' is-portrait' : ''}`}>
+          {images.map((src, index) => (
+            <figure key={`${src}-${index}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="" />
+              <figcaption>
+                <button type="button" disabled={index === 0} onClick={() => onMove(field, index, -1)}>
+                  ←
+                </button>
+                <button
+                  type="button"
+                  disabled={index === images.length - 1}
+                  onClick={() => onMove(field, index, 1)}
+                >
+                  →
+                </button>
+                <button type="button" onClick={() => onRemove(field, index)}>
+                  Remove
+                </button>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <p className="admin-hero-slides__empty">No slider images yet. The video banner stays until you add some.</p>
+      )}
+    </div>
+  )
+}
+
 export default function AdminSettingsPage() {
   const [form, setForm] = useState(EMPTY)
   const [note, setNote] = useState('')
@@ -171,6 +231,8 @@ export default function AdminSettingsPage() {
       heroVideoMobile: data.settings?.heroVideoMobile || EMPTY.heroVideoMobile,
       heroPoster: data.settings?.heroPoster || EMPTY.heroPoster,
       heroPosterMobile: data.settings?.heroPosterMobile || '',
+      heroImagesDesktop: data.settings?.heroImagesDesktop || [],
+      heroImagesMobile: data.settings?.heroImagesMobile || [],
       heroHeadline: data.settings?.heroHeadline ?? '',
       heroCtaText: data.settings?.heroCtaText || EMPTY.heroCtaText,
       heroCtaHref: data.settings?.heroCtaHref || EMPTY.heroCtaHref,
@@ -238,6 +300,8 @@ export default function AdminSettingsPage() {
           heroVideoMobile: form.heroVideoMobile.trim(),
           heroPoster: form.heroPoster.trim(),
           heroPosterMobile: form.heroPosterMobile.trim(),
+          heroImagesDesktop: form.heroImagesDesktop || [],
+          heroImagesMobile: form.heroImagesMobile || [],
           heroHeadline: form.heroHeadline.trim(),
           heroCtaText: form.heroCtaText.trim() || 'Shop Now',
           heroCtaHref: form.heroCtaHref.trim() || '/shop',
@@ -271,6 +335,8 @@ export default function AdminSettingsPage() {
         heroVideoMobile: data.settings.heroVideoMobile,
         heroPoster: data.settings.heroPoster,
         heroPosterMobile: data.settings.heroPosterMobile || '',
+        heroImagesDesktop: data.settings.heroImagesDesktop || [],
+        heroImagesMobile: data.settings.heroImagesMobile || [],
         heroHeadline: data.settings.heroHeadline ?? '',
         heroCtaText: data.settings.heroCtaText,
         heroCtaHref: data.settings.heroCtaHref,
@@ -332,6 +398,51 @@ export default function AdminSettingsPage() {
     } finally {
       setUploading('')
     }
+  }
+
+  async function uploadSlides(field, files) {
+    const list = Array.from(files || []).slice(0, 8)
+    if (!list.length) return
+    setUploading(field)
+    setError('')
+    setMsg('')
+    try {
+      const urls = []
+      for (const file of list) {
+        const body = new FormData()
+        body.append('file', file)
+        body.append('kind', 'image')
+        const data = await adminApi('/api/admin/upload', { method: 'POST', body })
+        if (data.url) urls.push(data.url)
+      }
+      setForm((current) => {
+        const next = [...(current[field] || []), ...urls].filter(Boolean).slice(0, 8)
+        return { ...current, [field]: next }
+      })
+      setMsg('Slider images uploaded — click Save to apply')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading('')
+    }
+  }
+
+  function removeSlide(field, index) {
+    setForm((current) => ({
+      ...current,
+      [field]: (current[field] || []).filter((_, i) => i !== index),
+    }))
+  }
+
+  function moveSlide(field, index, dir) {
+    setForm((current) => {
+      const images = [...(current[field] || [])]
+      const next = index + dir
+      if (next < 0 || next >= images.length) return current
+      const [item] = images.splice(index, 1)
+      images.splice(next, 0, item)
+      return { ...current, [field]: images }
+    })
   }
 
   if (loading) {
@@ -469,7 +580,7 @@ export default function AdminSettingsPage() {
           <div className="admin-card__head">
             <div>
               <h2>Hero banner</h2>
-              <p>One homepage video. Upload separate desktop and mobile files.</p>
+              <p>Video stays as the fallback. Add desktop and mobile images to run an auto slider instead.</p>
             </div>
           </div>
 
@@ -519,6 +630,32 @@ export default function AdminSettingsPage() {
               uploading={uploading}
               onUpload={(field, file) => uploadMedia(field, file, 'image')}
               onPathChange={(v) => setForm((f) => ({ ...f, heroPosterMobile: v }))}
+            />
+          </div>
+
+          <div className="admin-card__divider" />
+
+          <div className="admin-hero-slides-grid">
+            <HeroSlides
+              title="Desktop slider"
+              hint="Wide images, 21:9 works best. Up to 8. They auto-slide on desktop."
+              images={form.heroImagesDesktop}
+              field="heroImagesDesktop"
+              uploading={uploading}
+              onUpload={uploadSlides}
+              onRemove={removeSlide}
+              onMove={moveSlide}
+            />
+            <HeroSlides
+              title="Mobile slider"
+              hint="Portrait images at 4:5, about 1080 × 1350. Up to 8. They auto-slide on phones."
+              images={form.heroImagesMobile}
+              field="heroImagesMobile"
+              portrait
+              uploading={uploading}
+              onUpload={uploadSlides}
+              onRemove={removeSlide}
+              onMove={moveSlide}
             />
           </div>
 

@@ -10,6 +10,8 @@ const FALLBACK = {
   mobile: '/videos/home.mp4',
   poster: '/images/banners/royal-chandan.png',
   posterMobile: '/images/banners/royal-chandan.png',
+  imagesDesktop: [],
+  imagesMobile: [],
   headline: SITE_TAGLINE,
   ctaText: 'Shop Now',
   ctaHref: '/shop',
@@ -21,6 +23,7 @@ const MOBILE_MQ = '(max-width: 860px)'
 export default function Hero() {
   const [hero, setHero] = useState(FALLBACK)
   const [isMobile, setIsMobile] = useState(false)
+  const [slide, setSlide] = useState(0)
   const videoRef = useRef(null)
 
   useEffect(() => {
@@ -34,6 +37,8 @@ export default function Hero() {
             mobile: data.mobile || FALLBACK.mobile,
             poster: data.poster || FALLBACK.poster,
             posterMobile: data.posterMobile || data.poster || FALLBACK.posterMobile,
+            imagesDesktop: Array.isArray(data.imagesDesktop) ? data.imagesDesktop : [],
+            imagesMobile: Array.isArray(data.imagesMobile) ? data.imagesMobile : [],
             headline: data.headline || FALLBACK.headline,
             ctaText: data.ctaText || FALLBACK.ctaText,
             ctaHref: data.ctaHref || FALLBACK.ctaHref,
@@ -57,14 +62,29 @@ export default function Hero() {
 
   const src = isMobile ? hero.mobile : hero.desktop
   const poster = isMobile ? hero.posterMobile || hero.poster : hero.poster
+  const slides = isMobile ? hero.imagesMobile : hero.imagesDesktop
+
+  useEffect(() => {
+    setSlide(0)
+  }, [isMobile, slides])
+
+  useEffect(() => {
+    if (slides.length < 2) return undefined
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return undefined
+    const timer = window.setInterval(() => {
+      setSlide((current) => (current + 1) % slides.length)
+    }, 4500)
+    return () => window.clearInterval(timer)
+  }, [slides])
 
   useEffect(() => {
     const el = videoRef.current
-    if (!el) return
+    if (!el || slides.length) return
     el.load()
     const play = el.play()
     if (play?.catch) play.catch(() => {})
-  }, [src, poster])
+  }, [src, poster, slides.length])
 
   return (
     <section className="hero" id="top" aria-label={`${SITE_NAME} fragrance oils`}>
@@ -73,18 +93,43 @@ export default function Hero() {
       </h1>
 
       <div className="hero__stage">
-        <video
-          key={`${src}-${poster}`}
-          ref={videoRef}
-          className="hero__video"
-          src={src}
-          poster={poster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-        />
+        {slides.length ? (
+          slides.map((image, index) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={image}
+              src={image}
+              alt=""
+              className={`hero__slide${index === slide % slides.length ? ' is-active' : ''}`}
+            />
+          ))
+        ) : (
+          <video
+            key={`${src}-${poster}`}
+            ref={videoRef}
+            className="hero__video"
+            src={src}
+            poster={poster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+          />
+        )}
+        {slides.length > 1 ? (
+          <div className="hero__dots" role="tablist" aria-label="Banner slides">
+            {slides.map((image, index) => (
+              <button
+                key={image}
+                type="button"
+                className={index === slide % slides.length ? 'is-active' : ''}
+                aria-label={`Slide ${index + 1}`}
+                onClick={() => setSlide(index)}
+              />
+            ))}
+          </div>
+        ) : null}
 
         <div className="hero__overlay">
           <p className="hero__eyebrow">{hero.brand}</p>

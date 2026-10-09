@@ -12,6 +12,19 @@ import {
   normalizeInstagramStripPosts,
 } from '@/lib/instagramStrip'
 import { resolveCartRewards } from '@/lib/cartRewards'
+import { isSafePublicImage } from '@/lib/media'
+
+function cleanHeroImages(list) {
+  if (!Array.isArray(list)) return []
+  const images = []
+  for (const item of list) {
+    const value = String(item || '').trim()
+    if (!isSafePublicImage(value) || images.includes(value)) continue
+    images.push(value)
+    if (images.length >= 8) break
+  }
+  return images
+}
 
 const DEFAULTS = {
   shippingFee: 0,
@@ -20,6 +33,8 @@ const DEFAULTS = {
   heroVideoMobile: '/videos/home.mp4',
   heroPoster: '/images/banners/royal-chandan.png',
   heroPosterMobile: '',
+  heroImagesDesktop: [],
+  heroImagesMobile: [],
   heroHeadline: '',
   heroCtaText: 'Shop Now',
   heroCtaHref: '/shop',
@@ -128,6 +143,8 @@ const storeSettingsSchema = new mongoose.Schema(
     heroVideoMobile: { type: String, default: DEFAULTS.heroVideoMobile },
     heroPoster: { type: String, default: DEFAULTS.heroPoster },
     heroPosterMobile: { type: String, default: DEFAULTS.heroPosterMobile },
+    heroImagesDesktop: { type: [String], default: [] },
+    heroImagesMobile: { type: [String], default: [] },
     heroHeadline: { type: String, default: DEFAULTS.heroHeadline },
     heroCtaText: { type: String, default: DEFAULTS.heroCtaText },
     heroCtaHref: { type: String, default: DEFAULTS.heroCtaHref },
@@ -198,6 +215,8 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     heroVideoMobile: this.heroVideoMobile || DEFAULTS.heroVideoMobile,
     heroPoster: this.heroPoster || DEFAULTS.heroPoster,
     heroPosterMobile: this.heroPosterMobile || '',
+    heroImagesDesktop: cleanHeroImages(this.heroImagesDesktop),
+    heroImagesMobile: cleanHeroImages(this.heroImagesMobile),
     heroHeadline: this.heroHeadline ?? DEFAULTS.heroHeadline,
     heroCtaText: this.heroCtaText || DEFAULTS.heroCtaText,
     heroCtaHref: this.heroCtaHref || DEFAULTS.heroCtaHref,

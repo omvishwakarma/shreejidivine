@@ -42,6 +42,8 @@ export async function PATCH(request) {
       heroVideoMobile: z.string().min(1).max(500).optional(),
       heroPoster: z.string().max(800).optional(),
       heroPosterMobile: z.string().max(800).optional(),
+      heroImagesDesktop: z.array(z.string().max(800)).max(8).optional(),
+      heroImagesMobile: z.array(z.string().max(800)).max(8).optional(),
       heroHeadline: z.string().max(200).optional(),
       heroCtaText: z.string().min(1).max(60).optional(),
       heroCtaHref: z.string().min(1).max(200).optional(),
@@ -92,6 +94,26 @@ export async function PATCH(request) {
           { status: 400 }
         )
       }
+    }
+
+    for (const key of ['heroImagesDesktop', 'heroImagesMobile']) {
+      if (!Array.isArray(data[key])) continue
+      const images = []
+      for (const item of data[key]) {
+        const value = String(item || '').trim()
+        if (!value) continue
+        if (!isSafePublicImage(value)) {
+          return NextResponse.json(
+            {
+              error:
+                'Image must be an uploaded file or a web path like /images/... Desktop file paths are not allowed.',
+            },
+            { status: 400 }
+          )
+        }
+        if (!images.includes(value)) images.push(value)
+      }
+      data[key] = images.slice(0, 8)
     }
 
     if (data.cartRewards) data.cartRewards = normalizeCartRewards(data.cartRewards)

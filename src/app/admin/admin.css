@@ -496,6 +496,78 @@
   color: var(--admin-muted);
 }
 
+.admin-hero-slides-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.admin-hero-slides h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.admin-hero-slides__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-hero-slides__head p,
+.admin-hero-slides__empty {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 0.82rem;
+}
+
+.admin-hero-slides__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+}
+
+.admin-hero-slides__row.is-portrait {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+}
+
+.admin-hero-slides__row figure {
+  margin: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.admin-hero-slides__row img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+  background: #f4efe8;
+}
+
+.admin-hero-slides__row.is-portrait img {
+  aspect-ratio: 4 / 5;
+}
+
+.admin-hero-slides__row figcaption {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.35rem;
+}
+
+.admin-hero-slides__row figcaption button {
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.25rem 0.4rem;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
 .admin-media-grid {
   display: grid;
   grid-template-columns: 1.3fr 0.85fr;
@@ -1829,7 +1901,8 @@
 }
 
 @media (max-width: 900px) {
-  .admin-media-grid {
+  .admin-media-grid,
+  .admin-hero-slides-grid {
     grid-template-columns: 1fr;
   }
 }
