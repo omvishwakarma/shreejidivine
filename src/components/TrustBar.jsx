@@ -1,6 +1,10 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { DEFAULT_TRUST_ITEMS } from '@/lib/trustBar'
 import './TrustBar.css'
 
-function IconFlameFree() {
+function IconFlame() {
   return (
     <svg viewBox="0 0 72 72" fill="none" aria-hidden="true">
       <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="1.2" />
@@ -25,7 +29,7 @@ function IconFlameFree() {
   )
 }
 
-function IconSmokeFree() {
+function IconSmoke() {
   return (
     <svg viewBox="0 0 72 72" fill="none" aria-hidden="true">
       <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="1.2" />
@@ -51,7 +55,7 @@ function IconSmokeFree() {
   )
 }
 
-function IconHandcrafted() {
+function IconLeaf() {
   return (
     <svg viewBox="0 0 72 72" fill="none" aria-hidden="true">
       <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="1.2" />
@@ -73,7 +77,7 @@ function IconHandcrafted() {
   )
 }
 
-function IconReusable() {
+function IconDiya() {
   return (
     <svg viewBox="0 0 72 72" fill="none" aria-hidden="true">
       <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="1.2" />
@@ -93,47 +97,51 @@ function IconReusable() {
   )
 }
 
-const ITEMS = [
-  {
-    id: 'flame-free',
-    title: 'Flame-Free',
-    text: 'Pure fragrance, no flame',
-    Icon: IconFlameFree,
-  },
-  {
-    id: 'smoke-free',
-    title: 'Smoke-Free',
-    text: 'Clean aroma, no ash',
-    Icon: IconSmokeFree,
-  },
-  {
-    id: 'handcrafted',
-    title: 'Handcrafted',
-    text: 'Made in India',
-    Icon: IconHandcrafted,
-  },
-  {
-    id: 'reusable',
-    title: 'Reusable',
-    text: 'Refresh with fragrance oil',
-    Icon: IconReusable,
-  },
-]
+const ICONS = {
+  flame: IconFlame,
+  smoke: IconSmoke,
+  leaf: IconLeaf,
+  diya: IconDiya,
+}
 
 export default function TrustBar() {
+  const [items, setItems] = useState(DEFAULT_TRUST_ITEMS)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/homepage')
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled || !Array.isArray(data?.trust)) return
+        setItems(data.trust.filter((item) => item.active !== false && item.title))
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!items.length) return null
+
   return (
     <section className="trust-bar" aria-label="Brand highlights">
-      <div className="container trust-bar__inner">
-        {ITEMS.map(({ id, title, text, Icon }) => (
-          <article key={id} className="trust-bar__item">
-            <span className="trust-bar__icon">
-              <Icon />
-            </span>
-            <h3 className="trust-bar__title">{title}</h3>
-            <span className="trust-bar__rule" aria-hidden="true" />
-            <p className="trust-bar__text">{text}</p>
-          </article>
-        ))}
+      <div
+        className="container trust-bar__inner"
+        style={{ '--trust-cols': Math.min(items.length, 4) }}
+      >
+        {items.map((item) => {
+          const Icon = ICONS[item.icon] || IconFlame
+          return (
+            <article key={item.id} className="trust-bar__item">
+              <span className="trust-bar__icon">
+                <Icon />
+              </span>
+              <h3 className="trust-bar__title">{item.title}</h3>
+              <span className="trust-bar__rule" aria-hidden="true" />
+              {item.text ? <p className="trust-bar__text">{item.text}</p> : null}
+            </article>
+          )
+        })}
       </div>
     </section>
   )

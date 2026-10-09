@@ -6,8 +6,8 @@ import { useAdminToasts } from '../../../../components/admin/adminToast'
 
 const DEFAULT_COPY = {
   label: 'Follow us on Instagram',
-  handle: '@shreeji.divine',
-  url: 'https://www.instagram.com/shreeji.divine',
+  handle: '@shreejidivine.co',
+  url: 'https://www.instagram.com/shreejidivine.co',
   cta: 'Visit Instagram',
 }
 

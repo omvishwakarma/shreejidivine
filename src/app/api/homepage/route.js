@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getStoreSettings } from '@/lib/shipping'
 import { STORE_SETTINGS_DEFAULTS as D } from '@/lib/mongo/StoreSettings'
+import { trustItemsFromSettings } from '@/lib/trustBar'
 
 function copyFrom(settings) {
   return {
@@ -18,6 +19,7 @@ function copyFrom(settings) {
       title: settings.homeReviewsTitle || D.homeReviewsTitle,
       lead: settings.homeReviewsLead || D.homeReviewsLead,
     },
+    trust: trustItemsFromSettings(settings.trustItems),
   }
 }
 

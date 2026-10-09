@@ -6,6 +6,7 @@ import { shippingNote } from '@/lib/shipping'
 import { normalizeCartRewards } from '@/lib/cartRewards'
 import { normalizeWhatsappNumber } from '@/lib/whatsapp'
 import { isSafePublicImage } from '@/lib/media'
+import { normalizeTrustItems } from '@/lib/trustBar'
 
 export async function GET(request) {
   const gate = await requireAdmin(request)
@@ -77,6 +78,18 @@ export async function PATCH(request) {
       homeBestLead: z.string().max(280).optional(),
       homeReviewsTitle: z.string().max(120).optional(),
       homeReviewsLead: z.string().max(280).optional(),
+      trustItems: z
+        .array(
+          z.object({
+            id: z.string().max(40).optional(),
+            icon: z.string().max(20).optional(),
+            title: z.string().max(40),
+            text: z.string().max(80).optional(),
+            active: z.boolean().optional(),
+          })
+        )
+        .max(8)
+        .optional(),
       menuIconHome: z.string().max(800).optional(),
       menuIconShop: z.string().max(800).optional(),
       menuIconBracelet: z.string().max(800).optional(),
@@ -146,6 +159,7 @@ export async function PATCH(request) {
     }
 
     if (data.cartRewards) data.cartRewards = normalizeCartRewards(data.cartRewards)
+    if (data.trustItems !== undefined) data.trustItems = normalizeTrustItems(data.trustItems)
     if (data.whatsappNumber !== undefined) {
       const raw = String(data.whatsappNumber || '').trim()
       if (!raw) {

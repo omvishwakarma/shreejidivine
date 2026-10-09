@@ -2,9 +2,29 @@ import { SOCIAL } from '@/lib/site'
 
 export const INSTAGRAM_STRIP_DEFAULTS = {
   label: 'Follow us on Instagram',
-  handle: SOCIAL.instagramHandle || '@shreeji.divine',
-  url: SOCIAL.instagram || 'https://www.instagram.com/shreeji.divine',
+  handle: SOCIAL.instagramHandle || '@shreejidivine.co',
+  url: SOCIAL.instagram || 'https://www.instagram.com/shreejidivine.co',
   cta: 'Visit Instagram',
+}
+
+const PREVIOUS_HANDLES = new Set(['@shreeji.divine', 'shreeji.divine', '@shreejidivinearoma'])
+const PREVIOUS_URLS = new Set([
+  'https://www.instagram.com/shreeji.divine',
+  'https://instagram.com/shreeji.divine',
+  'https://www.instagram.com/shreejidivinearoma',
+  'https://instagram.com/shreejidivinearoma',
+])
+
+export function currentInstagramHandle(value) {
+  const handle = String(value || '').trim()
+  if (!handle || PREVIOUS_HANDLES.has(handle.toLowerCase())) return INSTAGRAM_STRIP_DEFAULTS.handle
+  return handle
+}
+
+export function currentInstagramUrl(value) {
+  const url = String(value || '').trim().replace(/\/+$/, '')
+  if (!url || PREVIOUS_URLS.has(url.toLowerCase())) return INSTAGRAM_STRIP_DEFAULTS.url
+  return String(value || '').trim()
 }
 
 export function normalizeInstagramStripPost(raw, index = 0) {
@@ -31,8 +51,8 @@ export function instagramStripCopy(settings) {
   const d = INSTAGRAM_STRIP_DEFAULTS
   return {
     label: settings?.instagramStripLabel || d.label,
-    handle: settings?.instagramStripHandle || d.handle,
-    url: settings?.instagramStripUrl || d.url,
+    handle: currentInstagramHandle(settings?.instagramStripHandle) || d.handle,
+    url: currentInstagramUrl(settings?.instagramStripUrl) || d.url,
     cta: settings?.instagramStripCta || d.cta,
   }
 }

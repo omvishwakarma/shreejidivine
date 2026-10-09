@@ -5,8 +5,7 @@ import { SITE_NAME, SOCIAL } from '../lib/site'
 import './InstagramStrip.css'
 
 export default function InstagramStrip() {
-  const [igUrl, setIgUrl] = useState(SOCIAL.instagram || 'https://www.instagram.com/shreeji.divine/')
-  const [handle, setHandle] = useState(SOCIAL.instagramHandle || '@shreeji.divine')
+  const [igUrl, setIgUrl] = useState(SOCIAL.instagram || 'https://www.instagram.com/shreejidivine.co/')
   const [label, setLabel] = useState('Follow us on Instagram')
   const [cta, setCta] = useState('Visit Instagram')
   const [posts, setPosts] = useState([])
@@ -20,7 +19,6 @@ export default function InstagramStrip() {
       .then((data) => {
         if (cancelled) return
         if (data.profileUrl) setIgUrl(data.profileUrl)
-        if (data.handle) setHandle(data.handle)
         if (data.label) setLabel(data.label)
         if (data.cta) setCta(data.cta)
         setPosts(Array.isArray(data.posts) ? data.posts : [])
@@ -41,11 +39,8 @@ export default function InstagramStrip() {
     <section className="ig-strip" aria-labelledby="ig-strip-heading">
       <div className="container">
         <div className="ig-strip__head reveal">
-          <p className="section-label">{label}</p>
-          <h2 id="ig-strip-heading" className="section-title">
-            <a href={igUrl} target="_blank" rel="noopener noreferrer">
-              {handle}
-            </a>
+          <h2 id="ig-strip-heading" className="section-label">
+            {label}
           </h2>
           <a
             href={igUrl}

@@ -8,15 +8,6 @@
   margin-bottom: 1rem;
 }
 
-.ig-strip__head .section-title a {
-  color: inherit;
-  transition: color 0.2s;
-}
-
-.ig-strip__head .section-title a:hover {
-  color: var(--accent);
-}
-
 .ig-strip__cta {
   margin-top: 1.15rem;
 }

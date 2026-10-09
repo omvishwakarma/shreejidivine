@@ -1552,6 +1552,37 @@
   gap: 0.75rem;
 }
 
+.admin-trust__list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-trust__row {
+  display: grid;
+  grid-template-columns: 8rem 1fr 1.2fr auto;
+  gap: 0.65rem;
+  align-items: end;
+}
+
+.admin-trust__show {
+  margin: 0;
+  align-self: end;
+  min-height: 2.6rem;
+}
+
+.admin-trust__actions {
+  display: flex;
+  gap: 0.4rem;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 800px) {
+  .admin-rewards__row,
+  .admin-trust__row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-rewards__row {
   display: grid;
   grid-template-columns: 9rem 1fr 8rem auto;

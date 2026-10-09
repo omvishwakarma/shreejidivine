@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from 'react'
 import { adminApi, formatINR } from '../../../../lib/adminApi'
 import { useAdminToasts } from '../../../../components/admin/adminToast'
+import { DEFAULT_TRUST_ITEMS } from '@/lib/trustBar'
 
 const EMPTY = {
   shippingFee: 0,
@@ -27,6 +28,7 @@ const EMPTY = {
   homeBestLead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
   homeReviewsTitle: 'Testimonials',
   homeReviewsLead: 'Loved in homes across India',
+  trustItems: DEFAULT_TRUST_ITEMS,
   menuIconHome: '',
   menuIconShop: '',
   menuIconBracelet: '',
@@ -299,6 +301,9 @@ export default function AdminSettingsPage() {
       homeBestLead: data.settings?.homeBestLead || EMPTY.homeBestLead,
       homeReviewsTitle: data.settings?.homeReviewsTitle || EMPTY.homeReviewsTitle,
       homeReviewsLead: data.settings?.homeReviewsLead || EMPTY.homeReviewsLead,
+      trustItems: Array.isArray(data.settings?.trustItems)
+        ? data.settings.trustItems
+        : EMPTY.trustItems,
       menuIconHome: data.settings?.menuIconHome || '',
       menuIconShop: data.settings?.menuIconShop || '',
       menuIconBracelet: data.settings?.menuIconBracelet || '',
@@ -368,6 +373,13 @@ export default function AdminSettingsPage() {
           homeBestLead: form.homeBestLead.trim(),
           homeReviewsTitle: form.homeReviewsTitle.trim(),
           homeReviewsLead: form.homeReviewsLead.trim(),
+          trustItems: (form.trustItems || []).map((item) => ({
+            id: item.id,
+            icon: item.icon || 'flame',
+            title: String(item.title || '').trim(),
+            text: String(item.text || '').trim(),
+            active: item.active !== false,
+          })),
           menuIconHome: form.menuIconHome.trim(),
           menuIconShop: form.menuIconShop.trim(),
           menuIconBracelet: form.menuIconBracelet.trim(),
@@ -403,6 +415,9 @@ export default function AdminSettingsPage() {
         homeBestLead: data.settings.homeBestLead || EMPTY.homeBestLead,
         homeReviewsTitle: data.settings.homeReviewsTitle || EMPTY.homeReviewsTitle,
         homeReviewsLead: data.settings.homeReviewsLead || EMPTY.homeReviewsLead,
+        trustItems: Array.isArray(data.settings.trustItems)
+          ? data.settings.trustItems
+          : EMPTY.trustItems,
         menuIconHome: data.settings.menuIconHome || '',
         menuIconShop: data.settings.menuIconShop || '',
         menuIconBracelet: data.settings.menuIconBracelet || '',
@@ -840,6 +855,153 @@ export default function AdminSettingsPage() {
               onPathChange={(v) => setForm((f) => ({ ...f, menuIconAbout: v }))}
             />
           </div>
+        </section>
+
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>Trust banner</h2>
+              <p>The icon row under the homepage banner. Turn an item off to hide it, or edit the words.</p>
+            </div>
+            <button
+              type="button"
+              className="admin-btn admin-btn-ghost"
+              onClick={() =>
+                setForm((current) => ({
+                  ...current,
+                  trustItems: [
+                    ...(current.trustItems || []),
+                    {
+                      id: `trust-${Date.now()}`,
+                      icon: 'flame',
+                      title: '',
+                      text: '',
+                      active: true,
+                    },
+                  ].slice(0, 8),
+                }))
+              }
+            >
+              + Add item
+            </button>
+          </div>
+
+          {(form.trustItems || []).length === 0 ? (
+            <p className="admin-page-sub" style={{ margin: 0 }}>
+              No items. The banner stays hidden until you add one and save.
+            </p>
+          ) : (
+            <div className="admin-trust__list">
+              {(form.trustItems || []).map((item, index) => (
+                <div key={item.id || index} className="admin-trust__row">
+                  <label className="admin-field">
+                    <span>Icon</span>
+                    <select
+                      value={item.icon || 'flame'}
+                      onChange={(e) =>
+                        setForm((current) => {
+                          const trustItems = [...(current.trustItems || [])]
+                          trustItems[index] = { ...trustItems[index], icon: e.target.value }
+                          return { ...current, trustItems }
+                        })
+                      }
+                    >
+                      <option value="flame">Flame</option>
+                      <option value="smoke">Smoke</option>
+                      <option value="leaf">Leaf</option>
+                      <option value="diya">Diya</option>
+                    </select>
+                  </label>
+                  <label className="admin-field">
+                    <span>Title</span>
+                    <input
+                      value={item.title || ''}
+                      placeholder="Flame-Free"
+                      onChange={(e) =>
+                        setForm((current) => {
+                          const trustItems = [...(current.trustItems || [])]
+                          trustItems[index] = { ...trustItems[index], title: e.target.value }
+                          return { ...current, trustItems }
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="admin-field">
+                    <span>Line</span>
+                    <input
+                      value={item.text || ''}
+                      placeholder="Pure fragrance, no flame"
+                      onChange={(e) =>
+                        setForm((current) => {
+                          const trustItems = [...(current.trustItems || [])]
+                          trustItems[index] = { ...trustItems[index], text: e.target.value }
+                          return { ...current, trustItems }
+                        })
+                      }
+                    />
+                  </label>
+                  <label className="admin-toggle admin-trust__show">
+                    <input
+                      type="checkbox"
+                      checked={item.active !== false}
+                      onChange={(e) =>
+                        setForm((current) => {
+                          const trustItems = [...(current.trustItems || [])]
+                          trustItems[index] = { ...trustItems[index], active: e.target.checked }
+                          return { ...current, trustItems }
+                        })
+                      }
+                    />
+                    <span>Show</span>
+                  </label>
+                  <div className="admin-trust__actions">
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-ghost"
+                      disabled={index === 0}
+                      onClick={() =>
+                        setForm((current) => {
+                          const trustItems = [...(current.trustItems || [])]
+                          const [moved] = trustItems.splice(index, 1)
+                          trustItems.splice(index - 1, 0, moved)
+                          return { ...current, trustItems }
+                        })
+                      }
+                    >
+                      Up
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-ghost"
+                      disabled={index === (form.trustItems || []).length - 1}
+                      onClick={() =>
+                        setForm((current) => {
+                          const trustItems = [...(current.trustItems || [])]
+                          const [moved] = trustItems.splice(index, 1)
+                          trustItems.splice(index + 1, 0, moved)
+                          return { ...current, trustItems }
+                        })
+                      }
+                    >
+                      Down
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-danger"
+                      onClick={() =>
+                        setForm((current) => ({
+                          ...current,
+                          trustItems: (current.trustItems || []).filter((_, i) => i !== index),
+                        }))
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="admin-card admin-card--lg">

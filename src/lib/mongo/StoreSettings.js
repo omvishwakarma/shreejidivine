@@ -9,10 +9,13 @@ import {
 } from '@/lib/testimonials'
 import {
   INSTAGRAM_STRIP_DEFAULTS,
+  currentInstagramHandle,
+  currentInstagramUrl,
   normalizeInstagramStripPosts,
 } from '@/lib/instagramStrip'
 import { resolveCartRewards } from '@/lib/cartRewards'
 import { isSafePublicImage } from '@/lib/media'
+import { DEFAULT_TRUST_ITEMS, trustItemsFromSettings } from '@/lib/trustBar'
 
 function cleanHeroImages(list) {
   if (!Array.isArray(list)) return []
@@ -53,6 +56,7 @@ const DEFAULTS = {
   homeBestLead: 'Most-loved aroma stones and oils — ready for home rituals and gifting.',
   homeReviewsTitle: 'Testimonials',
   homeReviewsLead: 'Loved in homes across India',
+  trustItems: DEFAULT_TRUST_ITEMS,
   menuIconHome: '',
   menuIconShop: '',
   menuIconBracelet: '',
@@ -162,6 +166,10 @@ const storeSettingsSchema = new mongoose.Schema(
     homeBestLead: { type: String, default: DEFAULTS.homeBestLead },
     homeReviewsTitle: { type: String, default: DEFAULTS.homeReviewsTitle },
     homeReviewsLead: { type: String, default: DEFAULTS.homeReviewsLead },
+    trustItems: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: () => DEFAULT_TRUST_ITEMS.map((item) => ({ ...item })),
+    },
     menuIconHome: { type: String, default: '' },
     menuIconShop: { type: String, default: '' },
     menuIconBracelet: { type: String, default: '' },
@@ -234,6 +242,7 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     homeBestLead: this.homeBestLead || DEFAULTS.homeBestLead,
     homeReviewsTitle: this.homeReviewsTitle || DEFAULTS.homeReviewsTitle,
     homeReviewsLead: this.homeReviewsLead || DEFAULTS.homeReviewsLead,
+    trustItems: trustItemsFromSettings(this.trustItems),
     menuIconHome: this.menuIconHome || '',
     menuIconShop: this.menuIconShop || '',
     menuIconBracelet: this.menuIconBracelet || '',
@@ -251,8 +260,9 @@ storeSettingsSchema.methods.toJSONSafe = function () {
         : this.instagramShopSubtitle,
     instagramShopLooks: looks,
     instagramStripLabel: this.instagramStripLabel || DEFAULTS.instagramStripLabel,
-    instagramStripHandle: this.instagramStripHandle || DEFAULTS.instagramStripHandle,
-    instagramStripUrl: this.instagramStripUrl || DEFAULTS.instagramStripUrl,
+    instagramStripHandle:
+      currentInstagramHandle(this.instagramStripHandle) || DEFAULTS.instagramStripHandle,
+    instagramStripUrl: currentInstagramUrl(this.instagramStripUrl) || DEFAULTS.instagramStripUrl,
     instagramStripCta: this.instagramStripCta || DEFAULTS.instagramStripCta,
     instagramStripPosts: normalizeInstagramStripPosts(this.instagramStripPosts),
     testimonialsEnabled: this.testimonialsEnabled !== false,

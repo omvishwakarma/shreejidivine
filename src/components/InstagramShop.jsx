@@ -289,7 +289,7 @@ export default function InstagramShop({ compact = false }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Follow {SOCIAL.instagramHandle || '@shreejidivinearoma'}
+          Follow {SOCIAL.instagramHandle || '@shreejidivine.co'}
         </a>
       </div>
     </section>
