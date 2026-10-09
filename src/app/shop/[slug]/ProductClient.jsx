@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import ShopNav from '../../../components/ShopNav'
 import Footer from '../../../components/Footer'
 import AddToCartButton from '../../../components/AddToCartButton'
+import ProductCard from '../../../components/ProductCard'
 import { trackMeta } from '../../../lib/meta'
 import BuyNowButton from '../../../components/BuyNowButton'
 import InstagramShop from '../../../components/InstagramShop'
@@ -94,7 +95,7 @@ function Stars({ value }) {
   )
 }
 
-export default function ProductClient() {
+export default function ProductClient({ showInstagram = false, showRelated = false }) {
   const { slug } = useParams()
   const { user } = useAuth()
   const [reviewOpen, setReviewOpen] = useState(false)
@@ -118,7 +119,6 @@ export default function ProductClient() {
   /** When true, gallery thumb wins over variant image */
   const [galleryFocus, setGalleryFocus] = useState(true)
   const touchStartX = useRef(null)
-  const relatedRailRef = useRef(null)
 
   useEffect(() => {
     if (!slug) return
@@ -149,20 +149,18 @@ export default function ProductClient() {
   }, [product?.id, product?.name, product?.price])
 
   useEffect(() => {
-    if (!product?.id) return
-    const category = product.categorySlug || product.subcategorySlug || ''
-    if (!category) {
+    if (!showRelated || !product?.id) {
       setRelated([])
       return
     }
 
     let cancelled = false
-    api(`/api/products?category=${encodeURIComponent(category)}`)
+    api('/api/products')
       .then((d) => {
         if (cancelled) return
         const list = (d.products || [])
           .filter((p) => p.id !== product.id && p.slug !== product.slug)
-          .slice(0, 12)
+          .sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0))
         setRelated(list)
       })
       .catch(() => {
@@ -172,14 +170,7 @@ export default function ProductClient() {
     return () => {
       cancelled = true
     }
-  }, [product])
-
-  function scrollRelated(dir) {
-    const el = relatedRailRef.current
-    if (!el) return
-    const step = Math.min(320, el.clientWidth * 0.75)
-    el.scrollBy({ left: dir * step, behavior: 'smooth' })
-  }
+  }, [product, showRelated])
 
   async function submitReview(e) {
     e.preventDefault()
@@ -688,73 +679,77 @@ export default function ProductClient() {
           </div>
         ) : null}
 
-        {related.length > 0 ? (
+        {product && showInstagram ? <InstagramShop compact /> : null}
+      </div>
+
+      {showRelated && related.length > 0 ? (
+        <div className="ecom-wrap ecom-wrap--shop related-products-wrap">
           <section className="related-products" aria-labelledby="related-products-heading">
             <div className="related-products__head">
               <h2 id="related-products-heading" className="related-products__title">
-                Related products
+                <span className="related-products__diya" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" fill="none">
+                    <path
+                      d="M10 28c0-6 6.2-10 14-10s14 4 14 10c0 5.2-6 9-14 9s-14-3.8-14-9Z"
+                      fill="#f4a03c"
+                    />
+                    <path
+                      d="M14 29.5c.4 3.2 4.4 5.5 10 5.5s9.6-2.3 10-5.5"
+                      stroke="#c45c1a"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M24 18c1.2-3.2 1-6.4-.2-9.2 2.6 1.2 4.4 3.6 4.8 6.4-1.2.6-2.8 1.6-4.6 2.8Z"
+                      fill="#ffb020"
+                    />
+                    <path
+                      d="M24 17.2c-.2-2.6.6-5.2 2-7.4"
+                      stroke="#fff4d6"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                    <circle cx="16" cy="12" r="1.1" fill="#e23b2f" />
+                    <circle cx="33" cy="10" r="0.9" fill="#f6c445" />
+                  </svg>
+                </span>
+                Diwali Offer Sale
+                <span className="related-products__diya related-products__diya--flip" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" fill="none">
+                    <path
+                      d="M10 28c0-6 6.2-10 14-10s14 4 14 10c0 5.2-6 9-14 9s-14-3.8-14-9Z"
+                      fill="#f4a03c"
+                    />
+                    <path
+                      d="M14 29.5c.4 3.2 4.4 5.5 10 5.5s9.6-2.3 10-5.5"
+                      stroke="#c45c1a"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M24 18c1.2-3.2 1-6.4-.2-9.2 2.6 1.2 4.4 3.6 4.8 6.4-1.2.6-2.8 1.6-4.6 2.8Z"
+                      fill="#ffb020"
+                    />
+                    <path
+                      d="M24 17.2c-.2-2.6.6-5.2 2-7.4"
+                      stroke="#fff4d6"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                    <circle cx="15" cy="11" r="0.9" fill="#f6c445" />
+                    <circle cx="32" cy="13" r="1.1" fill="#e23b2f" />
+                  </svg>
+                </span>
               </h2>
-              {related.length > 2 ? (
-                <div className="related-products__nav">
-                  <button
-                    type="button"
-                    className="related-products__arrow"
-                    onClick={() => scrollRelated(-1)}
-                    aria-label="Previous related products"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    className="related-products__arrow"
-                    onClick={() => scrollRelated(1)}
-                    aria-label="Next related products"
-                  >
-                    ›
-                  </button>
-                </div>
-              ) : null}
             </div>
-            <div
-              className="related-products__rail"
-              ref={relatedRailRef}
-              role="region"
-              aria-label="Related products"
-            >
-              <div className="related-products__track">
-                {related.map((p) => (
-                  <article key={p.id} className="product-card related-products__card">
-                    <Link href={`/shop/${p.slug}`} className="product-card__media">
-                      {p.badge ? <span className="product-card__badge">{p.badge}</span> : null}
-                      <Image
-                        src={p.image}
-                        alt={p.name}
-                        width={700}
-                        height={875}
-                        sizes="(max-width:560px) 42vw, 220px"
-                      />
-                    </Link>
-                    <div className="product-card__body">
-                      <Link href={`/shop/${p.slug}`}>
-                        <h3 className="product-card__name">{toTitleCase(p.name)}</h3>
-                      </Link>
-                      <div className="product-card__price">
-                        <strong>{formatINR(p.price)}</strong>
-                        {p.compareAt ? <s>{formatINR(p.compareAt)}</s> : null}
-                      </div>
-                      <div className="product-card__actions">
-                        <AddToCartButton product={p} />
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
+            <div className="ecom-grid">
+              {related.map((p) => (
+                <ProductCard key={p.id} product={p} heading="h3" />
+              ))}
             </div>
           </section>
-        ) : null}
-
-        {product ? <InstagramShop compact /> : null}
-      </div>
+        </div>
+      ) : null}
 
       {product ? (
         <div className="product-detail__bar">

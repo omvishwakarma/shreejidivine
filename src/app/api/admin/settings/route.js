@@ -60,6 +60,8 @@ export async function PATCH(request) {
       menuIconAbout: z.string().max(800).optional(),
       authBanner: z.string().max(800).optional(),
       codEnabled: z.boolean().optional(),
+      productDetailInstagramEnabled: z.boolean().optional(),
+      productDetailRelatedEnabled: z.boolean().optional(),
       giftTabText: z.string().max(80).optional(),
       giftTabSlug: z
         .string()

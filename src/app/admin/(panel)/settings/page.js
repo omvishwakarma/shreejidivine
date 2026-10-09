@@ -33,6 +33,8 @@ const EMPTY = {
   authBanner: '/images/hero-banner.png',
   giftTabText: 'Claim your Free Diwali Gift',
   giftTabSlug: '',
+  productDetailInstagramEnabled: false,
+  productDetailRelatedEnabled: false,
   whatsappNumber: '8882301900',
 }
 
@@ -188,6 +190,8 @@ export default function AdminSettingsPage() {
       authBanner: data.settings?.authBanner || EMPTY.authBanner,
       giftTabText: data.settings?.giftTabText ?? EMPTY.giftTabText,
       giftTabSlug: data.settings?.giftTabSlug || '',
+      productDetailInstagramEnabled: data.settings?.productDetailInstagramEnabled === true,
+      productDetailRelatedEnabled: data.settings?.productDetailRelatedEnabled === true,
       whatsappNumber: data.settings?.whatsappNumber || '',
     })
     setNote(data.note || '')
@@ -253,6 +257,8 @@ export default function AdminSettingsPage() {
           authBanner: form.authBanner.trim() || EMPTY.authBanner,
           giftTabText: form.giftTabText.trim(),
           giftTabSlug: form.giftTabSlug.trim(),
+          productDetailInstagramEnabled: form.productDetailInstagramEnabled === true,
+          productDetailRelatedEnabled: form.productDetailRelatedEnabled === true,
           whatsappNumber: form.whatsappNumber.trim(),
         }),
       })
@@ -284,6 +290,8 @@ export default function AdminSettingsPage() {
         authBanner: data.settings.authBanner || EMPTY.authBanner,
         giftTabText: data.settings.giftTabText ?? EMPTY.giftTabText,
         giftTabSlug: data.settings.giftTabSlug || '',
+        productDetailInstagramEnabled: data.settings.productDetailInstagramEnabled === true,
+        productDetailRelatedEnabled: data.settings.productDetailRelatedEnabled === true,
         whatsappNumber: data.settings.whatsappNumber || '',
       })
       setNote(data.note || '')
@@ -358,6 +366,43 @@ export default function AdminSettingsPage() {
       </section>
 
       <form className="admin-settings__form" onSubmit={onSubmit}>
+        <section className="admin-card admin-card--lg">
+          <div className="admin-card__head">
+            <div>
+              <h2>Product page</h2>
+              <p>Show or hide these blocks under a product. They stay off until you turn them on.</p>
+            </div>
+          </div>
+          <div className="admin-toggle-list">
+            <label className="admin-toggle">
+              <input
+                type="checkbox"
+                checked={form.productDetailInstagramEnabled === true}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, productDetailInstagramEnabled: e.target.checked }))
+                }
+              />
+              <span>
+                <strong>Shop the look on Instagram</strong>
+                <small>The Instagram strip on the product detail page.</small>
+              </span>
+            </label>
+            <label className="admin-toggle">
+              <input
+                type="checkbox"
+                checked={form.productDetailRelatedEnabled === true}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, productDetailRelatedEnabled: e.target.checked }))
+                }
+              />
+              <span>
+                <strong>Diwali Offer Sale</strong>
+                <small>The other products grid under the product details.</small>
+              </span>
+            </label>
+          </div>
+        </section>
+
         <section className="admin-card admin-card--lg">
           <div className="admin-card__head">
             <div>

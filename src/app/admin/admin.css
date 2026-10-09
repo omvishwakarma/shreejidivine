@@ -1013,6 +1013,11 @@
   margin-top: 0.65rem;
 }
 
+.admin-toggle-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
 .admin-toggle {
   display: flex;
   align-items: flex-start;
