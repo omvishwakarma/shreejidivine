@@ -10,7 +10,7 @@ import Footer from '../../components/Footer'
 import CheckoutMobile from './CheckoutMobile'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
-import { formatINR } from '../../lib/products'
+import { discountPct, formatINR } from '../../lib/products'
 import { api } from '../../lib/api'
 import '../ecom.css'
 import './checkout.css'
@@ -139,6 +139,7 @@ export default function CheckoutPage() {
   })
   const [isMobile, setIsMobile] = useState(null)
   const [addressesReady, setAddressesReady] = useState(false)
+  const [compareById, setCompareById] = useState({})
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 760px)')
@@ -146,6 +147,20 @@ export default function CheckoutPage() {
     apply()
     query.addEventListener('change', apply)
     return () => query.removeEventListener('change', apply)
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data) => {
+        const map = {}
+        for (const product of data.products || []) {
+          const compareAt = Number(product.compareAt) || 0
+          if (compareAt > 0) map[product.id] = compareAt
+        }
+        setCompareById(map)
+      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -521,6 +536,8 @@ export default function CheckoutPage() {
   }
 
   const current = items[Math.min(activeItem, items.length - 1)]
+  const compareAt = Number(current.compareAt) || compareById[current.productId] || 0
+  const priceOff = discountPct(current.price, compareAt)
   const nameParts = (shipping.fullName || '').trim().split(/\s+/)
   const firstName = nameParts[0] || ''
   const lastName = nameParts.slice(1).join(' ')
@@ -822,7 +839,11 @@ export default function CheckoutPage() {
                     Qty {current.quantity}
                     {items.length > 1 ? ` · Item ${activeItem + 1} of ${items.length}` : ''}
                   </p>
-                  <strong>{formatINR(current.price * current.quantity)}</strong>
+                  <p className="ck-product__price">
+                    <strong>{formatINR(current.price)}</strong>
+                    {priceOff > 0 ? <s>{formatINR(compareAt)}</s> : null}
+                    {priceOff > 0 ? <span>{priceOff}% off</span> : null}
+                  </p>
                 </div>
               </div>
 

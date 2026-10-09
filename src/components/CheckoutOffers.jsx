@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import AddToCartButton from './AddToCartButton'
 import { api } from '../lib/api'
-import { formatINR, toTitleCase } from '../lib/products'
+import { discountPct, formatINR, toTitleCase } from '../lib/products'
 import { freeShippingGoal } from '../lib/cartRewards'
 
 function pickOffers(products) {
@@ -27,7 +27,7 @@ export default function CheckoutOffers({ subtotal, settings }) {
   const progress = goal > 0 ? Math.min(100, Math.round((spent / goal) * 100)) : 0
 
   const picks = useMemo(() => pickOffers(products), [products])
-  const sectionTitle = 'Under ₹300'
+  const sectionTitle = 'Diwali Offer Sale'
   const fromPrice = picks.length ? Math.min(...picks.map((product) => Number(product.price) || 0)) : 0
 
   useEffect(() => {
@@ -120,7 +120,9 @@ export default function CheckoutOffers({ subtotal, settings }) {
             <span>{picks.length} products</span>
           </div>
           <div className="ck-offers__grid">
-            {picks.map((product) => (
+            {picks.map((product) => {
+              const off = discountPct(product.price, product.compareAt)
+              return (
               <article key={product.id} className="ck-offer">
                 <Link href={`/shop/${product.slug}`} className="ck-offer__media">
                   <Image
@@ -134,11 +136,16 @@ export default function CheckoutOffers({ subtotal, settings }) {
                   <Link href={`/shop/${product.slug}`}>
                     <h4>{toTitleCase(product.name)}</h4>
                   </Link>
-                  <strong>{formatINR(product.price)}</strong>
+                  <p className="ck-offer__price">
+                    <strong>{formatINR(product.price)}</strong>
+                    {off > 0 ? <s>{formatINR(product.compareAt)}</s> : null}
+                    {off > 0 ? <span>{off}% off</span> : null}
+                  </p>
                   <AddToCartButton product={product} label="ADD +" className="ck-offer__add" />
                 </div>
               </article>
-            ))}
+              )
+            })}
           </div>
         </section>
       ) : null}

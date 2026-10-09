@@ -50,7 +50,13 @@ export function CartProvider({ children }) {
       if (existing) {
         return prev.map((i) =>
           i.lineKey === lineKey
-            ? { ...i, quantity: free ? 1 : Math.min(20, i.quantity + qty), price, image }
+            ? {
+                ...i,
+                quantity: free ? 1 : Math.min(20, i.quantity + qty),
+                price,
+                image,
+                compareAt: Number(product.compareAt) > price ? Number(product.compareAt) : i.compareAt || 0,
+              }
             : i
         )
       }
@@ -62,6 +68,7 @@ export function CartProvider({ children }) {
           slug: product.slug,
           name: product.name,
           price,
+          compareAt: Number(product.compareAt) > price ? Number(product.compareAt) : 0,
           image,
           quantity: free ? 1 : qty,
           colour,

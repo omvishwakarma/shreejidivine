@@ -104,7 +104,7 @@ export default function CheckoutMobile({
   const currentIndex = STEPS.findIndex((item) => item.id === step)
   const selectedAddress = addresses.find((item) => item.id === selectedAddressId)
   const mrpTotal = items.reduce((sum, item) => {
-    const compareAt = compareById[item.productId] || 0
+    const compareAt = Number(item.compareAt) || compareById[item.productId] || 0
     const unit = compareAt > item.price ? compareAt : item.price
     return sum + unit * item.quantity
   }, 0)
@@ -385,7 +385,7 @@ export default function CheckoutMobile({
 
           <section className="ck-m__block ck-m__items">
             {items.map((item) => {
-              const compareAt = compareById[item.productId] || 0
+              const compareAt = Number(item.compareAt) || compareById[item.productId] || 0
               const off = discountPct(item.price, compareAt)
               const variant = [
                 item.colour,
@@ -427,9 +427,9 @@ export default function CheckoutMobile({
                       <p className="ck-m__qty">Qty: 1</p>
                     )}
                     <p className="ck-m__price">
-                      {off > 0 ? <span className="ck-m__off">{off}% off</span> : null}
-                      {off > 0 ? <s>{formatINR(compareAt)}</s> : null}
                       <strong>{formatINR(item.price)}</strong>
+                      {off > 0 ? <s>{formatINR(compareAt)}</s> : null}
+                      {off > 0 ? <span className="ck-m__off">{off}% off</span> : null}
                     </p>
                   </div>
                 </article>
