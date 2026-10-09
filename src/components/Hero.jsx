@@ -63,6 +63,7 @@ export default function Hero() {
   const src = isMobile ? hero.mobile : hero.desktop
   const poster = isMobile ? hero.posterMobile || hero.poster : hero.poster
   const slides = isMobile ? hero.imagesMobile : hero.imagesDesktop
+  const activeSlide = slides.length ? slides[slide % slides.length] : null
 
   useEffect(() => {
     setSlide(0)
@@ -97,8 +98,8 @@ export default function Hero() {
           slides.map((image, index) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              key={image}
-              src={image}
+              key={image.src}
+              src={image.src}
               alt=""
               className={`hero__slide${index === slide % slides.length ? ' is-active' : ''}`}
             />
@@ -121,7 +122,7 @@ export default function Hero() {
           <div className="hero__dots" role="tablist" aria-label="Banner slides">
             {slides.map((image, index) => (
               <button
-                key={image}
+                key={image.src}
                 type="button"
                 className={index === slide % slides.length ? 'is-active' : ''}
                 aria-label={`Slide ${index + 1}`}
@@ -132,10 +133,10 @@ export default function Hero() {
         ) : null}
 
         <div className="hero__overlay">
-          <p className="hero__eyebrow">{hero.brand}</p>
-          <p className="hero__headline">{hero.headline}</p>
-          <Link href={hero.ctaHref || '/shop'} className="hero__cta">
-            {hero.ctaText || 'Shop Now'}
+          <p className="hero__eyebrow">{activeSlide?.eyebrow || hero.brand}</p>
+          <p className="hero__headline">{activeSlide?.headline || hero.headline}</p>
+          <Link href={activeSlide?.ctaHref || hero.ctaHref || '/shop'} className="hero__cta">
+            {activeSlide?.ctaText || hero.ctaText || 'Shop Now'}
           </Link>
         </div>
       </div>

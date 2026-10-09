@@ -18,9 +18,15 @@ function cleanHeroImages(list) {
   if (!Array.isArray(list)) return []
   const images = []
   for (const item of list) {
-    const value = String(item || '').trim()
-    if (!isSafePublicImage(value) || images.includes(value)) continue
-    images.push(value)
+    const src = String(typeof item === 'string' ? item : item?.src || '').trim()
+    if (!isSafePublicImage(src) || images.some((slide) => slide.src === src)) continue
+    images.push({
+      src,
+      eyebrow: String(item?.eyebrow || '').trim().slice(0, 80),
+      headline: String(item?.headline || '').trim().slice(0, 160),
+      ctaText: String(item?.ctaText || '').trim().slice(0, 40),
+      ctaHref: String(item?.ctaHref || '').trim().slice(0, 200),
+    })
     if (images.length >= 8) break
   }
   return images
@@ -143,8 +149,8 @@ const storeSettingsSchema = new mongoose.Schema(
     heroVideoMobile: { type: String, default: DEFAULTS.heroVideoMobile },
     heroPoster: { type: String, default: DEFAULTS.heroPoster },
     heroPosterMobile: { type: String, default: DEFAULTS.heroPosterMobile },
-    heroImagesDesktop: { type: [String], default: [] },
-    heroImagesMobile: { type: [String], default: [] },
+    heroImagesDesktop: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    heroImagesMobile: { type: [mongoose.Schema.Types.Mixed], default: [] },
     heroHeadline: { type: String, default: DEFAULTS.heroHeadline },
     heroCtaText: { type: String, default: DEFAULTS.heroCtaText },
     heroCtaHref: { type: String, default: DEFAULTS.heroCtaHref },

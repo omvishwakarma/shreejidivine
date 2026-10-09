@@ -42,8 +42,30 @@ export async function PATCH(request) {
       heroVideoMobile: z.string().min(1).max(500).optional(),
       heroPoster: z.string().max(800).optional(),
       heroPosterMobile: z.string().max(800).optional(),
-      heroImagesDesktop: z.array(z.string().max(800)).max(8).optional(),
-      heroImagesMobile: z.array(z.string().max(800)).max(8).optional(),
+      heroImagesDesktop: z
+        .array(
+          z.object({
+            src: z.string().max(800),
+            eyebrow: z.string().max(80).optional(),
+            headline: z.string().max(160).optional(),
+            ctaText: z.string().max(40).optional(),
+            ctaHref: z.string().max(200).optional(),
+          })
+        )
+        .max(8)
+        .optional(),
+      heroImagesMobile: z
+        .array(
+          z.object({
+            src: z.string().max(800),
+            eyebrow: z.string().max(80).optional(),
+            headline: z.string().max(160).optional(),
+            ctaText: z.string().max(40).optional(),
+            ctaHref: z.string().max(200).optional(),
+          })
+        )
+        .max(8)
+        .optional(),
       heroHeadline: z.string().max(200).optional(),
       heroCtaText: z.string().min(1).max(60).optional(),
       heroCtaHref: z.string().min(1).max(200).optional(),
@@ -100,9 +122,9 @@ export async function PATCH(request) {
       if (!Array.isArray(data[key])) continue
       const images = []
       for (const item of data[key]) {
-        const value = String(item || '').trim()
-        if (!value) continue
-        if (!isSafePublicImage(value)) {
+        const src = String(item?.src || '').trim()
+        if (!src) continue
+        if (!isSafePublicImage(src)) {
           return NextResponse.json(
             {
               error:
@@ -111,7 +133,14 @@ export async function PATCH(request) {
             { status: 400 }
           )
         }
-        if (!images.includes(value)) images.push(value)
+        if (images.some((slide) => slide.src === src)) continue
+        images.push({
+          src,
+          eyebrow: String(item.eyebrow || '').trim().slice(0, 80),
+          headline: String(item.headline || '').trim().slice(0, 160),
+          ctaText: String(item.ctaText || '').trim().slice(0, 40),
+          ctaHref: String(item.ctaHref || '').trim().slice(0, 200),
+        })
       }
       data[key] = images.slice(0, 8)
     }

@@ -151,7 +151,18 @@ function PosterSlot({ title, badge, hint, value, field, uploading, onUpload, onP
   )
 }
 
-function HeroSlides({ title, hint, images, field, portrait, uploading, onUpload, onRemove, onMove }) {
+function HeroSlides({
+  title,
+  hint,
+  images,
+  field,
+  portrait,
+  uploading,
+  onUpload,
+  onRemove,
+  onMove,
+  onChange,
+}) {
   const inputId = useId()
   const busy = uploading === field
 
@@ -179,27 +190,71 @@ function HeroSlides({ title, hint, images, field, portrait, uploading, onUpload,
         </label>
       </div>
       {images.length ? (
-        <div className={`admin-hero-slides__row${portrait ? ' is-portrait' : ''}`}>
-          {images.map((src, index) => (
-            <figure key={`${src}-${index}`}>
+        <div className={`admin-hero-slides__list${portrait ? ' is-portrait' : ''}`}>
+          {images.map((slide, index) => (
+            <article key={`${slide.src}-${index}`} className="admin-hero-slide">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt="" />
-              <figcaption>
-                <button type="button" disabled={index === 0} onClick={() => onMove(field, index, -1)}>
-                  ←
-                </button>
-                <button
-                  type="button"
-                  disabled={index === images.length - 1}
-                  onClick={() => onMove(field, index, 1)}
-                >
-                  →
-                </button>
-                <button type="button" onClick={() => onRemove(field, index)}>
-                  Remove
-                </button>
-              </figcaption>
-            </figure>
+              <img src={slide.src} alt="" />
+              <div className="admin-hero-slide__fields">
+                <label>
+                  <span>Small line</span>
+                  <input
+                    type="text"
+                    maxLength={80}
+                    placeholder="SHREEJI DIVINE"
+                    value={slide.eyebrow || ''}
+                    onChange={(e) => onChange(field, index, 'eyebrow', e.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>Headline</span>
+                  <input
+                    type="text"
+                    maxLength={160}
+                    placeholder="A fragrance of divinity"
+                    value={slide.headline || ''}
+                    onChange={(e) => onChange(field, index, 'headline', e.target.value)}
+                  />
+                </label>
+                <div className="admin-hero-slide__row">
+                  <label>
+                    <span>Button</span>
+                    <input
+                      type="text"
+                      maxLength={40}
+                      placeholder="Shop Now"
+                      value={slide.ctaText || ''}
+                      onChange={(e) => onChange(field, index, 'ctaText', e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    <span>Button link</span>
+                    <input
+                      type="text"
+                      maxLength={200}
+                      placeholder="/shop"
+                      value={slide.ctaHref || ''}
+                      onChange={(e) => onChange(field, index, 'ctaHref', e.target.value)}
+                    />
+                  </label>
+                </div>
+                <div className="admin-hero-slide__actions">
+                  <button type="button" disabled={index === 0} onClick={() => onMove(field, index, -1)}>
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === images.length - 1}
+                    onClick={() => onMove(field, index, 1)}
+                  >
+                    →
+                  </button>
+                  <button type="button" onClick={() => onRemove(field, index)}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </article>
           ))}
         </div>
       ) : (
@@ -416,7 +471,13 @@ export default function AdminSettingsPage() {
         if (data.url) urls.push(data.url)
       }
       setForm((current) => {
-        const next = [...(current[field] || []), ...urls].filter(Boolean).slice(0, 8)
+        const next = [...(current[field] || []), ...urls.map((src) => ({
+          src,
+          eyebrow: '',
+          headline: '',
+          ctaText: '',
+          ctaHref: '',
+        }))].filter((slide) => slide?.src).slice(0, 8)
         return { ...current, [field]: next }
       })
       setMsg('Slider images uploaded — click Save to apply')
@@ -443,6 +504,15 @@ export default function AdminSettingsPage() {
       images.splice(next, 0, item)
       return { ...current, [field]: images }
     })
+  }
+
+  function updateSlide(field, index, key, value) {
+    setForm((current) => ({
+      ...current,
+      [field]: (current[field] || []).map((slide, i) =>
+        i === index ? { ...slide, [key]: value } : slide
+      ),
+    }))
   }
 
   if (loading) {
@@ -638,17 +708,18 @@ export default function AdminSettingsPage() {
           <div className="admin-hero-slides-grid">
             <HeroSlides
               title="Desktop slider"
-              hint="Wide images, 21:9 works best. Up to 8. They auto-slide on desktop."
+              hint="Wide images, 21:9 works best. Each slide can have its own line, headline, and button."
               images={form.heroImagesDesktop}
               field="heroImagesDesktop"
               uploading={uploading}
               onUpload={uploadSlides}
               onRemove={removeSlide}
               onMove={moveSlide}
+              onChange={updateSlide}
             />
             <HeroSlides
               title="Mobile slider"
-              hint="Portrait images at 4:5, about 1080 × 1350. Up to 8. They auto-slide on phones."
+              hint="Portrait 4:5 images. Each slide can have its own line, headline, and button."
               images={form.heroImagesMobile}
               field="heroImagesMobile"
               portrait
@@ -656,6 +727,7 @@ export default function AdminSettingsPage() {
               onUpload={uploadSlides}
               onRemove={removeSlide}
               onMove={moveSlide}
+              onChange={updateSlide}
             />
           </div>
 
