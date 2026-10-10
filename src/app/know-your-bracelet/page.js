@@ -3,7 +3,8 @@ import KnowYourBraceletClient from './KnowYourBraceletClient'
 export const metadata = {
   title: 'Know Your Product',
   description:
-    'Japam helps you to find the right spiritual wearables for your needs. Rudraksha bracelets, malas, Karungali malas, Pyrite bands, Nepali Rudraksha.',
+    'Pick your rashi and what you are seeking. Shreeji Divine matches a bracelet, mala, or fragrance for health, wealth, love, or protection.',
+  alternates: { canonical: '/know-your-bracelet' },
 }
 
 export default function KnowYourBraceletPage() {

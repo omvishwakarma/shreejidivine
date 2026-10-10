@@ -7,6 +7,7 @@ import '../ecom.css'
 export const metadata = {
   title: 'Policies',
   description: 'Refund, shipping, privacy, terms, cashback, and cancellation policies for Shreeji Divine.',
+  alternates: { canonical: '/policies' },
 }
 
 export default function PoliciesPage() {

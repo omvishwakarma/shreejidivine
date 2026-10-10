@@ -88,9 +88,9 @@ export default function Hero() {
   }, [src, poster, slides.length])
 
   return (
-    <section className="hero" id="top" aria-label={`${SITE_NAME} fragrance oils`}>
+    <section className="hero" id="top" aria-label={`${SITE_NAME} — ${SITE_TAGLINE}`}>
       <h1 className="sr-only">
-        {SITE_NAME} — {SITE_TAGLINE} | Premium Fragrance Oils &amp; Aroma Stones
+        {SITE_NAME} — Rudraksha, rashi bracelets, and certified Rudraksha only
       </h1>
 
       <div className="hero__stage">
@@ -100,7 +100,7 @@ export default function Hero() {
             <img
               key={image.src}
               src={image.src}
-              alt=""
+              alt={image.headline || image.eyebrow || `${SITE_NAME} — ${SITE_TAGLINE}`}
               className={`hero__slide${index === slide % slides.length ? ' is-active' : ''}`}
             />
           ))

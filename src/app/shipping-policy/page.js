@@ -9,6 +9,7 @@ export const metadata = {
   title: 'Shipping Policy',
   description:
     'Shreeji Divine shipping times, cash on delivery verification, and the free-shipping amount set in the store.',
+  alternates: { canonical: '/shipping-policy' },
 }
 
 function freeShippingCopy(settings) {

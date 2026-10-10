@@ -7,6 +7,7 @@ export const metadata = {
   title: 'Cancellation Policy',
   description:
     'How to cancel a Shreeji Divine order before dispatch, and what happens to prepaid and cash on delivery orders after the parcel has shipped.',
+  alternates: { canonical: '/cancellation-policy' },
 }
 
 export default function CancellationPolicyPage() {

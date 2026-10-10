@@ -7,6 +7,7 @@ export const metadata = {
   title: 'Refund & Return Policy',
   description:
     'Shreeji Divine 1-day replacement policy for wrong, damaged, or defective products. Unboxing video is required. Refunds are issued as store credit except in exceptional cases.',
+  alternates: { canonical: '/refund-policy' },
 }
 
 export default function RefundPolicyPage() {

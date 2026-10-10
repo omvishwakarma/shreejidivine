@@ -12,7 +12,7 @@ import { formatINR, toTitleCase } from '../../lib/products'
 import { tagSearchText } from '../../lib/rashi'
 import '../ecom.css'
 
-export default function ShopClient() {
+export default function ShopClient({ initialTitle = 'All Products', initialLead = '' }) {
   const searchParams = useSearchParams()
   const category = searchParams.get('category') || ''
   const subcategory = searchParams.get('subcategory') || ''
@@ -50,8 +50,22 @@ export default function ShopClient() {
       const child = (parent.children || []).find((c) => c.slug === subcategory)
       return child?.name || parent.name
     }
-    return parent?.name || 'Shop'
-  }, [categories, category, subcategory])
+    if (parent?.name) return parent.name
+    return initialTitle
+  }, [categories, category, subcategory, initialTitle])
+
+  const lead = useMemo(() => {
+    const parent = categories.find((c) => c.slug === category)
+    if (subcategory && parent) {
+      const child = (parent.children || []).find((c) => c.slug === subcategory)
+      return child?.description || parent.description || initialLead
+    }
+    if (parent?.description) return parent.description
+    if (!category && !subcategory) {
+      return 'Rudraksha, japa malas, rashi bracelets, lava stone aroma bracelets, and certified Rudraksha only. Handcrafted in India.'
+    }
+    return initialLead
+  }, [categories, category, subcategory, initialLead])
 
   const suggestions = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -143,6 +157,11 @@ export default function ShopClient() {
             <span>Shop</span>
           )}
         </p>
+
+        <header className="shop-head">
+          <h1 className="ecom-title">{title}</h1>
+          {lead ? <p className="ecom-lead">{lead}</p> : null}
+        </header>
 
         <div className="shop-filters" role="navigation" aria-label="Shop categories">
           {filterLinks.map((link) => (

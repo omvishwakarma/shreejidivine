@@ -7,6 +7,7 @@ export const metadata = {
   title: 'Cashback Policy',
   description:
     'How Shreeji Divine cart offers, store credit, and gift cards work. Cashback is store value for a future order, not a transfer to a bank account.',
+  alternates: { canonical: '/cashback-policy' },
 }
 
 export default function CashbackPolicyPage() {

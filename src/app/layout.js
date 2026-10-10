@@ -36,17 +36,11 @@ export const metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   applicationName: SITE_NAME,
-  category: 'Spiritual Wearables',
-  alternates: {
-    canonical: '/',
-  },
+  category: 'Spiritual jewellery and fragrance',
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: SITE_URL,
     siteName: SITE_NAME,
-    title: SEO_TITLE,
-    description: SITE_DESCRIPTION,
     images: [
       {
         url: '/images/logo.png',
@@ -58,8 +52,6 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: SEO_TITLE,
-    description: SITE_DESCRIPTION,
     images: ['/images/logo.png'],
   },
   robots: {

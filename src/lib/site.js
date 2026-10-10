@@ -1,27 +1,24 @@
-export const SITE_URL = 'https://shreejidivinearoma.com'
+export const SITE_URL = 'https://www.shreejidivine.co'
 
 export const SITE_NAME = 'Shreeji Divine'
 
 export const SITE_TAGLINE = 'A FRAGRANCE OF DIVINITY'
 
-export const SEO_TITLE = 'Shreeji Divine Spiritual Wearables | Certified Rudraksha Wearables'
+export const SEO_TITLE = 'Shreeji Divine | Rudraksha, Rashi Bracelets & Certified Rudraksha Only'
 
 export const SITE_DESCRIPTION =
-  'Rudraksha bracelets, malas, Karungali malas, Pyrite bands, Nepali Rudraksha. Japam helps you to find the right spiritual wearables for your needs. Next Day Dispatch. Free Delivery. COD Available.'
+  'Shop Rudraksha, japa malas, rashi bracelets, lava stone aroma bracelets, and certified Rudraksha only. Handcrafted in India, with free shipping on eligible orders and cash on delivery.'
 
 export const SITE_KEYWORDS = [
   'Shreeji Divine',
-  'Spiritual Wearables',
-  'Certified Rudraksha',
-  'Rudraksha bracelets',
-  'Rudraksha malas',
-  'Karungali malas',
-  'Pyrite bands',
-  'Nepali Rudraksha',
-  'Japam',
-  'Next Day Dispatch',
-  'Free Delivery',
-  'COD',
+  'Rudraksha bracelet',
+  'Rudraksha mala',
+  'japa mala',
+  'rashi bracelet',
+  'lava stone bracelet',
+  'fragrance oil',
+  'aroma stone',
+  'spiritual jewellery India',
 ]
 
 export const CONTACT_EMAIL = 'hello@shreejidivinearoma.com'

@@ -7,6 +7,7 @@ export const metadata = {
   title: 'Terms of Service',
   description:
     'Terms for browsing and buying from Shreeji Divine, including orders, prices, accounts, and related policies.',
+  alternates: { canonical: '/terms' },
 }
 
 export default function TermsPage() {

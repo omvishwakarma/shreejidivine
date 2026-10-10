@@ -54,6 +54,19 @@
   line-height: 1.55;
 }
 
+.shop-head {
+  margin: 0.15rem 0 1.1rem;
+}
+
+.shop-head .ecom-title {
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+}
+
+.shop-head .ecom-lead {
+  margin-top: 0.35rem;
+  font-size: 0.98rem;
+}
+
 .shop-filters {
   display: flex;
   flex-wrap: nowrap;

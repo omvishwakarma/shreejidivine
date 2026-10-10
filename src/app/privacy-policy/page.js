@@ -7,6 +7,7 @@ export const metadata = {
   title: 'Privacy Policy',
   description:
     'What personal information Shreeji Divine collects for orders and accounts, and how cookies and marketing tools are used.',
+  alternates: { canonical: '/privacy-policy' },
 }
 
 export default function PrivacyPolicyPage() {

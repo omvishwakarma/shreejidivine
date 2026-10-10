@@ -95,7 +95,11 @@ function Stars({ value }) {
   )
 }
 
-export default function ProductClient({ showInstagram = false, showRelated = false }) {
+export default function ProductClient({
+  showInstagram = false,
+  showRelated = false,
+  initialProduct = null,
+}) {
   const { slug } = useParams()
   const { user } = useAuth()
   const [reviewOpen, setReviewOpen] = useState(false)
@@ -110,12 +114,12 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
     images: [],
     video: null,
   })
-  const [product, setProduct] = useState(null)
+  const [product, setProduct] = useState(initialProduct)
   const [related, setRelated] = useState([])
   const [error, setError] = useState('')
   const [activeKey, setActiveKey] = useState('img-0')
-  const [colour, setColour] = useState('')
-  const [fragrance, setFragrance] = useState('')
+  const [colour, setColour] = useState(initialProduct?.colours?.[0]?.name || '')
+  const [fragrance, setFragrance] = useState(initialProduct?.fragrances?.[0]?.name || '')
   /** When true, gallery thumb wins over variant image */
   const [galleryFocus, setGalleryFocus] = useState(true)
   const [descriptionOpen, setDescriptionOpen] = useState(false)
@@ -686,7 +690,7 @@ export default function ProductClient({ showInstagram = false, showRelated = fal
                           <div className="product-reviews__photos">
                             {review.images.map((src) => (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img key={src} src={src} alt="" />
+                              <img key={src} src={src} alt={`${review.name || 'Customer'} review photo`} />
                             ))}
                           </div>
                         ) : null}
