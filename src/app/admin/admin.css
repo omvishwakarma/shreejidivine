@@ -1235,15 +1235,83 @@
 
 .admin-cat-pill {
   display: inline-flex;
-  max-width: 160px;
+  max-width: 220px;
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
   background: rgba(43, 30, 22, 0.06);
   color: var(--admin-ink);
   font-size: 0.78rem;
-  white-space: nowrap;
+  white-space: normal;
+  overflow: hidden;
+}
+
+.admin-cat-picker {
+  position: relative;
+}
+
+.admin-cat-picker__button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  padding: 0.72rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  color: var(--admin-ink);
+  font: inherit;
+}
+
+.admin-cat-picker__button span:first-child {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-cat-picker__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.45rem;
+  border-radius: 12px;
+  border: 1px solid var(--admin-border);
+  background: #fff;
+  box-shadow: var(--admin-shadow);
+}
+
+.admin-cat-picker__menu p {
+  margin: 0.4rem 0.5rem;
+  color: var(--admin-muted);
+}
+
+.admin-cat-picker__group label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin-cat-picker__group label.is-child {
+  margin-left: 1.15rem;
+  color: var(--admin-muted);
+}
+
+.admin-cat-picker__group label:hover {
+  background: rgba(43, 30, 22, 0.04);
+}
+
+.admin-cat-picker__group input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--admin-accent);
 }
 
 .admin-price-cell {

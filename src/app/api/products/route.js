@@ -5,6 +5,7 @@ import { Product } from '@/lib/mongo/Product'
 import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
 import { normalizeTags } from '@/lib/rashi'
 import { reviewsForStorage } from '@/lib/productReviews'
+import { applyCategoryAssignments, categoryMatchQuery } from '@/lib/productCategories'
 
 const colourSchema = z.object({
   name: z.string().min(1),
@@ -26,11 +27,8 @@ export async function GET(request) {
     const subcategory = searchParams.get('subcategory') || ''
     const filter = { active: true }
     if (searchParams.get('best') === '1') filter.bestSeller = true
-    if (subcategory) {
-      filter.subcategorySlug = subcategory
-    } else if (category) {
-      filter.$or = [{ categorySlug: category }, { subcategorySlug: category }]
-    }
+    const categoryQuery = categoryMatchQuery(category, subcategory)
+    if (categoryQuery) Object.assign(filter, categoryQuery)
     const products = await Product.find(filter).sort({ createdAt: 1 })
     return NextResponse.json({ products: products.map((p) => p.toPublicJSON()) })
   } catch (err) {
@@ -62,6 +60,15 @@ export async function POST(request) {
       category: z.string().optional(),
       categorySlug: z.string().optional(),
       subcategorySlug: z.string().optional(),
+      categoryAssignments: z
+        .array(
+          z.object({
+            categorySlug: z.string().optional(),
+            subcategorySlug: z.string().optional(),
+          })
+        )
+        .max(12)
+        .optional(),
       stock: z.number().int().optional(),
       stone: z.string().optional(),
       description: z.string().optional(),
@@ -81,7 +88,7 @@ export async function POST(request) {
       active: z.boolean().optional(),
       bestSeller: z.boolean().optional(),
     })
-    const data = schema.parse(await request.json())
+    const data = applyCategoryAssignments(schema.parse(await request.json()))
     data.colours = normalizeColours(data.colours)
     data.fragrances = normalizeFragrances(data.fragrances)
     data.tags = normalizeTags(data.tags)

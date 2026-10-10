@@ -4,6 +4,7 @@ import { Product } from '@/lib/mongo/Product'
 import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
 import { normalizeTags } from '@/lib/rashi'
 import { reviewsForStorage } from '@/lib/productReviews'
+import { applyCategoryAssignments } from '@/lib/productCategories'
 
 export async function GET(_request, { params }) {
   try {
@@ -42,6 +43,7 @@ export async function PATCH(request, { params }) {
       'category',
       'categorySlug',
       'subcategorySlug',
+      'categoryAssignments',
       'stock',
       'stone',
       'description',
@@ -74,6 +76,13 @@ export async function PATCH(request, { params }) {
     }
     if (update.reviews !== undefined) {
       update.reviews = reviewsForStorage(update.reviews)
+    }
+    if (
+      update.categoryAssignments !== undefined ||
+      update.categorySlug !== undefined ||
+      update.subcategorySlug !== undefined
+    ) {
+      Object.assign(update, applyCategoryAssignments(update))
     }
     if (update.purchaseCost !== undefined) {
       const cost = Number(update.purchaseCost)

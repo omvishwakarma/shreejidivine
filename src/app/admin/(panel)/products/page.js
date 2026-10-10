@@ -7,6 +7,7 @@ import { adminApi, formatINR } from '../../../../lib/adminApi'
 import { useAdminToasts } from '../../../../components/admin/adminToast'
 import { plainTextToHtml } from '../../../../lib/productHtml'
 import { RASHIS } from '../../../../lib/rashi'
+import { applyCategoryAssignments, categoryAssignmentsForProduct } from '../../../../lib/productCategories'
 
 const AdminRichTextEditor = dynamic(() => import('../../../../components/AdminRichTextEditor'), {
   ssr: false,
@@ -28,6 +29,7 @@ const empty = {
   category: 'singles',
   categorySlug: '',
   subcategorySlug: '',
+  categoryAssignments: [],
   stock: 50,
   stone: '',
   description: '',
@@ -45,6 +47,116 @@ function slugify(value) {
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+function assignmentLabel(tree, assignment) {
+  const parent = (tree || []).find((item) => item.slug === assignment.categorySlug)
+  if (!parent) {
+    return assignment.subcategorySlug
+      ? `${assignment.categorySlug} / ${assignment.subcategorySlug}`
+      : assignment.categorySlug
+  }
+  if (!assignment.subcategorySlug) return parent.name
+  const child = (parent.children || []).find((item) => item.slug === assignment.subcategorySlug)
+  return `${parent.name} / ${child?.name || assignment.subcategorySlug}`
+}
+
+function CategoryPicker({ tree, value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const boxRef = useRef(null)
+  const assignments = Array.isArray(value) ? value : []
+
+  useEffect(() => {
+    function onPointerDown(event) {
+      if (!boxRef.current?.contains(event.target)) setOpen(false)
+    }
+    function onKey(event) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [])
+
+  const summary = assignments.length
+    ? assignments.map((item) => assignmentLabel(tree, item)).join(', ')
+    : 'Select categories'
+
+  function toggleParent(slug) {
+    const selected = assignments.some((item) => item.categorySlug === slug)
+    onChange(selected ? assignments.filter((item) => item.categorySlug !== slug) : [...assignments, { categorySlug: slug, subcategorySlug: '' }])
+  }
+
+  function toggleChild(parentSlug, childSlug) {
+    const selected = assignments.some(
+      (item) => item.categorySlug === parentSlug && item.subcategorySlug === childSlug
+    )
+    if (selected) {
+      onChange(
+        assignments.filter(
+          (item) => !(item.categorySlug === parentSlug && item.subcategorySlug === childSlug)
+        )
+      )
+      return
+    }
+    onChange([
+      ...assignments.filter((item) => !(item.categorySlug === parentSlug && !item.subcategorySlug)),
+      { categorySlug: parentSlug, subcategorySlug: childSlug },
+    ])
+  }
+
+  return (
+    <div className="admin-cat-picker" ref={boxRef}>
+      <button
+        type="button"
+        className="admin-cat-picker__button"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span>{summary}</span>
+        <span aria-hidden="true">{open ? '▴' : '▾'}</span>
+      </button>
+      {open ? (
+        <div className="admin-cat-picker__menu">
+          {tree.length === 0 ? (
+            <p>No categories yet. Add them under Categories first.</p>
+          ) : (
+            tree.map((parent) => {
+              const parentOn = assignments.some((item) => item.categorySlug === parent.slug)
+              return (
+                <div key={parent.id || parent.slug} className="admin-cat-picker__group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={parentOn}
+                      onChange={() => toggleParent(parent.slug)}
+                    />
+                    <span>{parent.name}</span>
+                  </label>
+                  {(parent.children || []).map((child) => (
+                    <label key={child.id || child.slug} className="is-child">
+                      <input
+                        type="checkbox"
+                        checked={assignments.some(
+                          (item) =>
+                            item.categorySlug === parent.slug && item.subcategorySlug === child.slug
+                        )}
+                        onChange={() => toggleChild(parent.slug, child.slug)}
+                      />
+                      <span>{child.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )
+            })
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 export default function AdminProductsPage() {
@@ -100,7 +212,11 @@ export default function AdminProductsPage() {
         const match =
           p.categorySlug === categoryFilter ||
           p.subcategorySlug === categoryFilter ||
-          p.category === categoryFilter
+          p.category === categoryFilter ||
+          (p.categoryAssignments || []).some(
+            (item) =>
+              item.categorySlug === categoryFilter || item.subcategorySlug === categoryFilter
+          )
         if (!match) return false
       }
       if (activeFilter === 'active' && p.active === false) return false
@@ -115,6 +231,7 @@ export default function AdminProductsPage() {
         p.description,
         p.categorySlug,
         p.subcategorySlug,
+        ...(p.categoryAssignments || []).flatMap((item) => [item.categorySlug, item.subcategorySlug]),
       ]
         .filter(Boolean)
         .join(' ')
@@ -122,11 +239,6 @@ export default function AdminProductsPage() {
       return hay.includes(q)
     })
   }, [products, search, categoryFilter, activeFilter])
-
-  const selectedParent = useMemo(
-    () => catTree.find((c) => c.slug === form.categorySlug),
-    [catTree, form.categorySlug]
-  )
 
   const stats = useMemo(() => {
     const active = products.filter((p) => p.active !== false).length
@@ -223,6 +335,7 @@ export default function AdminProductsPage() {
       category: p.category || 'singles',
       categorySlug: p.categorySlug || '',
       subcategorySlug: p.subcategorySlug || '',
+      categoryAssignments: categoryAssignmentsForProduct(p),
       stock: p.stock,
       stone: p.stone || '',
       description: plainTextToHtml(p.description || ''),
@@ -444,7 +557,7 @@ export default function AdminProductsPage() {
       return
     }
     const image = form.image || gallery[0]
-    const payload = {
+    const payload = applyCategoryAssignments({
       ...form,
       image,
       gallery: [...new Set([image, ...gallery].filter(Boolean))],
@@ -484,7 +597,7 @@ export default function AdminProductsPage() {
           status: review.status === 'pending' ? 'pending' : 'approved',
         }))
         .filter((review) => review.text || review.images.length || review.video || review.instagram),
-    }
+    })
     try {
       if (editingId) {
         await adminApi(`/api/products/${editingId}`, {
@@ -633,9 +746,9 @@ export default function AdminProductsPage() {
   }
 
   function categoryLabel(p) {
-    return (
-      [p.categorySlug, p.subcategorySlug].filter(Boolean).join(' / ') || p.category || 'Uncategorized'
-    )
+    const assignments = categoryAssignmentsForProduct(p)
+    if (!assignments.length) return p.category || 'Uncategorized'
+    return assignments.map((item) => assignmentLabel(catTree, item)).join(', ')
   }
 
   if (loading) {
@@ -872,45 +985,21 @@ export default function AdminProductsPage() {
 
                 <div className="admin-form-section">
                   <h3>Organization</h3>
-                  <div className="admin-form-grid two">
-                    <label className="admin-field">
-                      <span>Category</span>
-                      <select
-                        value={form.categorySlug}
-                        onChange={(e) =>
-                          setForm((f) => ({
-                            ...f,
-                            categorySlug: e.target.value,
-                            subcategorySlug: '',
-                            category: e.target.value === 'divine' ? 'kits' : 'singles',
-                          }))
+                  <div className="admin-form-grid">
+                    <div className="admin-field admin-field--full">
+                      <span>Categories</span>
+                      <CategoryPicker
+                        tree={catTree}
+                        value={form.categoryAssignments}
+                        onChange={(categoryAssignments) =>
+                          setForm((current) => ({ ...current, categoryAssignments }))
                         }
-                      >
-                        <option value="">— Select —</option>
-                        {catTree.map((c) => (
-                          <option key={c.id} value={c.slug}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="admin-field">
-                      <span>Subcategory</span>
-                      <select
-                        value={form.subcategorySlug}
-                        onChange={(e) =>
-                          setForm((f) => ({ ...f, subcategorySlug: e.target.value }))
-                        }
-                        disabled={!selectedParent}
-                      >
-                        <option value="">— Optional —</option>
-                        {(selectedParent?.children || []).map((c) => (
-                          <option key={c.id} value={c.slug}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                      />
+                      <small>
+                        Tick every category or subcategory this product belongs to. A subcategory also
+                        shows inside its parent category.
+                      </small>
+                    </div>
                   </div>
                 </div>
 

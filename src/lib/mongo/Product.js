@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 import { safePublicImage, safePublicMedia } from '@/lib/media'
 import { normalizeColours, normalizeFragrances } from '@/lib/productVariants'
 import { adminReviews, publicReviews } from '@/lib/productReviews'
+import { categoryAssignmentsForProduct } from '@/lib/productCategories'
 
 const colourOptionSchema = new mongoose.Schema(
   {
@@ -35,6 +36,14 @@ const reviewSchema = new mongoose.Schema(
   { _id: true }
 )
 
+const categoryAssignmentSchema = new mongoose.Schema(
+  {
+    categorySlug: { type: String, default: '', trim: true },
+    subcategorySlug: { type: String, default: '', trim: true },
+  },
+  { _id: false }
+)
+
 const productSchema = new mongoose.Schema(
   {
     slug: { type: String, required: true, unique: true, trim: true },
@@ -51,6 +60,7 @@ const productSchema = new mongoose.Schema(
     category: { type: String, default: 'singles' },
     categorySlug: { type: String, default: '', index: true },
     subcategorySlug: { type: String, default: '', index: true },
+    categoryAssignments: { type: [categoryAssignmentSchema], default: [] },
     stock: { type: Number, default: 0 },
     stone: { type: String, default: '' },
     description: { type: String, default: '' },
@@ -63,6 +73,9 @@ const productSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
+
+productSchema.index({ 'categoryAssignments.categorySlug': 1 })
+productSchema.index({ 'categoryAssignments.subcategorySlug': 1 })
 
 productSchema.methods.toPublicJSON = function () {
   const image = safePublicImage(this.image, '/images/aroma-variants.png')
@@ -86,6 +99,7 @@ productSchema.methods.toPublicJSON = function () {
     category: this.category,
     categorySlug: this.categorySlug || '',
     subcategorySlug: this.subcategorySlug || '',
+    categoryAssignments: categoryAssignmentsForProduct(this),
     stock: this.stock,
     stone: this.stone,
     description: this.description,

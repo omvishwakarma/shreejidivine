@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Category, slugifyCategory } from '@/lib/mongo/Category'
 import { Product } from '@/lib/mongo/Product'
+import { categoryMatchQuery } from '@/lib/productCategories'
 import { isSafePublicImage, safePublicImage } from '@/lib/media'
 
 export async function PATCH(request, { params }) {
@@ -125,9 +126,11 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Category not found' }, { status: 404 })
   }
 
-  const inUse = await Product.countDocuments({
-    $or: [{ categorySlug: category.slug }, { subcategorySlug: category.slug }],
-  })
+  const inUse = await Product.countDocuments(
+    categoryMatchQuery(category.slug, category.parent ? category.slug : '') || {
+      categorySlug: category.slug,
+    }
+  )
   if (inUse > 0) {
     return NextResponse.json(
       { error: `Category is used by ${inUse} product(s). Reassign them first.` },
