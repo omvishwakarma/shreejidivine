@@ -38,7 +38,6 @@ export const metadata = {
   applicationName: SITE_NAME,
   category: 'Spiritual jewellery and fragrance',
   openGraph: {
-    type: 'website',
     locale: 'en_IN',
     siteName: SITE_NAME,
     images: [

@@ -21,6 +21,7 @@ export async function generateMetadata({ searchParams }) {
       description: SHOP_DESCRIPTION,
       alternates: { canonical: '/shop' },
       openGraph: {
+        type: 'website',
         title: SHOP_TITLE,
         description: SHOP_DESCRIPTION,
         url: '/shop',

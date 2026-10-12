@@ -5,6 +5,7 @@ import { SEO_TITLE, SITE_DESCRIPTION } from '../lib/site'
 export const metadata = {
   alternates: { canonical: '/' },
   openGraph: {
+    type: 'website',
     url: '/',
     title: SEO_TITLE,
     description: SITE_DESCRIPTION,
