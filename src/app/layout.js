@@ -72,6 +72,11 @@ export const metadata = {
     ],
     apple: [{ url: '/images/logo.png', sizes: '180x180' }],
   },
+  verification: {
+    other: {
+      'facebook-domain-verification': 'ddcokuwz8ph33id72jga0uogwo7tmn',
+    },
+  },
   other: {
     'geo.region': 'IN',
   },
