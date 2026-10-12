@@ -1,6 +1,18 @@
 export function trackMeta(event, params = {}) {
+  if (typeof window === 'undefined') return
+  if (typeof window.fbq === 'function') {
+    window.fbq('track', event, params)
+    return
+  }
+  window.__sjMetaQueue = window.__sjMetaQueue || []
+  window.__sjMetaQueue.push([event, params])
+}
+
+export function flushMetaQueue() {
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return
-  window.fbq('track', event, params)
+  const queued = window.__sjMetaQueue || []
+  window.__sjMetaQueue = []
+  queued.forEach(([event, params]) => window.fbq('track', event, params))
 }
 
 export function purchaseMeta(items, total) {

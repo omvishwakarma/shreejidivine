@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { flushMetaQueue } from '../lib/meta'
 
 const CONSENT_COOKIE = 'sj_consent'
 const VISITOR_COOKIE = 'sj_vid'
@@ -47,6 +48,7 @@ function loadMeta(pixelId, externalId) {
   })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
   window.fbq('init', pixelId, { external_id: externalId })
   window.fbq('track', 'PageView')
+  flushMetaQueue()
 }
 
 function loadGoogle(id) {
@@ -81,6 +83,7 @@ export default function MarketingCookies() {
     const saved = readCookie(CONSENT_COOKIE)
     setChoice(saved === 'marketing' || saved === 'essential' ? saved : '')
     setReady(true)
+    loadMeta(META_PIXEL_ID, visitorId())
   }, [])
 
   useEffect(() => {
