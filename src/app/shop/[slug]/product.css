@@ -686,8 +686,8 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
-  z-index: 60;
+  bottom: calc(7% + env(safe-area-inset-bottom));
+  z-index: 70;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
   align-items: center;
@@ -750,6 +750,11 @@
 
 .ecom-page:has(.product-detail__bar) {
   padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+.ecom-page:has(.product-detail__bar) ~ .wa-chat,
+body:has(.product-detail__bar) .wa-chat {
+  bottom: calc(20% + 5.75rem + env(safe-area-inset-bottom));
 }
 
 @media (max-width: 860px) {
