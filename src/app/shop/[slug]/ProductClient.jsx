@@ -131,6 +131,14 @@ export default function ProductClient({
     if (!slug) return
     setRelated([])
     setDescriptionOpen(false)
+    if (initialProduct?.slug === slug) {
+      setProduct(initialProduct)
+      setActiveKey('img-0')
+      setGalleryFocus(true)
+      setColour(initialProduct.colours?.[0]?.name || '')
+      setFragrance(initialProduct.fragrances?.[0]?.name || '')
+      return
+    }
     api(`/api/products/${slug}`)
       .then((d) => {
         setProduct(d.product)
@@ -143,7 +151,7 @@ export default function ProductClient({
         setFragrance(fragrances[0]?.name || '')
       })
       .catch((err) => setError(err.message))
-  }, [slug])
+  }, [slug, initialProduct])
 
   useEffect(() => {
     if (!product?.id) return
@@ -176,7 +184,7 @@ export default function ProductClient({
     }
 
     let cancelled = false
-    api('/api/products')
+    api(`/api/products?exclude=${encodeURIComponent(product.slug || slug || '')}&limit=8`)
       .then((d) => {
         if (cancelled) return
         const list = (d.products || [])
@@ -191,7 +199,7 @@ export default function ProductClient({
     return () => {
       cancelled = true
     }
-  }, [product, showRelated])
+  }, [product?.id, product?.slug, showRelated, slug])
 
   async function submitReview(e) {
     e.preventDefault()
@@ -433,10 +441,12 @@ export default function ProductClient({
                           galleryFocus && active?.key === item.key ? 'true' : undefined
                         }
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <Image
                           src={item.type === 'video' ? item.poster || gallery[0] : item.src}
                           alt=""
+                          width={144}
+                          height={144}
+                          sizes="72px"
                         />
                         {item.type === 'video' ? (
                           <span className="product-detail__thumb-play" aria-hidden="true">

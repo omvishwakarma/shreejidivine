@@ -19,18 +19,30 @@ const fragranceSchema = z.object({
   image: z.string().optional().default(''),
 })
 
+const LIST_CACHE = { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' }
+
 export async function GET(request) {
   try {
     await dbConnect()
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category') || ''
     const subcategory = searchParams.get('subcategory') || ''
+    const exclude = String(searchParams.get('exclude') || searchParams.get('related') || '').trim()
+    const limit = Math.min(40, Math.max(0, Number(searchParams.get('limit')) || 0))
     const filter = { active: true }
     if (searchParams.get('best') === '1') filter.bestSeller = true
+    if (exclude) filter.slug = { $ne: exclude }
     const categoryQuery = categoryMatchQuery(category, subcategory)
     if (categoryQuery) Object.assign(filter, categoryQuery)
-    const products = await Product.find(filter).sort({ createdAt: 1 })
-    return NextResponse.json({ products: products.map((p) => p.toPublicJSON()) })
+    let query = Product.find(filter)
+      .select('-reviews -description -highlights -gallery -video')
+      .sort({ createdAt: 1 })
+    if (limit) query = query.limit(limit)
+    const products = await query
+    return NextResponse.json(
+      { products: products.map((p) => p.toCardJSON()) },
+      { headers: LIST_CACHE }
+    )
   } catch (err) {
     console.error(err)
     return NextResponse.json(

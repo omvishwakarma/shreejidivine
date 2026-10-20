@@ -9,6 +9,8 @@ import { SITE_NAME, SITE_URL } from '../../../lib/site'
 import { clipText } from '../../../lib/seo'
 import { toTitleCase } from '../../../lib/products'
 
+export const revalidate = 120
+
 const getPublicProduct = cache(async (slug) => {
   await dbConnect()
   const doc = await Product.findOne({ slug, active: true })

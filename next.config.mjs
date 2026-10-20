@@ -10,6 +10,8 @@ const nextConfig = {
   // API runs inside Next.js (Vercel). Do NOT proxy /api to localhost —
   // that only works on your machine and causes 404 on production.
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: 'https',

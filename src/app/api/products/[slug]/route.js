@@ -14,7 +14,10 @@ export async function GET(_request, { params }) {
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
-    return NextResponse.json({ product: product.toPublicJSON() })
+    return NextResponse.json(
+      { product: product.toPublicJSON() },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
+    )
   } catch (err) {
     console.error(err)
     return NextResponse.json({ error: 'Could not load product' }, { status: 500 })

@@ -77,6 +77,28 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ 'categoryAssignments.categorySlug': 1 })
 productSchema.index({ 'categoryAssignments.subcategorySlug': 1 })
 
+productSchema.methods.toCardJSON = function () {
+  const image = safePublicImage(this.image, '/images/aroma-variants.png')
+  return {
+    id: this._id.toString(),
+    slug: this.slug,
+    name: this.name,
+    tagline: this.tagline,
+    price: this.price,
+    compareAt: this.compareAt,
+    image,
+    badge: this.badge,
+    tags: (this.tags || []).map((tag) => String(tag || '').trim()).filter(Boolean),
+    categorySlug: this.categorySlug || '',
+    subcategorySlug: this.subcategorySlug || '',
+    categoryAssignments: categoryAssignmentsForProduct(this),
+    stock: this.stock,
+    colours: normalizeColours(this.colours),
+    fragrances: normalizeFragrances(this.fragrances),
+    bestSeller: this.bestSeller === true,
+  }
+}
+
 productSchema.methods.toPublicJSON = function () {
   const image = safePublicImage(this.image, '/images/aroma-variants.png')
   const gallery = (this.gallery || [])
