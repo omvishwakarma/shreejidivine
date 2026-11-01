@@ -7,6 +7,8 @@ export function productShortCode(product) {
 }
 
 export function productShareUrl(product) {
+  const slug = String(product?.slug || '').trim()
+  if (slug) return `${SITE_URL.replace(/\/$/, '')}/shop/${slug}`
   const code = productShortCode(product)
   return `${SITE_URL.replace(/\/$/, '')}/p/${code}`
 }

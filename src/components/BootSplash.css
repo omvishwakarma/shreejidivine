@@ -22,10 +22,6 @@
   animation: sj-splash-logo-out 0.28s ease forwards;
 }
 
-html.sj-booted #sj-splash {
-  display: none;
-}
-
 @keyframes sj-splash-in {
   from {
     opacity: 0;

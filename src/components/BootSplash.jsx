@@ -1,28 +1,22 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import './BootSplash.css'
 
 export default function BootSplash() {
+  const [visible, setVisible] = useState(false)
+
   useEffect(() => {
-    const el = document.getElementById('sj-splash')
-    if (!el) return undefined
-    if (window.location.pathname.startsWith('/admin')) {
-      el.remove()
-      return undefined
-    }
+    if (window.location.pathname.startsWith('/admin')) return undefined
+    if (sessionStorage.getItem('sj_boot')) return undefined
 
-    if (sessionStorage.getItem('sj_boot')) {
-      el.remove()
-      return undefined
-    }
-
+    setVisible(true)
     let hidden = false
     const hide = () => {
       if (hidden) return
       hidden = true
       sessionStorage.setItem('sj_boot', '1')
-      el.classList.add('is-done')
-      window.setTimeout(() => el.remove(), 320)
+      setVisible(false)
     }
 
     const max = window.setTimeout(hide, 900)
@@ -36,5 +30,11 @@ export default function BootSplash() {
     }
   }, [])
 
-  return null
+  if (!visible) return null
+
+  return (
+    <div id="sj-splash" aria-hidden="true">
+      <img src="/images/logo-splash.webp" alt="" width="168" height="168" />
+    </div>
+  )
 }

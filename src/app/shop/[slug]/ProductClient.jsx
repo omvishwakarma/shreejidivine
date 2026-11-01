@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -51,13 +51,40 @@ async function shareImageFile(src, filename) {
   }
 }
 
-function ShareProduct({ name, tagline, image, slug, product }) {
+function ProductStickyBar({ children }) {
+  const ref = useRef(null)
+
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    const update = () => {
+      const el = ref.current
+      if (!el) return
+      root.style.setProperty('--product-bar-offset', `${Math.ceil(el.offsetHeight)}px`)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    if (ref.current) ro.observe(ref.current)
+    window.addEventListener('resize', update)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', update)
+      root.style.removeProperty('--product-bar-offset')
+    }
+  }, [])
+
+  return (
+    <div className="product-detail__bar" ref={ref}>
+      {children}
+    </div>
+  )
+}
+
+function ShareProduct({ name, image, slug, product }) {
   const [note, setNote] = useState('')
 
   async function onShare() {
     const url = productShareUrl(product || { slug })
     const title = toTitleCase(name)
-    const text = tagline ? `${url}\n\n${title}\n${tagline}` : `${url}\n\n${title}`
     const file = await shareImageFile(
       slug ? `/shop/${slug}/opengraph-image` : image,
       String(slug || name || 'product')
@@ -70,16 +97,16 @@ function ShareProduct({ name, tagline, image, slug, product }) {
       const withFile = file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
       try {
         if (withFile) {
-          await navigator.share({ title, text, url, files: [file] })
+          await navigator.share({ title, url, files: [file] })
         } else {
-          await navigator.share({ title, text, url })
+          await navigator.share({ title, url })
         }
         return
       } catch (err) {
         if (err?.name === 'AbortError') return
         if (withFile) {
           try {
-            await navigator.share({ title, text, url })
+            await navigator.share({ title, url })
             return
           } catch (fallbackErr) {
             if (fallbackErr?.name === 'AbortError') return
@@ -93,7 +120,7 @@ function ShareProduct({ name, tagline, image, slug, product }) {
       window.setTimeout(() => setNote(''), 2000)
     } catch {
       window.open(
-        `https://wa.me/?text=${encodeURIComponent(text)}`,
+        `https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}`,
         '_blank',
         'noopener,noreferrer'
       )
@@ -522,7 +549,6 @@ export default function ProductClient({
                 </span>
                 <ShareProduct
                   name={product.name}
-                  tagline={product.tagline}
                   image={mainImage || product.image}
                   slug={product.slug}
                   product={product}
@@ -855,7 +881,7 @@ export default function ProductClient({
       ) : null}
 
       {product ? (
-        <div className="product-detail__bar">
+        <ProductStickyBar>
           <div className="product-detail__bar-info">
             <span className="product-detail__bar-name">{toTitleCase(product.name)}</span>
             <strong className="product-detail__bar-price">{formatINR(unitPrice)}</strong>
@@ -877,7 +903,7 @@ export default function ProductClient({
               disabled={!canAdd}
             />
           </div>
-        </div>
+        </ProductStickyBar>
       ) : null}
 
       <Footer />

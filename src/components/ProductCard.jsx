@@ -13,7 +13,7 @@ export default function ProductCard({ product, heading = 'h2', className = '' })
       <Link href={`/shop/${product.slug}`} className="product-card__media">
         {product.badge ? <span className="product-card__badge">{product.badge}</span> : null}
         <Image
-          src={storeImageSrc(product.image, 720)}
+          src={storeImageSrc(product.image, 720) || '/images/aroma-collection.png'}
           alt={product.name}
           width={700}
           height={600}

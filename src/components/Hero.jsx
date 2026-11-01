@@ -61,7 +61,9 @@ export default function Hero({ initialHero = null }) {
     return () => mq.removeEventListener('change', apply)
   }, [])
 
-  const slides = isMobile ? hero.imagesMobile : hero.imagesDesktop
+  const slides = isMobile
+    ? (Array.isArray(hero.imagesMobile) ? hero.imagesMobile : [])
+    : (Array.isArray(hero.imagesDesktop) ? hero.imagesDesktop : [])
   const poster = isMobile ? hero.posterMobile || hero.poster : hero.poster
   const banners = slides.length
     ? slides
@@ -71,9 +73,11 @@ export default function Hero({ initialHero = null }) {
   const activeSlide = slides.length ? slides[slide % slides.length] : banners[0] || null
   const bannerWidth = isMobile ? 900 : 1920
 
+  const slideKey = banners.map((image) => image.src).join('|')
+
   useEffect(() => {
     setSlide(0)
-  }, [isMobile, slides])
+  }, [isMobile, slideKey])
 
   const bannerCount = banners.length
 
@@ -101,15 +105,17 @@ export default function Hero({ initialHero = null }) {
               key={`${image.src}-${index}`}
               className={`hero__slide${index === slide % banners.length ? ' is-active' : ''}`}
             >
-              <Image
-                src={src}
-                alt={image.headline || image.eyebrow || `${SITE_NAME} — ${SITE_TAGLINE}`}
-                fill
-                priority={index === 0}
-                sizes="100vw"
-                unoptimized={isBlobSrc(image.src)}
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
-              />
+              {src ? (
+                <Image
+                  src={src}
+                  alt={image.headline || image.eyebrow || `${SITE_NAME} — ${SITE_TAGLINE}`}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  unoptimized={isBlobSrc(image.src)}
+                  style={{ objectFit: 'cover', objectPosition: 'center' }}
+                />
+              ) : null}
             </div>
           )
         })}

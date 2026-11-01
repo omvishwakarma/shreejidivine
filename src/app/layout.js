@@ -8,7 +8,6 @@ import {
 } from '../lib/site'
 import Providers from '../components/Providers'
 import './globals.css'
-import '../components/BootSplash.css'
 
 /** Match Gulessence: Cabin headings + Outfit body */
 const display = Cabin({
@@ -95,18 +94,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en-IN" className={`${display.variable} ${body.variable}`}>
-      <head>
-        <link rel="preload" href="/images/logo-splash.webp" as="image" type="image/webp" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{if(sessionStorage.getItem('sj_boot')||location.pathname.indexOf('/admin')===0)document.documentElement.classList.add('sj-booted')}catch(e){}`,
-          }}
-        />
-      </head>
       <body>
-        <div id="sj-splash" aria-hidden="true">
-          <img src="/images/logo-splash.webp" alt="" width="168" height="168" />
-        </div>
         <Providers>{children}</Providers>
       </body>
     </html>
