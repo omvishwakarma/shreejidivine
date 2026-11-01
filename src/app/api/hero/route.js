@@ -1,34 +1,18 @@
 import { NextResponse } from 'next/server'
-import { getStoreSettings } from '@/lib/shipping'
+import { getHeroPayload } from '@/lib/hero'
 import { SITE_NAME, SITE_TAGLINE } from '@/lib/site'
 
 export async function GET() {
   try {
-    const settings = await getStoreSettings()
-    return NextResponse.json(
-      {
-        desktop: settings.heroVideoDesktop,
-        mobile: settings.heroVideoMobile,
-        poster: settings.heroPoster,
-        posterMobile: settings.heroPosterMobile || settings.heroPoster,
-        imagesDesktop: settings.heroImagesDesktop || [],
-        imagesMobile: settings.heroImagesMobile || [],
-        headline: settings.heroHeadline || SITE_TAGLINE,
-        ctaText: settings.heroCtaText || 'Shop Now',
-        ctaHref: settings.heroCtaHref || '/shop',
-        brand: SITE_NAME,
+    const hero = await getHeroPayload()
+    return NextResponse.json(hero, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
-      {
-        headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-        },
-      }
-    )
+    })
   } catch (err) {
     console.error(err)
     return NextResponse.json({
-      desktop: '/videos/home.mp4',
-      mobile: '/videos/home.mp4',
       poster: '/images/banners/royal-chandan.png',
       posterMobile: '/images/banners/royal-chandan.png',
       imagesDesktop: [],

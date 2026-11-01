@@ -1,0 +1,60 @@
+#sj-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: #fdf8f1;
+  pointer-events: none;
+}
+
+#sj-splash img {
+  width: min(42vw, 168px);
+  height: auto;
+  animation: sj-splash-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#sj-splash.is-done {
+  animation: sj-splash-out 0.28s ease forwards;
+}
+
+#sj-splash.is-done img {
+  animation: sj-splash-logo-out 0.28s ease forwards;
+}
+
+html.sj-booted #sj-splash {
+  display: none;
+}
+
+@keyframes sj-splash-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sj-splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes sj-splash-logo-out {
+  to {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sj-splash img,
+  #sj-splash.is-done,
+  #sj-splash.is-done img {
+    animation: none;
+  }
+}

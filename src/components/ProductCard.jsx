@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import AddToCartButton from './AddToCartButton'
 import { discountPct, formatINR, toTitleCase } from '../lib/products'
+import { isBlobSrc, storeImageSrc } from '../lib/storeImage'
 
 export default function ProductCard({ product, heading = 'h2', className = '' }) {
   const off = discountPct(product.price, product.compareAt)
@@ -12,11 +13,12 @@ export default function ProductCard({ product, heading = 'h2', className = '' })
       <Link href={`/shop/${product.slug}`} className="product-card__media">
         {product.badge ? <span className="product-card__badge">{product.badge}</span> : null}
         <Image
-          src={product.image}
+          src={storeImageSrc(product.image, 720)}
           alt={product.name}
           width={700}
           height={600}
           sizes="(max-width:560px) 50vw, (max-width:960px) 45vw, 360px"
+          unoptimized={isBlobSrc(product.image)}
         />
       </Link>
       <div className="product-card__body">

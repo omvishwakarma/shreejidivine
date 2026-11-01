@@ -8,6 +8,7 @@ import {
 } from '../lib/site'
 import Providers from '../components/Providers'
 import './globals.css'
+import '../components/BootSplash.css'
 
 /** Match Gulessence: Cabin headings + Outfit body */
 const display = Cabin({
@@ -67,9 +68,10 @@ export const metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: '48x48' },
-      { url: '/images/logo.png', type: 'image/png', sizes: '512x512' },
+      { url: '/images/logo-app-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/images/logo-app-512.png', type: 'image/png', sizes: '512x512' },
     ],
-    apple: [{ url: '/images/logo.png', sizes: '180x180' }],
+    apple: [{ url: '/images/logo-app-192.png', sizes: '192x192' }],
   },
   verification: {
     other: {
@@ -83,8 +85,8 @@ export const metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1b18' },
+    { media: '(prefers-color-scheme: light)', color: '#fdf8f1' },
+    { media: '(prefers-color-scheme: dark)', color: '#fdf8f1' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -93,7 +95,18 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en-IN" className={`${display.variable} ${body.variable}`}>
+      <head>
+        <link rel="preload" href="/images/logo-splash.webp" as="image" type="image/webp" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(sessionStorage.getItem('sj_boot')||location.pathname.indexOf('/admin')===0)document.documentElement.classList.add('sj-booted')}catch(e){}`,
+          }}
+        />
+      </head>
       <body>
+        <div id="sj-splash" aria-hidden="true">
+          <img src="/images/logo-splash.webp" alt="" width="168" height="168" />
+        </div>
         <Providers>{children}</Providers>
       </body>
     </html>

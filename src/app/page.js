@@ -1,6 +1,9 @@
 import JsonLd from '../components/JsonLd'
 import HomeContent from '../components/HomeContent'
+import { getHeroPayload } from '../lib/hero'
 import { SEO_TITLE, SITE_DESCRIPTION } from '../lib/site'
+
+export const revalidate = 60
 
 export const metadata = {
   alternates: { canonical: '/' },
@@ -16,11 +19,17 @@ export const metadata = {
   },
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  let hero = null
+  try {
+    hero = await getHeroPayload()
+  } catch (err) {
+    console.error(err)
+  }
   return (
     <>
       <JsonLd />
-      <HomeContent />
+      <HomeContent hero={hero} />
     </>
   )
 }

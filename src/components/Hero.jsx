@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { SITE_NAME, SITE_TAGLINE } from '../lib/site'
+import { isBlobSrc, storeImageSrc } from '../lib/storeImage'
 import './Hero.css'
 
 const FALLBACK = {
-  desktop: '/videos/home.mp4',
-  mobile: '/videos/home.mp4',
   poster: '/images/banners/royal-chandan.png',
   posterMobile: '/images/banners/royal-chandan.png',
   imagesDesktop: [],
@@ -20,21 +20,22 @@ const FALLBACK = {
 
 const MOBILE_MQ = '(max-width: 860px)'
 
-export default function Hero() {
-  const [hero, setHero] = useState(FALLBACK)
+export default function Hero({ initialHero = null }) {
+  const [hero, setHero] = useState(initialHero || FALLBACK)
   const [isMobile, setIsMobile] = useState(false)
   const [slide, setSlide] = useState(0)
-  const videoRef = useRef(null)
 
   useEffect(() => {
+    if (initialHero) {
+      setHero(initialHero)
+      return undefined
+    }
     let cancelled = false
     fetch('/api/hero')
       .then((r) => r.json())
       .then((data) => {
         if (!cancelled && data) {
           setHero({
-            desktop: data.desktop || FALLBACK.desktop,
-            mobile: data.mobile || FALLBACK.mobile,
             poster: data.poster || FALLBACK.poster,
             posterMobile: data.posterMobile || data.poster || FALLBACK.posterMobile,
             imagesDesktop: Array.isArray(data.imagesDesktop) ? data.imagesDesktop : [],
@@ -50,7 +51,7 @@ export default function Hero() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [initialHero])
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_MQ)
@@ -60,32 +61,31 @@ export default function Hero() {
     return () => mq.removeEventListener('change', apply)
   }, [])
 
-  const src = isMobile ? hero.mobile : hero.desktop
-  const poster = isMobile ? hero.posterMobile || hero.poster : hero.poster
   const slides = isMobile ? hero.imagesMobile : hero.imagesDesktop
-  const activeSlide = slides.length ? slides[slide % slides.length] : null
+  const poster = isMobile ? hero.posterMobile || hero.poster : hero.poster
+  const banners = slides.length
+    ? slides
+    : poster
+      ? [{ src: poster, headline: hero.headline }]
+      : []
+  const activeSlide = slides.length ? slides[slide % slides.length] : banners[0] || null
+  const bannerWidth = isMobile ? 900 : 1920
 
   useEffect(() => {
     setSlide(0)
   }, [isMobile, slides])
 
+  const bannerCount = banners.length
+
   useEffect(() => {
-    if (slides.length < 2) return undefined
+    if (bannerCount < 2) return undefined
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) return undefined
     const timer = window.setInterval(() => {
-      setSlide((current) => (current + 1) % slides.length)
+      setSlide((current) => (current + 1) % bannerCount)
     }, 4500)
     return () => window.clearInterval(timer)
-  }, [slides])
-
-  useEffect(() => {
-    const el = videoRef.current
-    if (!el || slides.length) return
-    el.load()
-    const play = el.play()
-    if (play?.catch) play.catch(() => {})
-  }, [src, poster, slides.length])
+  }, [bannerCount])
 
   return (
     <section className="hero" id="top" aria-label={`${SITE_NAME} — ${SITE_TAGLINE}`}>
@@ -94,37 +94,32 @@ export default function Hero() {
       </h1>
 
       <div className="hero__stage">
-        {slides.length ? (
-          slides.map((image, index) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={image.src}
-              src={image.src}
-              alt={image.headline || image.eyebrow || `${SITE_NAME} — ${SITE_TAGLINE}`}
-              className={`hero__slide${index === slide % slides.length ? ' is-active' : ''}`}
-            />
-          ))
-        ) : (
-          <video
-            key={`${src}-${poster}`}
-            ref={videoRef}
-            className="hero__video"
-            src={src}
-            poster={poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-          />
-        )}
-        {slides.length > 1 ? (
+        {banners.map((image, index) => {
+          const src = storeImageSrc(image.src, bannerWidth)
+          return (
+            <div
+              key={`${image.src}-${index}`}
+              className={`hero__slide${index === slide % banners.length ? ' is-active' : ''}`}
+            >
+              <Image
+                src={src}
+                alt={image.headline || image.eyebrow || `${SITE_NAME} — ${SITE_TAGLINE}`}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                unoptimized={isBlobSrc(image.src)}
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+              />
+            </div>
+          )
+        })}
+        {banners.length > 1 ? (
           <div className="hero__dots" role="tablist" aria-label="Banner slides">
-            {slides.map((image, index) => (
+            {banners.map((image, index) => (
               <button
-                key={image.src}
+                key={`${image.src}-${index}`}
                 type="button"
-                className={index === slide % slides.length ? 'is-active' : ''}
+                className={index === slide % banners.length ? 'is-active' : ''}
                 aria-label={`Slide ${index + 1}`}
                 onClick={() => setSlide(index)}
               />

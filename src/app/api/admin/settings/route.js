@@ -39,8 +39,8 @@ export async function PATCH(request) {
         )
         .max(6)
         .optional(),
-      heroVideoDesktop: z.string().min(1).max(500).optional(),
-      heroVideoMobile: z.string().min(1).max(500).optional(),
+      heroVideoDesktop: z.string().max(500).optional(),
+      heroVideoMobile: z.string().max(500).optional(),
       heroPoster: z.string().max(800).optional(),
       heroPosterMobile: z.string().max(800).optional(),
       heroImagesDesktop: z

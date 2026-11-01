@@ -10,8 +10,8 @@ const EMPTY = {
   freeShippingMinOrder: 0,
   codEnabled: true,
   cartRewards: [],
-  heroVideoDesktop: '/videos/home.mp4',
-  heroVideoMobile: '/videos/home.mp4',
+  heroVideoDesktop: '',
+  heroVideoMobile: '',
   heroPoster: '/images/banners/royal-chandan.png',
   heroPosterMobile: '',
   heroImagesDesktop: [],
@@ -52,6 +52,7 @@ function VideoSlot({
   uploading,
   onUpload,
   onPathChange,
+  onRemove,
 }) {
   const inputId = useId()
   const busy = uploading === field
@@ -63,18 +64,22 @@ function VideoSlot({
           <p className="admin-media-card__badge">{badge}</p>
           <h3>{title}</h3>
         </div>
-        <span className="admin-chip">{busy ? 'Uploading…' : 'Ready'}</span>
+        <span className="admin-chip">{busy ? 'Uploading…' : value ? 'Ready' : 'Empty'}</span>
       </div>
 
       <div className="admin-media-card__preview">
-        <video
-          key={value}
-          src={value}
-          muted
-          playsInline
-          controls
-          preload="metadata"
-        />
+        {value ? (
+          <video
+            key={value}
+            src={value}
+            muted
+            playsInline
+            controls
+            preload="metadata"
+          />
+        ) : (
+          <div className="admin-empty-preview">No video</div>
+        )}
       </div>
 
       <label htmlFor={inputId} className={`admin-dropzone ${busy ? 'is-busy' : ''}`}>
@@ -90,10 +95,16 @@ function VideoSlot({
           }}
         />
         <span className="admin-dropzone__title">
-          {busy ? 'Uploading video…' : 'Click to upload video'}
+          {busy ? 'Uploading video…' : value ? 'Replace video' : 'Click to upload video'}
         </span>
         <span className="admin-dropzone__hint">{hint}</span>
       </label>
+
+      {value ? (
+        <button type="button" className="admin-btn-danger" onClick={onRemove} disabled={!!uploading}>
+          Delete video
+        </button>
+      ) : null}
 
       <label className="admin-field">
         <span>Video path</span>
@@ -260,7 +271,7 @@ function HeroSlides({
           ))}
         </div>
       ) : (
-        <p className="admin-hero-slides__empty">No slider images yet. The video banner stays until you add some.</p>
+        <p className="admin-hero-slides__empty">No slider images yet. The poster image shows on the homepage until you add slides.</p>
       )}
     </div>
   )
@@ -284,8 +295,8 @@ export default function AdminSettingsPage() {
       freeShippingMinOrder: data.settings?.freeShippingMinOrder ?? 0,
       codEnabled: data.settings?.codEnabled !== false,
       cartRewards: data.settings?.cartRewards || [],
-      heroVideoDesktop: data.settings?.heroVideoDesktop || EMPTY.heroVideoDesktop,
-      heroVideoMobile: data.settings?.heroVideoMobile || EMPTY.heroVideoMobile,
+      heroVideoDesktop: data.settings?.heroVideoDesktop || '',
+      heroVideoMobile: data.settings?.heroVideoMobile || '',
       heroPoster: data.settings?.heroPoster || EMPTY.heroPoster,
       heroPosterMobile: data.settings?.heroPosterMobile || '',
       heroImagesDesktop: data.settings?.heroImagesDesktop || [],
@@ -398,8 +409,8 @@ export default function AdminSettingsPage() {
         freeShippingMinOrder: data.settings.freeShippingMinOrder,
         codEnabled: data.settings.codEnabled !== false,
         cartRewards: data.settings.cartRewards || [],
-        heroVideoDesktop: data.settings.heroVideoDesktop,
-        heroVideoMobile: data.settings.heroVideoMobile,
+        heroVideoDesktop: data.settings.heroVideoDesktop || '',
+        heroVideoMobile: data.settings.heroVideoMobile || '',
         heroPoster: data.settings.heroPoster,
         heroPosterMobile: data.settings.heroPosterMobile || '',
         heroImagesDesktop: data.settings.heroImagesDesktop || [],
@@ -665,7 +676,7 @@ export default function AdminSettingsPage() {
           <div className="admin-card__head">
             <div>
               <h2>Hero banner</h2>
-              <p>Video stays as the fallback. Add desktop and mobile images to run an auto slider instead.</p>
+              <p>Homepage shows image slides only. Upload or delete videos here if you need them later.</p>
             </div>
           </div>
 
@@ -679,6 +690,7 @@ export default function AdminSettingsPage() {
               uploading={uploading}
               onUpload={(field, file) => uploadMedia(field, file, 'video')}
               onPathChange={(v) => setForm((f) => ({ ...f, heroVideoDesktop: v }))}
+              onRemove={() => setForm((f) => ({ ...f, heroVideoDesktop: '' }))}
             />
             <VideoSlot
               title="Mobile video"
@@ -690,6 +702,7 @@ export default function AdminSettingsPage() {
               uploading={uploading}
               onUpload={(field, file) => uploadMedia(field, file, 'video')}
               onPathChange={(v) => setForm((f) => ({ ...f, heroVideoMobile: v }))}
+              onRemove={() => setForm((f) => ({ ...f, heroVideoMobile: '' }))}
             />
           </div>
 

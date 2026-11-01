@@ -21,6 +21,8 @@ import {
   sanitizeProductHtml,
 } from '../../../lib/productHtml'
 import { resolveVariantImage, resolveVariantPrice } from '../../../lib/productVariants'
+import { isBlobSrc, storeImageSrc } from '../../../lib/storeImage'
+import { productShareUrl } from '../../../lib/productLink'
 import '../../ecom.css'
 import './product.css'
 
@@ -49,13 +51,13 @@ async function shareImageFile(src, filename) {
   }
 }
 
-function ShareProduct({ name, tagline, image, slug }) {
+function ShareProduct({ name, tagline, image, slug, product }) {
   const [note, setNote] = useState('')
 
   async function onShare() {
-    const url = window.location.href.split('#')[0]
+    const url = productShareUrl(product || { slug })
     const title = toTitleCase(name)
-    const text = tagline ? `${title}. ${tagline}\n${url}` : `${title}\n${url}`
+    const text = tagline ? `${url}\n\n${title}\n${tagline}` : `${url}\n\n${title}`
     const file = await shareImageFile(
       slug ? `/shop/${slug}/opengraph-image` : image,
       String(slug || name || 'product')
@@ -428,12 +430,13 @@ export default function ProductClient({
                   ) : (
                     <Image
                       key={mainImage}
-                      src={mainImage}
+                      src={storeImageSrc(mainImage, 1080)}
                       alt={product.name}
                       width={900}
                       height={900}
                       priority
                       sizes="(max-width:860px) 100vw, 540px"
+                      unoptimized={isBlobSrc(mainImage)}
                     />
                   )}
 
@@ -482,11 +485,17 @@ export default function ProductClient({
                         }
                       >
                         <Image
-                          src={item.type === 'video' ? item.poster || gallery[0] : item.src}
+                          src={storeImageSrc(
+                            item.type === 'video' ? item.poster || gallery[0] : item.src,
+                            160
+                          )}
                           alt=""
                           width={144}
                           height={144}
                           sizes="72px"
+                          unoptimized={isBlobSrc(
+                            item.type === 'video' ? item.poster || gallery[0] : item.src
+                          )}
                         />
                         {item.type === 'video' ? (
                           <span className="product-detail__thumb-play" aria-hidden="true">
@@ -516,6 +525,7 @@ export default function ProductClient({
                   tagline={product.tagline}
                   image={mainImage || product.image}
                   slug={product.slug}
+                  product={product}
                 />
               </div>
 

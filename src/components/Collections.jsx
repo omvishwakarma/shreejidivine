@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { safePublicImage } from '../lib/media'
+import { isBlobSrc, storeImageSrc } from '../lib/storeImage'
 import './Collections.css'
 
 const FALLBACK_IMAGE = '/images/aroma-collection.png'
@@ -88,11 +89,12 @@ export default function Collections() {
               <Link href={c.href} className="collections__card">
                 <span className="collections__media">
                   <Image
-                    src={c.image}
+                    src={storeImageSrc(c.image, 480)}
                     alt={c.name}
                     width={480}
                     height={480}
                     sizes="(max-width:900px) 33vw, 16vw"
+                    unoptimized={isBlobSrc(c.image)}
                   />
                 </span>
                 <span className="collections__name">{c.name}</span>

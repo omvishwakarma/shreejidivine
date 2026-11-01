@@ -12,13 +12,13 @@ export default function manifest() {
     lang: 'en-IN',
     icons: [
       {
-        src: '/images/logo.png',
+        src: '/images/logo-app-192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/images/logo.png',
+        src: '/images/logo-app-512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',

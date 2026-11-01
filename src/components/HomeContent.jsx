@@ -12,7 +12,7 @@ import InstagramShop from './InstagramShop'
 import InstagramStrip from './InstagramStrip'
 import Footer from './Footer'
 
-export default function HomeContent() {
+export default function HomeContent({ hero = null }) {
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.reveal'))
     if (!els.length) return undefined
@@ -57,7 +57,7 @@ export default function HomeContent() {
       </a>
       <StoreHeader />
       <main id="main-content" className="home-main">
-        <Hero />
+        <Hero initialHero={hero} />
         <TrustBar />
         <Collections />
         <DiwaliOfferSale />

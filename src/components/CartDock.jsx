@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCart } from '../context/CartContext'
 import { formatINR } from '../lib/products'
+import { storeImageSrc } from '../lib/storeImage'
 import './CartDock.css'
 
 const HIDDEN_PREFIXES = [
@@ -40,7 +41,7 @@ export default function CartDock() {
         <div className="cart-dock__thumbs" aria-hidden="true">
           {thumbs.map((item) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={item.lineKey || item.productId} src={item.image} alt="" />
+            <img key={item.lineKey || item.productId} src={storeImageSrc(item.image, 96)} alt="" />
           ))}
         </div>
         <span>{label}</span>

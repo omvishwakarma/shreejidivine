@@ -8,6 +8,7 @@ import KnowBraceletTab from './KnowBraceletTab'
 import GiftTab from './GiftTab'
 import WhatsAppChat from './WhatsAppChat'
 import PwaClient from './PwaClient'
+import BootSplash from './BootSplash'
 
 export default function Providers({ children }) {
   return (
@@ -20,6 +21,7 @@ export default function Providers({ children }) {
         <WhatsAppChat />
         <MarketingCookies />
         <PwaClient />
+        <BootSplash />
       </CartProvider>
     </AuthProvider>
   )
