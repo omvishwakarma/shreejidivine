@@ -38,7 +38,9 @@ export async function generateMetadata({ params }) {
         product.tagline ||
         `${name} from ${SITE_NAME}. Handcrafted in India.`
     )
-    const image = productImageUrl(product) || undefined
+    const image = product.image
+      ? `${SITE_URL}/shop/${product.slug}/opengraph-image`
+      : undefined
     const offer = productOffer(product)
     return {
       title: name,
@@ -48,7 +50,15 @@ export async function generateMetadata({ params }) {
         title: name,
         description,
         url: `/shop/${product.slug}`,
-        images: image ? [{ url: image, alt: name }] : undefined,
+        images: image
+          ? [{ url: image, alt: name, width: 1200, height: 1200, type: 'image/jpeg' }]
+          : undefined,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: name,
+        description,
+        images: image ? [image] : undefined,
       },
       other: {
         'product:price:amount': offer.price,
@@ -92,7 +102,9 @@ function productOffer(product) {
 function ProductMeta({ product }) {
   const name = toTitleCase(product.name)
   const offer = productOffer(product)
-  const image = productImageUrl(product)
+  const image = product.image
+    ? `${SITE_URL}/shop/${product.slug}/opengraph-image`
+    : productImageUrl(product)
   const url = `${SITE_URL}/shop/${product.slug}`
   return (
     <>
@@ -100,6 +112,11 @@ function ProductMeta({ product }) {
       <meta property="og:title" content={name} />
       <meta property="og:url" content={url} />
       {image ? <meta property="og:image" content={image} /> : null}
+      {image ? <meta property="og:image:secure_url" content={image} /> : null}
+      {image ? <meta property="og:image:type" content="image/jpeg" /> : null}
+      {image ? <meta property="og:image:width" content="1200" /> : null}
+      {image ? <meta property="og:image:height" content="1200" /> : null}
+      {image ? <meta name="twitter:image" content={image} /> : null}
       <meta property="product:price:amount" content={offer.price} />
       <meta property="product:price:currency" content="INR" />
       {offer.sale ? (

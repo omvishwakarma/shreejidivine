@@ -30,19 +30,59 @@ function reviewAverage(reviews) {
   return total / reviews.length
 }
 
-function ShareProduct({ name, tagline }) {
+async function shareImageFile(src, filename) {
+  if (!src || typeof File === 'undefined') return null
+  try {
+    const href = src.startsWith('http') ? src : new URL(src, window.location.origin).href
+    const res = await fetch(href)
+    if (!res.ok) return null
+    const blob = await res.blob()
+    if (!blob.type.startsWith('image/')) return null
+    const ext = blob.type.includes('jpeg') || blob.type.includes('jpg')
+      ? 'jpg'
+      : blob.type.includes('webp')
+        ? 'webp'
+        : 'png'
+    return new File([blob], `${filename}.${ext}`, { type: blob.type })
+  } catch {
+    return null
+  }
+}
+
+function ShareProduct({ name, tagline, image, slug }) {
   const [note, setNote] = useState('')
 
   async function onShare() {
     const url = window.location.href.split('#')[0]
     const title = toTitleCase(name)
-    const text = tagline ? `${title}. ${tagline}` : title
+    const text = tagline ? `${title}. ${tagline}\n${url}` : `${title}\n${url}`
+    const file = await shareImageFile(
+      slug ? `/shop/${slug}/opengraph-image` : image,
+      String(slug || name || 'product')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '') || 'product'
+    )
+
     if (typeof navigator.share === 'function') {
+      const withFile = file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
       try {
-        await navigator.share({ title, text, url })
+        if (withFile) {
+          await navigator.share({ title, text, url, files: [file] })
+        } else {
+          await navigator.share({ title, text, url })
+        }
         return
       } catch (err) {
         if (err?.name === 'AbortError') return
+        if (withFile) {
+          try {
+            await navigator.share({ title, text, url })
+            return
+          } catch (fallbackErr) {
+            if (fallbackErr?.name === 'AbortError') return
+          }
+        }
       }
     }
     try {
@@ -51,7 +91,7 @@ function ShareProduct({ name, tagline }) {
       window.setTimeout(() => setNote(''), 2000)
     } catch {
       window.open(
-        `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
+        `https://wa.me/?text=${encodeURIComponent(text)}`,
         '_blank',
         'noopener,noreferrer'
       )
@@ -471,7 +511,12 @@ export default function ProductClient({
                   ) : null}
                   {priceOff > 0 ? <span className="product-detail__save">{priceOff}% off</span> : null}
                 </span>
-                <ShareProduct name={product.name} tagline={product.tagline} />
+                <ShareProduct
+                  name={product.name}
+                  tagline={product.tagline}
+                  image={mainImage || product.image}
+                  slug={product.slug}
+                />
               </div>
 
               {colours.length || fragrances.length ? (
