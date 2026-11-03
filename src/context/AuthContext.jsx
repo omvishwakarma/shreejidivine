@@ -64,9 +64,24 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const loginWithWhatsAppUser = useCallback((nextUser, token) => {
+    if (token) setToken(token)
+    setUser(nextUser)
+    return nextUser
+  }, [])
+
   const value = useMemo(
-    () => ({ user, loading, login, loginWithGoogle, signup, logout, refresh }),
-    [user, loading, login, loginWithGoogle, signup, logout, refresh]
+    () => ({
+      user,
+      loading,
+      login,
+      loginWithGoogle,
+      loginWithWhatsAppUser,
+      signup,
+      logout,
+      refresh,
+    }),
+    [user, loading, login, loginWithGoogle, loginWithWhatsAppUser, signup, logout, refresh]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
+import { notifyWhatsAppOrderStatus } from '@/lib/whatsapp'
 
 export async function PATCH(request, { params }) {
   const gate = await requireAdmin(request)
@@ -14,10 +15,16 @@ export async function PATCH(request, { params }) {
   }
   const order = await Order.findByIdAndUpdate(id, { status }, { new: true }).populate(
     'user',
-    'name email'
+    'name email phone'
   )
   if (!order) {
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
+
+  void notifyWhatsAppOrderStatus(order, status, {
+    name: order.shippingName || order.user?.name,
+    phone: order.shippingPhone || order.user?.phone,
+  })
+
   return NextResponse.json({ order: order.toJSONSafe() })
 }

@@ -1,4 +1,4 @@
-import { WHATSAPP_MESSAGE, WHATSAPP_NUMBER } from './site'
+import { WHATSAPP_MESSAGE, WHATSAPP_NUMBER } from '../site'
 
 export function normalizeWhatsappNumber(value) {
   let digits = String(value || '').replace(/\D/g, '')

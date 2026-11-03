@@ -6,6 +6,10 @@ import {
   delhiveryLabelUrl,
   trackDelhiveryShipment,
 } from '@/lib/delhivery'
+import {
+  notifyWhatsAppShipped,
+  notifyWhatsAppTrackingUpdate,
+} from '@/lib/whatsapp'
 
 export async function POST(request, { params }) {
   const gate = await requireAdmin(request)
@@ -42,7 +46,12 @@ export async function POST(request, { params }) {
       order.status = 'SHIPPED'
     }
     await order.save()
-    await order.populate('user', 'name email')
+    await order.populate('user', 'name email phone')
+
+    void notifyWhatsAppShipped(order, {
+      name: order.shippingName || order.user?.name,
+      phone: order.shippingPhone || order.user?.phone,
+    })
 
     return NextResponse.json({ order: order.toJSONSafe(), shipment: created })
   } catch (err) {
@@ -77,7 +86,11 @@ export async function GET(request, { params }) {
       order.delhiveryStatus = tracking.status
       await order.save()
     }
-    await order.populate('user', 'name email')
+    await order.populate('user', 'name email phone')
+    void notifyWhatsAppTrackingUpdate(order, tracking, {
+      name: order.shippingName || order.user?.name,
+      phone: order.shippingPhone || order.user?.phone,
+    })
     return NextResponse.json({ order: order.toJSONSafe(), tracking })
   } catch (err) {
     console.error(err)

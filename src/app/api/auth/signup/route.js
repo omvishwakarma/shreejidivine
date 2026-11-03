@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { dbConnect, signToken } from '@/lib/mongo/auth'
 import { User } from '@/lib/mongo/User'
 import { sendWelcomeEmail } from '@/lib/mail'
+import { normalizeWhatsappNumber, notifyWhatsAppWelcome } from '@/lib/whatsapp'
 
 export async function POST(request) {
   try {
@@ -18,17 +19,29 @@ export async function POST(request) {
     if (exists) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
     }
+    const phoneKey = normalizeWhatsappNumber(data.phone || '')
+    if (phoneKey) {
+      const phoneTaken = await User.findOne({ phoneKey })
+      if (phoneTaken) {
+        return NextResponse.json(
+          { error: 'This phone number is already registered' },
+          { status: 409 }
+        )
+      }
+    }
     const user = await User.create({
       name: data.name.trim(),
       email: data.email.toLowerCase(),
       passwordHash: await User.hashPassword(data.password),
       phone: data.phone || '',
+      ...(phoneKey ? { phoneKey } : {}),
       role: 'user',
     })
     const token = await signToken(user)
 
-    // Don't block signup if mail fails / isn't configured
+    // Don't block signup if mail / WhatsApp fails
     void sendWelcomeEmail(user.toSafeJSON())
+    void notifyWhatsAppWelcome(user.toSafeJSON())
 
     return NextResponse.json({ user: user.toSafeJSON(), token }, { status: 201 })
   } catch (err) {

@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import path from 'path'
 import { get, put } from '@vercel/blob'
 import { v2 as cloudinary } from 'cloudinary'
+import { SITE_URL } from './site'
 
 function hasVercelBlob() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN)
@@ -145,8 +146,26 @@ export async function storeUpload({
   return { url, provider: 'local' }
 }
 
+function canUseLiveBlobFallback() {
+  return !process.env.VERCEL && process.env.NODE_ENV !== 'production'
+}
+
+async function fetchBlobFromLiveSite(pathname) {
+  const url = `${SITE_URL.replace(/\/$/, '')}/api/blob?pathname=${encodeURIComponent(pathname)}&original=1`
+  const res = await fetch(url, { cache: 'no-store' })
+  if (!res.ok || !res.body) return null
+  return {
+    stream: res.body,
+    blob: {
+      contentType: res.headers.get('content-type') || 'application/octet-stream',
+      size: Number(res.headers.get('content-length')) || undefined,
+    },
+  }
+}
+
 /**
  * Stream a private Vercel Blob by pathname (used by /api/blob).
+ * Locally, a missing/forbidden token falls back to the live storefront.
  */
 export async function readPrivateBlob(pathname) {
   if (!pathname || pathname.includes('..') || pathname.startsWith('/')) {
@@ -154,14 +173,26 @@ export async function readPrivateBlob(pathname) {
     err.code = 'INVALID_PATH'
     throw err
   }
-  const result = await get(pathname, {
-    access: 'private',
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-  })
-  if (!result?.stream) {
-    const err = new Error('Blob not found')
-    err.code = 'NOT_FOUND'
+
+  try {
+    const result = await get(pathname, {
+      access: 'private',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    })
+    if (result?.stream) return result
+  } catch (err) {
+    if (!canUseLiveBlobFallback()) throw err
+    const fallback = await fetchBlobFromLiveSite(pathname)
+    if (fallback) return fallback
     throw err
   }
-  return result
+
+  if (canUseLiveBlobFallback()) {
+    const fallback = await fetchBlobFromLiveSite(pathname)
+    if (fallback) return fallback
+  }
+
+  const err = new Error('Blob not found')
+  err.code = 'NOT_FOUND'
+  throw err
 }

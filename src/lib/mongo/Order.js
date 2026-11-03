@@ -53,6 +53,7 @@ const orderSchema = new mongoose.Schema(
     delhiveryWaybill: { type: String, default: '' },
     delhiveryStatus: { type: String, default: '' },
     delhiverySortCode: { type: String, default: '' },
+    whatsappSent: { type: [String], default: [] },
     items: [orderItemSchema],
   },
   { timestamps: true }

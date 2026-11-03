@@ -4,6 +4,7 @@ import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendOrderEmail } from '@/lib/mail'
+import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
 import { redeemCoupon } from '@/lib/coupons'
 
 export async function POST(request) {
@@ -58,6 +59,11 @@ export async function POST(request) {
       void sendOrderEmail(order, {
         email: gate.auth.email,
         name: gate.auth.name || order.shippingName,
+      })
+      void notifyWhatsAppOrderPlaced(order, {
+        email: gate.auth.email,
+        name: gate.auth.name || order.shippingName,
+        phone: order.shippingPhone,
       })
     }
 
