@@ -5,6 +5,7 @@ import {
   isWhatsAppConfigured,
   normalizeWhatsappNumber,
 } from '@/lib/whatsapp'
+import { isWhatsAppAuthEnabled } from '@/lib/whatsapp/authEnabled'
 import { dbConnect } from '@/lib/mongo/auth'
 import { User } from '@/lib/mongo/User'
 
@@ -17,6 +18,12 @@ async function findUserByPhone(phone) {
 
 export async function POST(request) {
   try {
+    if (!isWhatsAppAuthEnabled()) {
+      return NextResponse.json(
+        { error: 'WhatsApp login is not available yet.' },
+        { status: 503 }
+      )
+    }
     if (!isWhatsAppConfigured()) {
       return NextResponse.json(
         { error: 'WhatsApp login is not configured yet.' },

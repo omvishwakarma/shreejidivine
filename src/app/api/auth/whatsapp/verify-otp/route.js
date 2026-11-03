@@ -7,6 +7,7 @@ import {
   notifyWhatsAppWelcome,
   verifyWhatsAppOtp,
 } from '@/lib/whatsapp'
+import { isWhatsAppAuthEnabled } from '@/lib/whatsapp/authEnabled'
 
 function syntheticEmail(phone) {
   return `wa_${phone}@users.shreejidivine.co`
@@ -14,6 +15,12 @@ function syntheticEmail(phone) {
 
 export async function POST(request) {
   try {
+    if (!isWhatsAppAuthEnabled()) {
+      return NextResponse.json(
+        { error: 'WhatsApp login is not available yet.' },
+        { status: 503 }
+      )
+    }
     const schema = z.object({
       phone: z.string().min(10),
       code: z.string().min(4),
