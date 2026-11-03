@@ -9,3 +9,4 @@ export {
   notifyWhatsAppTrackingUpdate,
 } from './notify'
 export { createAndSendWhatsAppOtp, verifyWhatsAppOtp } from './otp'
+export { scheduleWhatsApp } from './schedule'

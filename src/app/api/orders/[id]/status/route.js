@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
-import { notifyWhatsAppOrderStatus } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderStatus, scheduleWhatsApp } from '@/lib/whatsapp'
 
 export async function PATCH(request, { params }) {
   const gate = await requireAdmin(request)
@@ -21,11 +21,12 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  // Await on Vercel — fire-and-forget is frozen after the response returns.
-  await notifyWhatsAppOrderStatus(order, status, {
-    name: order.shippingName || order.user?.name,
-    phone: order.shippingPhone || order.user?.phone,
-  })
+  scheduleWhatsApp(() =>
+    notifyWhatsAppOrderStatus(order, status, {
+      name: order.shippingName || order.user?.name,
+      phone: order.shippingPhone || order.user?.phone,
+    })
+  )
 
   return NextResponse.json({ order: order.toJSONSafe() })
 }

@@ -2,9 +2,42 @@ import { NextResponse } from 'next/server'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { getRazorpayClient } from '@/lib/razorpay'
+import { redeemCoupon } from '@/lib/coupons'
+import { sendOrderEmail } from '@/lib/mail'
+import { notifyWhatsAppOrderPlaced, scheduleWhatsApp } from '@/lib/whatsapp'
 
 export const PAYMENT_FAILED_MESSAGE =
   'Payment failed. If money was deducted, it will return to your bank in 5–7 business days. Please try again.'
+
+async function markPaidAndNotify(order, gate) {
+  const alreadyPaid = order.paymentStatus === 'PAID'
+  order.paymentStatus = 'PAID'
+  order.status = 'CONFIRMED'
+  order.paymentMethod = 'RAZORPAY'
+  await order.save()
+
+  if (alreadyPaid) return
+
+  if (order.couponCode) {
+    try {
+      await redeemCoupon(order.couponCode)
+    } catch (err) {
+      console.error('[razorpay status] redeemCoupon', err?.message || err)
+    }
+  }
+
+  void sendOrderEmail(order, {
+    email: gate.auth.email,
+    name: gate.auth.name || order.shippingName,
+  })
+  scheduleWhatsApp(() =>
+    notifyWhatsAppOrderPlaced(order, {
+      email: gate.auth.email,
+      name: gate.auth.name || order.shippingName,
+      phone: order.shippingPhone,
+    })
+  )
+}
 
 export async function GET(request) {
   const gate = await requireUser(request)
@@ -33,6 +66,7 @@ export async function GET(request) {
     const items = Array.isArray(result?.items) ? result.items : []
     const captured = items.some((item) => item.status === 'captured' || item.status === 'authorized')
     if (captured) {
+      await markPaidAndNotify(order, gate)
       return NextResponse.json({ status: 'paid' })
     }
 

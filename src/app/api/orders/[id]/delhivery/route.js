@@ -9,6 +9,7 @@ import {
 import {
   notifyWhatsAppShipped,
   notifyWhatsAppTrackingUpdate,
+  scheduleWhatsApp,
 } from '@/lib/whatsapp'
 
 export async function POST(request, { params }) {
@@ -48,10 +49,12 @@ export async function POST(request, { params }) {
     await order.save()
     await order.populate('user', 'name email phone')
 
-    await notifyWhatsAppShipped(order, {
-      name: order.shippingName || order.user?.name,
-      phone: order.shippingPhone || order.user?.phone,
-    })
+    scheduleWhatsApp(() =>
+      notifyWhatsAppShipped(order, {
+        name: order.shippingName || order.user?.name,
+        phone: order.shippingPhone || order.user?.phone,
+      })
+    )
 
     return NextResponse.json({ order: order.toJSONSafe(), shipment: created })
   } catch (err) {
@@ -87,10 +90,12 @@ export async function GET(request, { params }) {
       await order.save()
     }
     await order.populate('user', 'name email phone')
-    await notifyWhatsAppTrackingUpdate(order, tracking, {
-      name: order.shippingName || order.user?.name,
-      phone: order.shippingPhone || order.user?.phone,
-    })
+    scheduleWhatsApp(() =>
+      notifyWhatsAppTrackingUpdate(order, tracking, {
+        name: order.shippingName || order.user?.name,
+        phone: order.shippingPhone || order.user?.phone,
+      })
+    )
     return NextResponse.json({ order: order.toJSONSafe(), tracking })
   } catch (err) {
     console.error(err)

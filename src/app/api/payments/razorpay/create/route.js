@@ -5,7 +5,7 @@ import { Order } from '@/lib/mongo/Order'
 import { getRazorpayClient, getRazorpayKeyId, razorpayErrorMessage } from '@/lib/razorpay'
 import { validateCoupon, redeemCoupon } from '@/lib/coupons'
 import { sendOrderEmail } from '@/lib/mail'
-import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderPlaced, scheduleWhatsApp } from '@/lib/whatsapp'
 import { applyCartRewards } from '@/lib/cartRewards'
 import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
 import {
@@ -118,11 +118,13 @@ export async function POST(request) {
         email: gate.auth.email,
         name: gate.auth.name || data.shipping.fullName,
       })
-      await notifyWhatsAppOrderPlaced(order, {
-        email: gate.auth.email,
-        name: gate.auth.name || data.shipping.fullName,
-        phone: data.shipping.phone,
-      })
+      scheduleWhatsApp(() =>
+        notifyWhatsAppOrderPlaced(order, {
+          email: gate.auth.email,
+          name: gate.auth.name || data.shipping.fullName,
+          phone: data.shipping.phone,
+        })
+      )
       return NextResponse.json({
         freeOrder: true,
         orderId: order._id.toString(),

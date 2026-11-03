@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { sendOrderEmail } from '@/lib/mail'
-import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderPlaced, scheduleWhatsApp } from '@/lib/whatsapp'
 import { redeemCoupon, validateCoupon } from '@/lib/coupons'
 import { applyCartRewards } from '@/lib/cartRewards'
 import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
@@ -137,12 +137,12 @@ export async function POST(request) {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
     })
-    // Await on Vercel — fire-and-forget is frozen after the response returns.
-    await notifyWhatsAppOrderPlaced(order, {
+    const customer = {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
       phone: data.shipping.phone,
-    })
+    }
+    scheduleWhatsApp(() => notifyWhatsAppOrderPlaced(order, customer))
 
     return NextResponse.json({ order: order.toJSONSafe() }, { status: 201 })
   } catch (err) {
