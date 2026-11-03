@@ -3,8 +3,10 @@ import { z } from 'zod'
 import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { sendOrderEmail } from '@/lib/mail'
-import { notifyWhatsAppOrderPlaced, scheduleWhatsApp } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
 import { redeemCoupon, validateCoupon } from '@/lib/coupons'
+
+export const maxDuration = 30
 import { applyCartRewards } from '@/lib/cartRewards'
 import { calcShippingFee, getStoreSettings, orderTotal } from '@/lib/shipping'
 import {
@@ -137,12 +139,11 @@ export async function POST(request) {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
     })
-    const customer = {
+    await notifyWhatsAppOrderPlaced(order, {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
       phone: data.shipping.phone,
-    }
-    scheduleWhatsApp(() => notifyWhatsAppOrderPlaced(order, customer))
+    })
 
     return NextResponse.json({ order: order.toJSONSafe() }, { status: 201 })
   } catch (err) {

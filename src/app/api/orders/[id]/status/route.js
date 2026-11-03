@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { dbConnect, requireAdmin } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
-import { notifyWhatsAppOrderStatus, scheduleWhatsApp } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderStatus, whatsappConfigDebug } from '@/lib/whatsapp'
+
+export const maxDuration = 30
 
 export async function PATCH(request, { params }) {
   const gate = await requireAdmin(request)
@@ -21,12 +23,20 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  scheduleWhatsApp(() =>
-    notifyWhatsAppOrderStatus(order, status, {
+  // Await + force: every admin status change sends the matching WhatsApp template.
+  const whatsapp = await notifyWhatsAppOrderStatus(
+    order,
+    status,
+    {
       name: order.shippingName || order.user?.name,
       phone: order.shippingPhone || order.user?.phone,
-    })
+    },
+    { force: true }
   )
 
-  return NextResponse.json({ order: order.toJSONSafe() })
+  return NextResponse.json({
+    order: order.toJSONSafe(),
+    whatsapp,
+    whatsappConfig: whatsappConfigDebug(),
+  })
 }

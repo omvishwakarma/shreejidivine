@@ -43,7 +43,16 @@ export default function AdminOrderDetailPage() {
         body: JSON.stringify({ status }),
       })
       setOrder(data.order)
-      setMsg('Status updated')
+      const wa = data.whatsapp
+      if (wa?.ok) setMsg(`Status updated · WhatsApp sent (${wa.template || status})`)
+      else if (wa?.skipped) {
+        setMsg(
+          `Status updated · WhatsApp skipped (${wa.reason || 'n/a'}${
+            data.whatsappConfig && !data.whatsappConfig.configured ? ', env missing on deploy' : ''
+          })`
+        )
+      } else if (wa?.error) setMsg(`Status updated · WhatsApp failed: ${wa.error}`)
+      else setMsg('Status updated')
     } catch (err) {
       setError(err.message)
     } finally {

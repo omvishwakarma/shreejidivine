@@ -173,22 +173,86 @@ export async function notifyWhatsAppShipped(order, customer = {}) {
   return result
 }
 
-export async function notifyWhatsAppOrderStatus(order, status, customer = {}) {
+/**
+ * Send the WhatsApp template that matches an order status.
+ * @param {object} [options]
+ * @param {boolean} [options.force] — admin status change: send even if sent before
+ */
+export async function notifyWhatsAppOrderStatus(order, status, customer = {}, options = {}) {
+  const force = Boolean(options.force)
   const to = orderPhone(order, customer)
-  if (!to) return { skipped: true }
+  if (!to) {
+    return {
+      skipped: true,
+      reason: 'invalid_phone',
+      shippingPhone: order?.shippingPhone || '',
+      customerPhone: customer?.phone || '',
+    }
+  }
 
   const name = firstName(customer.name || order?.shippingName || order?.user?.name)
   const orderId = orderLabel(order)
   const amount = money(order?.total)
   const next = String(status || order?.status || '').toUpperCase()
 
+  if (next === 'PENDING') {
+    return { skipped: true, reason: 'no_template', status: next }
+  }
+
+  if (next === 'CONFIRMED') {
+    if (order?.paymentMethod === 'COD' && order?.paymentStatus !== 'PAID') {
+      const key = `cod_confirmed:${orderId}`
+      if (!force && alreadySent(order, key)) return { skipped: true, reason: 'already_sent', key }
+      const result = await sendSafe(
+        to,
+        WA_TEMPLATES.codConfirmed,
+        { name, orderId, amount },
+        key
+      )
+      if (result?.ok) await markSent(order, key)
+      return { ...result, status: next, template: WA_TEMPLATES.codConfirmed }
+    }
+
+    const key = `confirm:${orderId}`
+    if (!force && alreadySent(order, key)) return { skipped: true, reason: 'already_sent', key }
+    const result = await sendSafe(
+      to,
+      WA_TEMPLATES.orderConfirmation,
+      {
+        name,
+        orderId,
+        amount,
+        paymentMethod: paymentLabel(order),
+      },
+      key
+    )
+    if (result?.ok) await markSent(order, key)
+    return { ...result, status: next, template: WA_TEMPLATES.orderConfirmation }
+  }
+
   if (next === 'SHIPPED') {
-    return notifyWhatsAppShipped(order, customer)
+    const key = `shipped:${orderId}`
+    if (!force && alreadySent(order, key)) return { skipped: true, reason: 'already_sent', key }
+    const waybill = String(order?.delhiveryWaybill || '').trim() || 'Pending'
+    const result = await sendSafe(
+      to,
+      WA_TEMPLATES.orderShipped,
+      {
+        name,
+        orderId,
+        courier: 'Delhivery',
+        trackingId: waybill,
+        trackUrl: trackUrl(order),
+      },
+      key
+    )
+    if (result?.ok) await markSent(order, key)
+    return { ...result, status: next, template: WA_TEMPLATES.orderShipped }
   }
 
   if (next === 'DELIVERED') {
     const key = `delivered:${orderId}`
-    if (alreadySent(order, key)) return { skipped: true }
+    if (!force && alreadySent(order, key)) return { skipped: true, reason: 'already_sent', key }
     const result = await sendSafe(
       to,
       WA_TEMPLATES.orderDelivered,
@@ -196,12 +260,12 @@ export async function notifyWhatsAppOrderStatus(order, status, customer = {}) {
       key
     )
     if (result?.ok) await markSent(order, key)
-    return result
+    return { ...result, status: next, template: WA_TEMPLATES.orderDelivered }
   }
 
   if (next === 'CANCELLED') {
     const key = `cancelled:${orderId}`
-    if (alreadySent(order, key)) return { skipped: true }
+    if (!force && alreadySent(order, key)) return { skipped: true, reason: 'already_sent', key }
     const result = await sendSafe(
       to,
       WA_TEMPLATES.orderCancelled,
@@ -209,23 +273,10 @@ export async function notifyWhatsAppOrderStatus(order, status, customer = {}) {
       key
     )
     if (result?.ok) await markSent(order, key)
-    return result
+    return { ...result, status: next, template: WA_TEMPLATES.orderCancelled }
   }
 
-  if (next === 'CONFIRMED' && order?.paymentMethod === 'COD') {
-    const key = `cod_confirmed:${orderId}`
-    if (alreadySent(order, key)) return { skipped: true }
-    const result = await sendSafe(
-      to,
-      WA_TEMPLATES.codConfirmed,
-      { name, orderId, amount },
-      key
-    )
-    if (result?.ok) await markSent(order, key)
-    return result
-  }
-
-  return { skipped: true, reason: 'no_template' }
+  return { skipped: true, reason: 'no_template', status: next }
 }
 
 export async function notifyWhatsAppTrackingUpdate(order, tracking = {}, customer = {}) {

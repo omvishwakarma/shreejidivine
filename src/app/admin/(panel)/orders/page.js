@@ -13,6 +13,7 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [paymentFilter, setPaymentFilter] = useState('all')
+  const [msg, setMsg] = useState('')
 
   async function load() {
     const data = await adminApi('/api/orders?all=1')
@@ -27,11 +28,22 @@ export default function AdminOrdersPage() {
   }, [])
 
   async function updateStatus(id, status) {
-    await adminApi(`/api/orders/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    })
-    await load()
+    setError('')
+    setMsg('')
+    try {
+      const data = await adminApi(`/api/orders/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+      const wa = data.whatsapp
+      if (wa?.ok) setMsg(`${status}: WhatsApp sent (${wa.template || 'ok'})`)
+      else if (wa?.skipped) setMsg(`${status}: WhatsApp skipped (${wa.reason || 'n/a'})`)
+      else if (wa?.error) setMsg(`${status}: WhatsApp failed — ${wa.error}`)
+      else setMsg(`${status}: updated`)
+      await load()
+    } catch (err) {
+      setError(err.message)
+    }
   }
 
   const filtered = useMemo(() => {
@@ -63,6 +75,7 @@ export default function AdminOrdersPage() {
       <h1 className="admin-page-title">Orders</h1>
       <p className="admin-page-sub">Newest orders first — search, filter, or open details</p>
       {error ? <p className="admin-error">{error}</p> : null}
+      {msg ? <p className="admin-success">{msg}</p> : null}
 
       <div className="admin-toolbar">
         <input

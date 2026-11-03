@@ -1,11 +1,21 @@
 import { normalizeWhatsappNumber } from './phone'
 
 function env(name) {
-  return String(process.env[name] || '').trim()
+  return String(process.env[name] || '').trim().replace(/^["']|["']$/g, '')
 }
 
 export function isWhatsAppConfigured() {
   return Boolean(env('WHATSAPP_ACCESS_TOKEN') && env('WHATSAPP_PHONE_NUMBER_ID'))
+}
+
+export function whatsappConfigDebug() {
+  return {
+    configured: isWhatsAppConfigured(),
+    hasToken: Boolean(env('WHATSAPP_ACCESS_TOKEN')),
+    hasPhoneId: Boolean(env('WHATSAPP_PHONE_NUMBER_ID')),
+    apiBase: env('WHATSAPP_API_BASE') || 'https://omni.yourbulksms.com/V23.0',
+    language: env('WHATSAPP_TEMPLATE_LANGUAGE') || 'en',
+  }
 }
 
 function messagesUrl() {
@@ -51,7 +61,8 @@ export async function sendWhatsAppTemplate({
   }
   if (callbackData) body.biz_opaque_callback_data = String(callbackData).slice(0, 512)
 
-  const res = await fetch(messagesUrl(), {
+  const url = messagesUrl()
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -68,17 +79,26 @@ export async function sendWhatsAppTemplate({
     data = { raw: text }
   }
 
-  if (!res.ok) {
+  const omniInvalid = data?.isValid === false
+  const omniMessage =
+    data?.response?.[0]?.message ||
+    data?.response?.[0]?.status ||
+    data?.error?.message ||
+    data?.message ||
+    ''
+
+  if (!res.ok || omniInvalid) {
     const message =
-      data?.error?.message ||
-      data?.message ||
+      omniMessage ||
       (typeof data?.raw === 'string' ? data.raw.slice(0, 200) : '') ||
       `WhatsApp send failed (${res.status})`
     const err = new Error(message)
-    err.status = res.status
+    err.status = res.status || 400
     err.payload = data
+    console.error('[whatsapp] send failed', { url, template: name, to: phone, message, data })
     throw err
   }
 
-  return { ok: true, data }
+  console.info('[whatsapp] sent', { template: name, to: phone, id: data?.messages?.[0]?.id })
+  return { ok: true, data, to: phone, template: name }
 }

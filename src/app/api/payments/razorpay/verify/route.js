@@ -4,7 +4,9 @@ import { dbConnect, requireUser } from '@/lib/mongo/auth'
 import { Order } from '@/lib/mongo/Order'
 import { verifyRazorpaySignature } from '@/lib/razorpay'
 import { sendOrderEmail } from '@/lib/mail'
-import { notifyWhatsAppOrderPlaced, scheduleWhatsApp } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
+
+export const maxDuration = 30
 import { redeemCoupon } from '@/lib/coupons'
 
 export async function POST(request) {
@@ -60,13 +62,11 @@ export async function POST(request) {
         email: gate.auth.email,
         name: gate.auth.name || order.shippingName,
       })
-      scheduleWhatsApp(() =>
-        notifyWhatsAppOrderPlaced(order, {
-          email: gate.auth.email,
-          name: gate.auth.name || order.shippingName,
-          phone: order.shippingPhone,
-        })
-      )
+      await notifyWhatsAppOrderPlaced(order, {
+        email: gate.auth.email,
+        name: gate.auth.name || order.shippingName,
+        phone: order.shippingPhone,
+      })
     }
 
     return NextResponse.json({ order: order.toJSONSafe() })

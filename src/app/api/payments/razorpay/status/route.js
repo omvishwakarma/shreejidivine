@@ -4,7 +4,9 @@ import { Order } from '@/lib/mongo/Order'
 import { getRazorpayClient } from '@/lib/razorpay'
 import { redeemCoupon } from '@/lib/coupons'
 import { sendOrderEmail } from '@/lib/mail'
-import { notifyWhatsAppOrderPlaced, scheduleWhatsApp } from '@/lib/whatsapp'
+import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
+
+export const maxDuration = 30
 
 export const PAYMENT_FAILED_MESSAGE =
   'Payment failed. If money was deducted, it will return to your bank in 5–7 business days. Please try again.'
@@ -30,13 +32,11 @@ async function markPaidAndNotify(order, gate) {
     email: gate.auth.email,
     name: gate.auth.name || order.shippingName,
   })
-  scheduleWhatsApp(() =>
-    notifyWhatsAppOrderPlaced(order, {
-      email: gate.auth.email,
-      name: gate.auth.name || order.shippingName,
-      phone: order.shippingPhone,
-    })
-  )
+  await notifyWhatsAppOrderPlaced(order, {
+    email: gate.auth.email,
+    name: gate.auth.name || order.shippingName,
+    phone: order.shippingPhone,
+  })
 }
 
 export async function GET(request) {
