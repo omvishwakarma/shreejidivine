@@ -21,7 +21,8 @@ export async function PATCH(request, { params }) {
     return NextResponse.json({ error: 'Order not found' }, { status: 404 })
   }
 
-  void notifyWhatsAppOrderStatus(order, status, {
+  // Await on Vercel — fire-and-forget is frozen after the response returns.
+  await notifyWhatsAppOrderStatus(order, status, {
     name: order.shippingName || order.user?.name,
     phone: order.shippingPhone || order.user?.phone,
   })

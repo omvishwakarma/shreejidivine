@@ -48,7 +48,7 @@ export async function POST(request, { params }) {
     await order.save()
     await order.populate('user', 'name email phone')
 
-    void notifyWhatsAppShipped(order, {
+    await notifyWhatsAppShipped(order, {
       name: order.shippingName || order.user?.name,
       phone: order.shippingPhone || order.user?.phone,
     })
@@ -87,7 +87,7 @@ export async function GET(request, { params }) {
       await order.save()
     }
     await order.populate('user', 'name email phone')
-    void notifyWhatsAppTrackingUpdate(order, tracking, {
+    await notifyWhatsAppTrackingUpdate(order, tracking, {
       name: order.shippingName || order.user?.name,
       phone: order.shippingPhone || order.user?.phone,
     })

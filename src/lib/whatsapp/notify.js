@@ -50,14 +50,23 @@ function trackUrl(order) {
 }
 
 async function sendSafe(to, template, params, callbackData) {
-  if (!isWhatsAppConfigured() || !to) return { skipped: true }
+  if (!isWhatsAppConfigured()) {
+    console.warn('[whatsapp] skipped — WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID missing')
+    return { skipped: true, reason: 'not_configured' }
+  }
+  if (!to) {
+    console.warn('[whatsapp] skipped — no phone on order')
+    return { skipped: true, reason: 'invalid_phone' }
+  }
   try {
-    return await sendWhatsAppTemplate({
+    const result = await sendWhatsAppTemplate({
       to,
       template,
       components: buildTemplateComponents(template, params),
       callbackData,
     })
+    console.info('[whatsapp] sent', template, to)
+    return result
   } catch (err) {
     console.error('[whatsapp]', template, err.message || err)
     return { error: err.message || 'send_failed' }

@@ -60,7 +60,7 @@ export async function POST(request) {
         email: gate.auth.email,
         name: gate.auth.name || order.shippingName,
       })
-      void notifyWhatsAppOrderPlaced(order, {
+      await notifyWhatsAppOrderPlaced(order, {
         email: gate.auth.email,
         name: gate.auth.name || order.shippingName,
         phone: order.shippingPhone,

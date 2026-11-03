@@ -137,7 +137,8 @@ export async function POST(request) {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
     })
-    void notifyWhatsAppOrderPlaced(order, {
+    // Await on Vercel — fire-and-forget is frozen after the response returns.
+    await notifyWhatsAppOrderPlaced(order, {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
       phone: data.shipping.phone,
