@@ -1410,6 +1410,35 @@
   font-weight: 500;
 }
 
+.admin-sort-th {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.admin-sort-th:hover,
+.admin-sort-th.is-active {
+  color: var(--admin-ink, #2b1e16);
+}
+
+.admin-sort-th__arrow {
+  font-size: 0.75rem;
+  opacity: 0.55;
+}
+
+.admin-sort-th.is-active .admin-sort-th__arrow {
+  opacity: 1;
+}
+
 .admin-coupon-users {
   margin: 0;
   padding: 0;
