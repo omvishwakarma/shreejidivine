@@ -4,6 +4,48 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '../../../../lib/adminApi'
 
+function csvEscape(value) {
+  const text = String(value ?? '')
+  if (/[",\n\r]/.test(text)) return `"${text.replace(/"/g, '""')}"`
+  return text
+}
+
+function downloadCustomersExcel(rows) {
+  const header = ['Name', 'Email', 'Phone', 'Joined']
+  const lines = [
+    header.join(','),
+    ...rows.map((u) =>
+      [
+        csvEscape(u.name || ''),
+        csvEscape(u.email || ''),
+        csvEscape(u.phone || ''),
+        csvEscape(
+          u.createdAt
+            ? new Date(u.createdAt).toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })
+            : ''
+        ),
+      ].join(',')
+    ),
+  ]
+  // BOM so Excel opens Hindi/special characters correctly
+  const blob = new Blob([`\uFEFF${lines.join('\n')}`], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
+  })
+  const url = URL.createObjectURL(blob)
+  const stamp = new Date().toISOString().slice(0, 10)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `shreeji-customers-${stamp}.csv`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
 export default function AdminUsersPage() {
   const router = useRouter()
   const [users, setUsers] = useState([])
@@ -49,6 +91,14 @@ export default function AdminUsersPage() {
           <option value="newest">Newest first</option>
           <option value="name">Name A–Z</option>
         </select>
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary"
+          disabled={filtered.length === 0}
+          onClick={() => downloadCustomersExcel(filtered)}
+        >
+          Download Excel
+        </button>
         <span className="admin-toolbar__count">
           {filtered.length} / {users.length}
         </span>
