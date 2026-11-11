@@ -14,6 +14,7 @@ const COLUMNS = [
   'brand',
   'product_type',
   'inventory',
+  'origin_country',
 ]
 
 export function catalogOrigin(request) {
@@ -87,6 +88,8 @@ export function productToCatalogRow(product, origin) {
     brand: SITE_NAME,
     product_type: category || 'Spiritual Wearables',
     inventory: String(Math.max(0, Math.floor(Number(product.stock) || 0))),
+    // Meta catalog: ISO 3166-1 alpha-2 (India)
+    origin_country: 'IN',
   }
 }
 
