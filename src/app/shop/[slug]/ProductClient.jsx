@@ -659,6 +659,10 @@ export default function ProductClient({
                   ))}
                 </ul>
               ) : null}
+              <p className="product-detail__origin">
+                <span>Country of Origin</span>
+                <strong>India</strong>
+              </p>
               {(product.reviews || []).length ? (
               <section className="product-reviews" aria-label="Reviews">
                 <div className="product-reviews__head">

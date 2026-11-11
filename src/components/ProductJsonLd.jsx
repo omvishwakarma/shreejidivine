@@ -38,6 +38,10 @@ export default function ProductJsonLd({ product }) {
       '@type': 'Brand',
       name: SITE_NAME,
     },
+    countryOfOrigin: {
+      '@type': 'Country',
+      name: 'India',
+    },
     offers: offer,
   }
 
