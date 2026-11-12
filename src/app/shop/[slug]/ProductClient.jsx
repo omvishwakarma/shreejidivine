@@ -252,8 +252,22 @@ export default function ProductClient({
       return
     }
 
+    const categoryKey =
+      String(product.categorySlug || '').trim() ||
+      String(product.categoryAssignments?.[0]?.categorySlug || '').trim()
+
+    if (!categoryKey) {
+      setRelated([])
+      return
+    }
+
     let cancelled = false
-    api(`/api/products?exclude=${encodeURIComponent(product.slug || slug || '')}&limit=8`)
+    const qs = new URLSearchParams({
+      category: categoryKey,
+      exclude: product.slug || slug || '',
+      limit: '8',
+    })
+    api(`/api/products?${qs.toString()}`)
       .then((d) => {
         if (cancelled) return
         const list = (d.products || [])
@@ -268,7 +282,7 @@ export default function ProductClient({
     return () => {
       cancelled = true
     }
-  }, [product?.id, product?.slug, showRelated, slug])
+  }, [product?.id, product?.slug, product?.categorySlug, product?.categoryAssignments, showRelated, slug])
 
   async function submitReview(e) {
     e.preventDefault()
@@ -820,59 +834,7 @@ export default function ProductClient({
           <section className="related-products" aria-labelledby="related-products-heading">
             <div className="related-products__head">
               <h2 id="related-products-heading" className="related-products__title">
-                <span className="related-products__diya" aria-hidden="true">
-                  <svg viewBox="0 0 48 48" fill="none">
-                    <path
-                      d="M10 28c0-6 6.2-10 14-10s14 4 14 10c0 5.2-6 9-14 9s-14-3.8-14-9Z"
-                      fill="#f4a03c"
-                    />
-                    <path
-                      d="M14 29.5c.4 3.2 4.4 5.5 10 5.5s9.6-2.3 10-5.5"
-                      stroke="#c45c1a"
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M24 18c1.2-3.2 1-6.4-.2-9.2 2.6 1.2 4.4 3.6 4.8 6.4-1.2.6-2.8 1.6-4.6 2.8Z"
-                      fill="#ffb020"
-                    />
-                    <path
-                      d="M24 17.2c-.2-2.6.6-5.2 2-7.4"
-                      stroke="#fff4d6"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="16" cy="12" r="1.1" fill="#e23b2f" />
-                    <circle cx="33" cy="10" r="0.9" fill="#f6c445" />
-                  </svg>
-                </span>
-                Diwali Offer Sale
-                <span className="related-products__diya related-products__diya--flip" aria-hidden="true">
-                  <svg viewBox="0 0 48 48" fill="none">
-                    <path
-                      d="M10 28c0-6 6.2-10 14-10s14 4 14 10c0 5.2-6 9-14 9s-14-3.8-14-9Z"
-                      fill="#f4a03c"
-                    />
-                    <path
-                      d="M14 29.5c.4 3.2 4.4 5.5 10 5.5s9.6-2.3 10-5.5"
-                      stroke="#c45c1a"
-                      strokeWidth="1.4"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M24 18c1.2-3.2 1-6.4-.2-9.2 2.6 1.2 4.4 3.6 4.8 6.4-1.2.6-2.8 1.6-4.6 2.8Z"
-                      fill="#ffb020"
-                    />
-                    <path
-                      d="M24 17.2c-.2-2.6.6-5.2 2-7.4"
-                      stroke="#fff4d6"
-                      strokeWidth="1.2"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="15" cy="11" r="0.9" fill="#f6c445" />
-                    <circle cx="32" cy="13" r="1.1" fill="#e23b2f" />
-                  </svg>
-                </span>
+                Related Products
               </h2>
             </div>
             <div className="ecom-grid">

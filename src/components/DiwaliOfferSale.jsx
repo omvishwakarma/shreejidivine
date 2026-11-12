@@ -22,6 +22,7 @@ export default function DiwaliOfferSale() {
       ariaLabel="Diwali offer sale"
       sectionClass="diwali-offer"
       festive
+      mobileLoadMore={false}
       sortProducts={byPrice}
       fallbackCopy={COPY}
     />

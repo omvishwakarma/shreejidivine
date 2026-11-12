@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import ProductCard from './ProductCard'
 import { api } from '../lib/api'
 import '../app/ecom.css'
 import './BestSellers.css'
+
+const MOBILE_PAGE_SIZE = 10
+const MOBILE_MQ = '(max-width: 960px)'
 
 function Diya({ flip = false }) {
   return (
@@ -36,6 +38,7 @@ export default function BestSellers({
   ariaLabel = 'Best sellers products',
   sectionClass = '',
   festive = false,
+  mobileLoadMore = true,
   sortProducts,
   fallbackCopy = {
     label: 'Customer favourites',
@@ -48,8 +51,15 @@ export default function BestSellers({
   const [error, setError] = useState('')
   const [canPrev, setCanPrev] = useState(false)
   const [canNext, setCanNext] = useState(false)
+  const [isMobile, setIsMobile] = useState(null)
+  const [visibleCount, setVisibleCount] = useState(MOBILE_PAGE_SIZE)
   const railRef = useRef(null)
   const [copy, setCopy] = useState(fallbackCopy)
+
+  const useMobileGrid = Boolean(mobileLoadMore && isMobile !== false)
+  const showSliderNav = !mobileLoadMore || isMobile === false
+  const visibleProducts = useMobileGrid ? products.slice(0, visibleCount) : products
+  const hasMore = Boolean(mobileLoadMore && isMobile && visibleCount < products.length)
 
   useEffect(() => {
     if (!copyKey) return undefined
@@ -67,14 +77,24 @@ export default function BestSellers({
       .then((d) => {
         const list = d.products || []
         setProducts(typeof sortProducts === 'function' ? sortProducts(list) : list)
+        setVisibleCount(MOBILE_PAGE_SIZE)
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [endpoint, sortProducts])
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined
+    const mq = window.matchMedia(MOBILE_MQ)
+    const sync = () => setIsMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  useEffect(() => {
     const el = railRef.current
-    if (!el) return undefined
+    if (!el || !showSliderNav) return undefined
     const sync = () => {
       const cards = el.querySelectorAll('.product-card')
       const rail = el.getBoundingClientRect()
@@ -102,7 +122,7 @@ export default function BestSellers({
       observer.disconnect()
       el.removeEventListener('scroll', sync)
     }
-  }, [products, loading])
+  }, [products, loading, showSliderNav])
 
   function scrollByDir(dir) {
     const el = railRef.current
@@ -114,9 +134,13 @@ export default function BestSellers({
     el.scrollBy({ left: dir * amount, behavior: 'smooth' })
   }
 
+  function loadMore() {
+    setVisibleCount((count) => count + MOBILE_PAGE_SIZE)
+  }
+
   return (
     <section
-      className={`best-sellers${sectionClass ? ` ${sectionClass}` : ''}`}
+      className={`best-sellers${mobileLoadMore ? ' best-sellers--paged' : ''}${sectionClass ? ` ${sectionClass}` : ''}`}
       id={id}
       aria-labelledby={headingId}
     >
@@ -135,64 +159,70 @@ export default function BestSellers({
           <p className="best-sellers__error">Could not load products.</p>
         ) : loading || products.length > 0 ? (
           <div className="best-sellers__stage">
-            <button
-              type="button"
-              className="best-sellers__nav best-sellers__nav--prev"
-              aria-label="Previous"
-              disabled={!canPrev}
-              onClick={() => scrollByDir(-1)}
-            >
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M10.2 3.2 5.4 8l4.8 4.8" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="best-sellers__nav best-sellers__nav--next"
-              aria-label="Next"
-              disabled={!canNext}
-              onClick={() => scrollByDir(1)}
-            >
-              <svg viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M5.8 3.2 10.6 8l-4.8 4.8" />
-              </svg>
-            </button>
+            {showSliderNav ? (
+              <>
+                <button
+                  type="button"
+                  className="best-sellers__nav best-sellers__nav--prev"
+                  aria-label="Previous"
+                  disabled={!canPrev}
+                  onClick={() => scrollByDir(-1)}
+                >
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M10.2 3.2 5.4 8l4.8 4.8" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="best-sellers__nav best-sellers__nav--next"
+                  aria-label="Next"
+                  disabled={!canNext}
+                  onClick={() => scrollByDir(1)}
+                >
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M5.8 3.2 10.6 8l-4.8 4.8" />
+                  </svg>
+                </button>
+              </>
+            ) : null}
             <div
               className="best-sellers__rail"
               ref={railRef}
               role="region"
               aria-label={ariaLabel}
             >
-            <div className="best-sellers__grid">
-              {loading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <article key={i} className="product-card product-card--skel" aria-hidden="true">
-                      <div className="product-card__media product-card__skel-block" />
-                      <div className="product-card__body">
-                        <span className="product-card__skel-line product-card__skel-line--name" />
-                        <span className="product-card__skel-line product-card__skel-line--price" />
-                        <span className="product-card__skel-line product-card__skel-line--btn" />
-                      </div>
-                    </article>
-                  ))
-                : products.map((p, i) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      heading="h3"
-                      className={`reveal reveal-delay-${(i % 4) + 1}`}
-                    />
-                  ))}
-            </div>
+              <div className="best-sellers__grid">
+                {loading
+                  ? Array.from({ length: mobileLoadMore ? 4 : 5 }).map((_, i) => (
+                      <article key={i} className="product-card product-card--skel" aria-hidden="true">
+                        <div className="product-card__media product-card__skel-block" />
+                        <div className="product-card__body">
+                          <span className="product-card__skel-line product-card__skel-line--name" />
+                          <span className="product-card__skel-line product-card__skel-line--price" />
+                          <span className="product-card__skel-line product-card__skel-line--btn" />
+                        </div>
+                      </article>
+                    ))
+                  : visibleProducts.map((p, i) => (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        heading="h3"
+                        className={i < MOBILE_PAGE_SIZE ? `reveal reveal-delay-${(i % 4) + 1}` : ''}
+                      />
+                    ))}
+              </div>
             </div>
           </div>
         ) : null}
 
-        <div className="best-sellers__cta reveal">
-          <Link href="/shop" className="btn">
-            View all
-          </Link>
-        </div>
+        {hasMore ? (
+          <div className="best-sellers__more">
+            <button type="button" className="best-sellers__load-more" onClick={loadMore}>
+              Load More
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   )

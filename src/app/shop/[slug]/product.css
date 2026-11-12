@@ -663,26 +663,15 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.15rem;
-  padding: 0.7rem 1rem;
-  border-radius: 10px;
-  background:
-    radial-gradient(circle at 8% 50%, rgba(244, 160, 60, 0.35), transparent 26%),
-    radial-gradient(circle at 92% 50%, rgba(226, 59, 47, 0.18), transparent 24%),
-    linear-gradient(90deg, #fff4e4, #fffaf3 48%, #fff4e4);
-  border: 1px solid rgba(196, 92, 26, 0.2);
 }
 
 .related-products__title {
   margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
   font-family: var(--font-display), Cabin, sans-serif;
   font-size: 1.55rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: #8f3c22;
+  color: var(--brown);
   text-align: center;
 }
 
