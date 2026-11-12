@@ -69,16 +69,6 @@ export async function POST(request) {
       )
     }
 
-    if (data.paymentMethod === 'COD') {
-      const settings = await getStoreSettings()
-      if (settings.codEnabled === false) {
-        return NextResponse.json(
-          { error: 'Cash on delivery is not available right now.' },
-          { status: 400 }
-        )
-      }
-    }
-
     const { lineItems, subtotal } = await buildOrderLineItems(data.items)
     let discount = 0
     let couponCode = ''
@@ -102,6 +92,25 @@ export async function POST(request) {
       discount,
       rewardDiscount: rewards.discount,
     })
+    const merchandiseTotal = Math.max(0, subtotal - discount - rewards.discount)
+    const codMinOrder = Math.max(0, Number(settings.codMinOrder) || 0)
+
+    if (data.paymentMethod === 'COD') {
+      if (settings.codEnabled === false) {
+        return NextResponse.json(
+          { error: 'Cash on delivery is not available right now.' },
+          { status: 400 }
+        )
+      }
+      if (codMinOrder > 0 && merchandiseTotal < codMinOrder) {
+        return NextResponse.json(
+          {
+            error: `Cash on delivery is available on orders of ₹${codMinOrder} or more.`,
+          },
+          { status: 400 }
+        )
+      }
+    }
 
     await maybeSaveAddress(
       gate.auth.sub,

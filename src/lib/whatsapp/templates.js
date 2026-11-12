@@ -2,6 +2,8 @@
 export const WA_TEMPLATES = {
   welcome: 'sd_welcome_message',
   welcomeOffer: 'sd_welcome_offer',
+  /** Free-gift popup; override if Meta template name differs. */
+  freeGift: process.env.WHATSAPP_FREE_GIFT_TEMPLATE || 'sd_welcome_offer',
   thankYou: 'sd_customer_thankyou',
   orderConfirmation: 'sd_order_confirmation',
   codVerification: 'sd_cod_verification',
@@ -41,12 +43,22 @@ export function buildTemplateComponents(templateName, params = {}) {
     ]
   }
 
-  if (
-    name === WA_TEMPLATES.welcome ||
-    name === WA_TEMPLATES.welcomeOffer ||
-    name === WA_TEMPLATES.thankYou
-  ) {
+  if (name === WA_TEMPLATES.welcome || name === WA_TEMPLATES.thankYou) {
     return [{ type: 'body', parameters: textParams([params.name]) }]
+  }
+
+  if (name === WA_TEMPLATES.welcomeOffer || name === WA_TEMPLATES.freeGift) {
+    const components = [{ type: 'body', parameters: textParams([params.name]) }]
+    const urlPath = String(params.urlPath || '').replace(/^\/+/, '').trim()
+    if (urlPath) {
+      components.push({
+        type: 'button',
+        sub_type: 'url',
+        index: '0',
+        parameters: textParams([urlPath]),
+      })
+    }
+    return components
   }
 
   if (name === WA_TEMPLATES.orderConfirmation) {

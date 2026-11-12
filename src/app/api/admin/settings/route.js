@@ -97,6 +97,7 @@ export async function PATCH(request) {
       menuIconAbout: z.string().max(800).optional(),
       authBanner: z.string().max(800).optional(),
       codEnabled: z.boolean().optional(),
+      codMinOrder: z.number().min(0).max(100000).optional(),
       productDetailInstagramEnabled: z.boolean().optional(),
       productDetailRelatedEnabled: z.boolean().optional(),
       giftTabText: z.string().max(80).optional(),

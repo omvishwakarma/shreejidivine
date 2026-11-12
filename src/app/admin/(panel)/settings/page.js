@@ -9,6 +9,7 @@ const EMPTY = {
   shippingFee: 0,
   freeShippingMinOrder: 0,
   codEnabled: true,
+  codMinOrder: 100,
   cartRewards: [],
   heroVideoDesktop: '',
   heroVideoMobile: '',
@@ -35,7 +36,7 @@ const EMPTY = {
   menuIconBest: '',
   menuIconAbout: '',
   authBanner: '/images/hero-banner.png',
-  giftTabText: 'Claim your Free Diwali Gift',
+  giftTabText: 'CLAIM YOUR FREE GIFT',
   giftTabSlug: '',
   productDetailInstagramEnabled: false,
   productDetailRelatedEnabled: false,
@@ -294,6 +295,7 @@ export default function AdminSettingsPage() {
       shippingFee: data.settings?.shippingFee ?? 0,
       freeShippingMinOrder: data.settings?.freeShippingMinOrder ?? 0,
       codEnabled: data.settings?.codEnabled !== false,
+      codMinOrder: data.settings?.codMinOrder ?? 100,
       cartRewards: data.settings?.cartRewards || [],
       heroVideoDesktop: data.settings?.heroVideoDesktop || '',
       heroVideoMobile: data.settings?.heroVideoMobile || '',
@@ -360,6 +362,7 @@ export default function AdminSettingsPage() {
           shippingFee: Number(form.shippingFee) || 0,
           freeShippingMinOrder: Number(form.freeShippingMinOrder) || 0,
           codEnabled: form.codEnabled !== false,
+          codMinOrder: Math.max(0, Number(form.codMinOrder) || 0),
           cartRewards: (form.cartRewards || [])
             .map((reward) => ({
               amount: Number(reward.amount) || 0,
@@ -408,6 +411,7 @@ export default function AdminSettingsPage() {
         shippingFee: data.settings.shippingFee,
         freeShippingMinOrder: data.settings.freeShippingMinOrder,
         codEnabled: data.settings.codEnabled !== false,
+        codMinOrder: data.settings.codMinOrder ?? 100,
         cartRewards: data.settings.cartRewards || [],
         heroVideoDesktop: data.settings.heroVideoDesktop || '',
         heroVideoMobile: data.settings.heroVideoMobile || '',
@@ -1143,6 +1147,18 @@ export default function AdminSettingsPage() {
                 <strong>{form.codEnabled === false ? 'COD off' : 'Cash on delivery'}</strong>
                 <small>Turn off to hide COD at checkout. Online payment stays available.</small>
               </span>
+            </label>
+            <label className="admin-field">
+              <span>Minimum order for COD (₹)</span>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={form.codMinOrder}
+                onChange={(e) => setForm((f) => ({ ...f, codMinOrder: e.target.value }))}
+                disabled={form.codEnabled === false}
+              />
+              <small>COD is hidden below this amount. Set 0 for no minimum.</small>
             </label>
           </div>
 

@@ -6,6 +6,7 @@ import MarketingCookies from './MarketingCookies'
 import CartDock from './CartDock'
 import KnowBraceletTab from './KnowBraceletTab'
 import GiftTab from './GiftTab'
+import FreeGiftPopup from './FreeGiftPopup'
 import WhatsAppChat from './WhatsAppChat'
 import PwaClient from './PwaClient'
 import BootSplash from './BootSplash'
@@ -18,6 +19,7 @@ export default function Providers({ children }) {
         <CartDock />
         <KnowBraceletTab />
         <GiftTab />
+        <FreeGiftPopup />
         <WhatsAppChat />
         <MarketingCookies />
         <PwaClient />

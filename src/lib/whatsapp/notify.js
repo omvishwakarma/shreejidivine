@@ -101,6 +101,52 @@ export async function notifyWhatsAppWelcome(user) {
   )
 }
 
+/**
+ * Free-gift popup claim: marketing template with name + optional gift URL button path.
+ * Retries without URL button params if Meta template uses a static URL.
+ */
+export async function notifyWhatsAppFreeGift({ name, phone, giftUrl = '' }) {
+  const to = normalizeWhatsappNumber(phone)
+  if (!to) return { skipped: true, reason: 'invalid_phone' }
+
+  const template = WA_TEMPLATES.freeGift || WA_TEMPLATES.welcomeOffer
+  const displayName = firstName(name)
+  const base = SITE_URL.replace(/\/$/, '')
+  let urlPath = ''
+  const absolute = String(giftUrl || '').trim()
+  if (absolute.startsWith(base)) {
+    urlPath = absolute.slice(base.length).replace(/^\/+/, '')
+  } else if (absolute.startsWith('/')) {
+    urlPath = absolute.replace(/^\/+/, '')
+  } else if (absolute.startsWith('http')) {
+    try {
+      urlPath = new URL(absolute).pathname.replace(/^\/+/, '')
+    } catch {
+      urlPath = ''
+    }
+  } else {
+    urlPath = absolute.replace(/^\/+/, '')
+  }
+
+  const resolvedGiftUrl = absolute || (urlPath ? `${base}/${urlPath}` : base)
+
+  if (urlPath) {
+    const withUrl = await sendSafe(
+      to,
+      template,
+      { name: displayName, urlPath },
+      `free-gift:${to}`
+    )
+    if (withUrl?.ok || withUrl?.skipped) return { ...withUrl, giftUrl: resolvedGiftUrl }
+
+    const fallback = await sendSafe(to, template, { name: displayName }, `free-gift:${to}`)
+    return { ...fallback, giftUrl: resolvedGiftUrl, retriedWithoutUrl: true }
+  }
+
+  const result = await sendSafe(to, template, { name: displayName }, `free-gift:${to}`)
+  return { ...result, giftUrl: resolvedGiftUrl }
+}
+
 export async function notifyWhatsAppOrderPlaced(order, customer = {}) {
   const to = orderPhone(order, customer)
   if (!to) return { skipped: true }

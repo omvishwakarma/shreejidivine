@@ -171,8 +171,24 @@ export default function CheckoutPage() {
   }, [])
 
   useEffect(() => {
-    if (shipSettings?.codEnabled === false) setPaymentMethod('RAZORPAY')
-  }, [shipSettings])
+    if (shipSettings?.codEnabled === false) {
+      setPaymentMethod('RAZORPAY')
+      return
+    }
+    if (paymentMethod !== 'COD') return
+    const min = Math.max(0, Number(shipSettings?.codMinOrder) || 0)
+    if (min <= 0) return
+    const discountAmt = coupon?.discount || 0
+    const rewardAmt =
+      applyCartRewards(
+        subtotal,
+        shipSettings?.cartRewards,
+        Math.max(0, subtotal - discountAmt)
+      ).discount || 0
+    if (Math.max(0, subtotal - discountAmt - rewardAmt) < min) {
+      setPaymentMethod('RAZORPAY')
+    }
+  }, [shipSettings, subtotal, coupon, paymentMethod])
 
   useEffect(() => {
     if (!loading && !user) {
@@ -480,9 +496,13 @@ export default function CheckoutPage() {
     shipSettings.cartRewards,
     Math.max(0, subtotal - discount)
   )
-  const codEnabled = shipSettings?.codEnabled !== false
+  const merchandiseTotal = Math.max(0, subtotal - discount - rewards.discount)
+  const codMinOrder = Math.max(0, Number(shipSettings?.codMinOrder) || 0)
+  const codEnabled =
+    shipSettings?.codEnabled !== false &&
+    (codMinOrder <= 0 || merchandiseTotal >= codMinOrder)
   const shippingFee = shippingFeeFor(subtotal, shipSettings)
-  const total = Math.max(0, subtotal - discount - rewards.discount) + shippingFee
+  const total = merchandiseTotal + shippingFee
 
   if (isMobile && !addressesReady) {
     return <CheckoutSkeleton mobileOnly />

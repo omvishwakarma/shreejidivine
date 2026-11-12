@@ -76,12 +76,14 @@ const DEFAULTS = {
   instagramStripPosts: [],
   testimonialsEnabled: true,
   testimonials: DEFAULT_TESTIMONIALS,
-  giftTabText: 'Claim your Free Diwali Gift',
+  giftTabText: 'CLAIM YOUR FREE GIFT',
   giftTabSlug: '',
   productDetailInstagramEnabled: false,
   productDetailRelatedEnabled: false,
   whatsappNumber: '918882301900',
   codEnabled: true,
+  /** COD hidden when order merchandise value is below this (₹). 0 = no minimum. */
+  codMinOrder: 100,
 }
 
 const instagramShopLookSchema = new mongoose.Schema(
@@ -202,6 +204,7 @@ const storeSettingsSchema = new mongoose.Schema(
     },
     whatsappNumber: { type: String, default: DEFAULTS.whatsappNumber },
     codEnabled: { type: Boolean, default: true },
+    codMinOrder: { type: Number, default: DEFAULTS.codMinOrder },
     testimonials: {
       type: [testimonialSchema],
       default: () => DEFAULT_TESTIMONIALS.map((t) => ({ ...t })),
@@ -273,6 +276,10 @@ storeSettingsSchema.methods.toJSONSafe = function () {
     productDetailRelatedEnabled: this.productDetailRelatedEnabled === true,
     whatsappNumber: this.whatsappNumber == null ? DEFAULTS.whatsappNumber : this.whatsappNumber,
     codEnabled: this.codEnabled !== false,
+    codMinOrder:
+      this.codMinOrder == null || Number.isNaN(Number(this.codMinOrder))
+        ? DEFAULTS.codMinOrder
+        : Math.max(0, Number(this.codMinOrder)),
     updatedAt: this.updatedAt,
   }
 }

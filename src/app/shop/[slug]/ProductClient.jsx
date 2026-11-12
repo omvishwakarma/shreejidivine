@@ -252,32 +252,63 @@ export default function ProductClient({
       return
     }
 
-    const categoryKey =
-      String(product.categorySlug || '').trim() ||
-      String(product.categoryAssignments?.[0]?.categorySlug || '').trim()
+    const assignmentSlugs = (product.categoryAssignments || [])
+      .map((item) => String(item?.categorySlug || '').trim())
+      .filter(Boolean)
+    const candidateSlugs = [
+      ...new Set(
+        [
+          ...assignmentSlugs,
+          String(product.categorySlug || '').trim(),
+        ].filter(Boolean)
+      ),
+    ]
 
-    if (!categoryKey) {
+    if (!candidateSlugs.length) {
       setRelated([])
       return
     }
 
     let cancelled = false
-    const qs = new URLSearchParams({
-      category: categoryKey,
-      exclude: product.slug || slug || '',
-      limit: '8',
-    })
-    api(`/api/products?${qs.toString()}`)
-      .then((d) => {
+
+    async function loadRelated() {
+      let categoryKey = candidateSlugs[0]
+      try {
+        const cats = await api('/api/categories')
+        const roots = new Set(
+          (cats.categories || [])
+            .filter((c) => c && !c.parent)
+            .map((c) => String(c.slug || '').trim())
+            .filter(Boolean)
+        )
+        const rootMatch = candidateSlugs.find((slugKey) => roots.has(slugKey))
+        if (rootMatch) categoryKey = rootMatch
+      } catch {
+        /* keep first candidate */
+      }
+
+      if (cancelled || !categoryKey) {
+        if (!cancelled) setRelated([])
+        return
+      }
+
+      try {
+        const qs = new URLSearchParams({
+          category: categoryKey,
+          exclude: product.slug || slug || '',
+        })
+        const d = await api(`/api/products?${qs.toString()}`)
         if (cancelled) return
         const list = (d.products || [])
           .filter((p) => p.id !== product.id && p.slug !== product.slug)
           .sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0))
         setRelated(list)
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setRelated([])
-      })
+      }
+    }
+
+    loadRelated()
 
     return () => {
       cancelled = true

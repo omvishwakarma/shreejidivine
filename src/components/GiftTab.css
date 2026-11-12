@@ -16,6 +16,10 @@
   color: #f3ebe0;
   text-decoration: none;
   box-shadow: 8px 10px 22px rgba(154, 72, 18, 0.28);
+  cursor: pointer;
+  font: inherit;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .gift-tab__icon {

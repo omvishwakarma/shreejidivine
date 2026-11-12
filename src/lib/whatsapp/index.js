@@ -3,6 +3,7 @@ export { sendWhatsAppTemplate, isWhatsAppConfigured, whatsappConfigDebug } from 
 export { WA_TEMPLATES, buildTemplateComponents } from './templates'
 export {
   notifyWhatsAppWelcome,
+  notifyWhatsAppFreeGift,
   notifyWhatsAppOrderPlaced,
   notifyWhatsAppOrderStatus,
   notifyWhatsAppShipped,
