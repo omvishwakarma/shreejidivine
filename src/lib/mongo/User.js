@@ -13,13 +13,30 @@ const userSchema = new mongoose.Schema(
       default: 'local',
     },
     phone: { type: String, default: '' },
-    phoneKey: { type: String, default: '', unique: true, sparse: true },
+    // Omit when empty — sparse unique index treats "" as a real value and breaks Google signup.
+    phoneKey: { type: String, unique: true, sparse: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     resetPasswordTokenHash: { type: String, default: '' },
     resetPasswordExpires: { type: Date, default: null },
   },
   { timestamps: true }
 )
+
+userSchema.pre('validate', function clearEmptyPhoneKey(next) {
+  if (!this.phoneKey) {
+    this.phoneKey = undefined
+    this.set('phoneKey', undefined)
+  }
+  next()
+})
+
+userSchema.pre('save', function clearEmptyPhoneKey(next) {
+  if (!this.phoneKey) {
+    this.phoneKey = undefined
+    this.set('phoneKey', undefined)
+  }
+  next()
+})
 
 userSchema.methods.comparePassword = function (password) {
   if (!this.passwordHash) return Promise.resolve(false)
@@ -28,6 +45,15 @@ userSchema.methods.comparePassword = function (password) {
 
 userSchema.statics.hashPassword = function (password) {
   return bcrypt.hash(password, 10)
+}
+
+/** One-time cleanup for docs that stored phoneKey as "". */
+userSchema.statics.unsetEmptyPhoneKeys = async function unsetEmptyPhoneKeys() {
+  const result = await this.updateMany(
+    { $or: [{ phoneKey: '' }, { phoneKey: null }] },
+    { $unset: { phoneKey: 1 } }
+  )
+  return result
 }
 
 userSchema.methods.toSafeJSON = function () {
