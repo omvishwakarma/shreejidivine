@@ -337,6 +337,14 @@ export default function CheckoutPage() {
         window.clearInterval(poll)
         fn()
       }
+      const rawContact = String(payload.customer?.contact || shipping.phone || '').replace(/\D/g, '')
+      const contact =
+        rawContact.length === 10
+          ? `+91${rawContact}`
+          : rawContact.length > 10
+            ? `+${rawContact}`
+            : rawContact
+
       const rzp = new window.Razorpay({
         key: payload.keyId,
         amount: payload.amount,
@@ -345,10 +353,12 @@ export default function CheckoutPage() {
         description: `Order ${payload.orderNumber}`,
         order_id: payload.razorpayOrderId,
         retry: { enabled: false },
+        one_click_checkout: true,
+        show_coupons: false,
         prefill: {
           name: payload.customer?.name || '',
           email: payload.customer?.email || user?.email || '',
-          contact: payload.customer?.contact || '',
+          contact,
         },
         theme: { color: '#2b1e16' },
         handler: async (response) => {
