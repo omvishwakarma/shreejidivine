@@ -16,6 +16,8 @@ const userSchema = new mongoose.Schema(
     // Omit when empty — sparse unique index treats "" as a real value and breaks Google signup.
     phoneKey: { type: String, unique: true, sparse: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    /** Set when admin opens WhatsApp outreach to this customer. */
+    whatsappOutreachAt: { type: Date, default: null },
     resetPasswordTokenHash: { type: String, default: '' },
     resetPasswordExpires: { type: Date, default: null },
   },
@@ -63,6 +65,8 @@ userSchema.methods.toSafeJSON = function () {
     email: this.email,
     phone: this.phone,
     role: this.role,
+    whatsappOutreachAt: this.whatsappOutreachAt || null,
+    whatsappSent: Boolean(this.whatsappOutreachAt),
     createdAt: this.createdAt,
   }
 }

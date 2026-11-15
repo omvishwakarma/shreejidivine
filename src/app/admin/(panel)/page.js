@@ -169,22 +169,22 @@ export default function AdminDashboardPage() {
       <p className="admin-page-sub">Overview of your Shreeji Divine store</p>
 
       <div className="admin-stats">
-        <div className="admin-stat-card">
+        <Link href="/admin/orders" className="admin-stat-card admin-stat-card--link">
           <span>Revenue</span>
           <strong>{formatINR(stats.revenue)}</strong>
-        </div>
-        <div className="admin-stat-card">
+        </Link>
+        <Link href="/admin/orders" className="admin-stat-card admin-stat-card--link">
           <span>Orders</span>
           <strong>{stats.orders}</strong>
-        </div>
-        <div className="admin-stat-card">
+        </Link>
+        <Link href="/admin/products" className="admin-stat-card admin-stat-card--link">
           <span>Products</span>
           <strong>{stats.products}</strong>
-        </div>
-        <div className="admin-stat-card">
+        </Link>
+        <Link href="/admin/users" className="admin-stat-card admin-stat-card--link">
           <span>Customers</span>
           <strong>{stats.users}</strong>
-        </div>
+        </Link>
       </div>
 
       <AnalyticsPanel />

@@ -19,7 +19,7 @@ function csvEscape(value) {
 }
 
 function downloadCustomersExcel(rows) {
-  const header = ['Name', 'Email', 'Phone', 'Joined']
+  const header = ['Name', 'Email', 'Phone', 'WhatsApp Sent', 'Joined']
   const lines = [
     header.join(','),
     ...rows.map((u) =>
@@ -27,6 +27,7 @@ function downloadCustomersExcel(rows) {
         csvEscape(u.name || ''),
         csvEscape(u.email || ''),
         csvEscape(u.phone || ''),
+        csvEscape(u.whatsappSent ? 'Yes' : 'No'),
         csvEscape(
           u.createdAt
             ? new Date(u.createdAt).toLocaleDateString('en-IN', {
@@ -63,8 +64,47 @@ function compareUsers(a, b, sortKey, sortDir) {
   return left.localeCompare(right, 'en', { numeric: true, sensitivity: 'base' }) * dir
 }
 
-function WhatsAppButton({ user, className = '' }) {
+function WhatsAppSentTick({ sent }) {
+  if (!sent) return null
+  return (
+    <span className="admin-wa-tick" title="WhatsApp message sent" aria-label="WhatsApp sent">
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path d="M8.2 13.6 4.8 10.2l1.3-1.3 2.1 2.1 5.2-5.2 1.3 1.3z" />
+      </svg>
+    </span>
+  )
+}
+
+function CustomersSkeleton() {
+  return (
+    <div className="admin-users-skel" aria-hidden="true">
+      <div className="admin-users-skel__list">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="admin-users-skel__card">
+            <span className="admin-skel-line admin-skel-line--lg" />
+            <span className="admin-skel-line admin-skel-line--md" />
+            <span className="admin-skel-line admin-skel-line--sm" />
+          </div>
+        ))}
+      </div>
+      <div className="admin-users-skel__table">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="admin-users-skel__row">
+            <span className="admin-skel-line" />
+            <span className="admin-skel-line" />
+            <span className="admin-skel-line" />
+            <span className="admin-skel-line" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function WhatsAppButton({ user, onMarked, className = '' }) {
   const href = customerWhatsAppHref({ phone: user.phone, name: user.name })
+  const [saving, setSaving] = useState(false)
+
   if (!href) {
     return (
       <button type="button" className={`admin-btn admin-btn-ghost${className ? ` ${className}` : ''}`} disabled>
@@ -72,32 +112,71 @@ function WhatsAppButton({ user, className = '' }) {
       </button>
     )
   }
+
+  async function markSent() {
+    if (saving) return
+    setSaving(true)
+    try {
+      const data = await adminApi(`/api/admin/users/${user.id}/whatsapp`, { method: 'POST' })
+      onMarked?.(data.user)
+    } catch {
+      /* still open WhatsApp even if mark fails */
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`admin-btn admin-btn-wa${className ? ` ${className}` : ''}`}
-      onClick={(e) => e.stopPropagation()}
-    >
-      WhatsApp
-    </a>
+    <span className="admin-wa-action">
+      <WhatsAppSentTick sent={user.whatsappSent} />
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`admin-btn admin-btn-wa${user.whatsappSent ? ' is-sent' : ''}${className ? ` ${className}` : ''}`}
+        onClick={(e) => {
+          e.stopPropagation()
+          void markSent()
+        }}
+      >
+        {user.whatsappSent ? 'Sent again' : saving ? 'Saving…' : 'WhatsApp'}
+      </a>
+    </span>
   )
 }
 
 export default function AdminUsersPage() {
   const router = useRouter()
   const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState('joined')
   const [sortDir, setSortDir] = useState('desc')
 
   useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError('')
     adminApi('/api/admin/users')
-      .then((d) => setUsers(d.users || []))
-      .catch((err) => setError(err.message))
+      .then((d) => {
+        if (!cancelled) setUsers(d.users || [])
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message || 'Could not load customers')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
+
+  function markUser(nextUser) {
+    if (!nextUser?.id) return
+    setUsers((list) => list.map((u) => (u.id === nextUser.id ? { ...u, ...nextUser } : u)))
+  }
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -108,6 +187,8 @@ export default function AdminUsersPage() {
     })
     return [...list].sort((a, b) => compareUsers(a, b, sortKey, sortDir))
   }, [users, search, sortKey, sortDir])
+
+  const sentCount = useMemo(() => users.filter((u) => u.whatsappSent).length, [users])
 
   function toggleSort(key) {
     if (sortKey === key) {
@@ -121,7 +202,9 @@ export default function AdminUsersPage() {
   return (
     <div className="admin-users">
       <h1 className="admin-page-title">Customers</h1>
-      <p className="admin-page-sub">Search customers or tap a customer for details</p>
+      <p className="admin-page-sub">
+        WhatsApp pe click → message open. Green tick = pehle bhej chuke ho.
+      </p>
       {error ? <p className="admin-error">{error}</p> : null}
 
       <div className="admin-toolbar admin-users__toolbar">
@@ -160,13 +243,19 @@ export default function AdminUsersPage() {
             Download Excel
           </button>
           <span className="admin-toolbar__count">
-            {filtered.length} / {users.length}
+            {loading ? 'Loading…' : `${filtered.length} / ${users.length} · WA ${sentCount}`}
           </span>
         </div>
       </div>
 
       <div className="admin-card admin-users__card">
-        {users.length === 0 ? (
+        {loading ? (
+          <CustomersSkeleton />
+        ) : error && users.length === 0 ? (
+          <p className="admin-error" style={{ marginBottom: 0 }}>
+            {error}
+          </p>
+        ) : users.length === 0 ? (
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
             No customers yet
           </p>
@@ -178,13 +267,16 @@ export default function AdminUsersPage() {
           <>
             <div className="admin-users__list" aria-label="Customers">
               {filtered.map((u) => (
-                <div key={u.id} className="admin-users__item">
+                <div key={u.id} className={`admin-users__item${u.whatsappSent ? ' is-wa-sent' : ''}`}>
                   <button
                     type="button"
                     className="admin-users__item-main"
                     onClick={() => router.push(`/admin/users/${u.id}`)}
                   >
-                    <strong className="admin-users__name">{u.name || '—'}</strong>
+                    <strong className="admin-users__name">
+                      {u.name || '—'}
+                      <WhatsAppSentTick sent={u.whatsappSent} />
+                    </strong>
                     <span className="admin-users__email">{u.email || '—'}</span>
                     <span className="admin-users__meta">
                       <span>{u.phone || 'No phone'}</span>
@@ -196,7 +288,7 @@ export default function AdminUsersPage() {
                     </span>
                   </button>
                   <div className="admin-users__item-actions">
-                    <WhatsAppButton user={u} />
+                    <WhatsAppButton user={u} onMarked={markUser} />
                     <button
                       type="button"
                       className="admin-btn admin-btn-ghost"
@@ -239,11 +331,14 @@ export default function AdminUsersPage() {
                   {filtered.map((u) => (
                     <tr
                       key={u.id}
-                      className="admin-table__row--click"
+                      className={`admin-table__row--click${u.whatsappSent ? ' is-wa-sent' : ''}`}
                       onClick={() => router.push(`/admin/users/${u.id}`)}
                     >
                       <td>
-                        <strong>{u.name}</strong>
+                        <strong className="admin-users__name-cell">
+                          {u.name}
+                          <WhatsAppSentTick sent={u.whatsappSent} />
+                        </strong>
                       </td>
                       <td>
                         <span className="admin-users__email-cell">{u.email}</span>
@@ -252,7 +347,7 @@ export default function AdminUsersPage() {
                       <td>{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="admin-users__row-actions">
-                          <WhatsAppButton user={u} />
+                          <WhatsAppButton user={u} onMarked={markUser} />
                           <button
                             type="button"
                             className="admin-btn admin-btn-ghost"

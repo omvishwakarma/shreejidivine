@@ -12,6 +12,7 @@ export default function AdminUserDetailPage() {
   const [user, setUser] = useState(null)
   const [orders, setOrders] = useState([])
   const [error, setError] = useState('')
+  const [markingWa, setMarkingWa] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -22,6 +23,22 @@ export default function AdminUserDetailPage() {
       })
       .catch((err) => setError(err.message))
   }, [id])
+
+  const waHref = user ? customerWhatsAppHref({ phone: user.phone, name: user.name }) : ''
+
+  async function openWhatsApp() {
+    if (!user?.id || !waHref || markingWa) return
+    setMarkingWa(true)
+    try {
+      const data = await adminApi(`/api/admin/users/${user.id}/whatsapp`, { method: 'POST' })
+      if (data.user) setUser((prev) => ({ ...prev, ...data.user }))
+    } catch {
+      /* still open chat */
+    } finally {
+      setMarkingWa(false)
+    }
+    window.open(waHref, '_blank', 'noopener,noreferrer')
+  }
 
   if (error && !user) {
     return (
@@ -122,16 +139,29 @@ export default function AdminUserDetailPage() {
                 <dt>Phone</dt>
                 <dd>{user.phone || '—'}</dd>
               </div>
-              {customerWhatsAppHref({ phone: user.phone, name: user.name }) ? (
+              {waHref ? (
                 <div className="admin-users__detail-wa">
-                  <a
-                    href={customerWhatsAppHref({ phone: user.phone, name: user.name })}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="admin-btn admin-btn-wa"
+                  {user.whatsappSent ? (
+                    <p className="admin-wa-sent-note">
+                      <span className="admin-wa-tick" aria-hidden="true">
+                        <svg viewBox="0 0 20 20">
+                          <path d="M8.2 13.6 4.8 10.2l1.3-1.3 2.1 2.1 5.2-5.2 1.3 1.3z" />
+                        </svg>
+                      </span>
+                      WhatsApp sent
+                      {user.whatsappOutreachAt
+                        ? ` · ${new Date(user.whatsappOutreachAt).toLocaleString('en-IN')}`
+                        : ''}
+                    </p>
+                  ) : null}
+                  <button
+                    type="button"
+                    className={`admin-btn admin-btn-wa${user.whatsappSent ? ' is-sent' : ''}`}
+                    onClick={openWhatsApp}
+                    disabled={markingWa}
                   >
-                    WhatsApp message
-                  </a>
+                    {user.whatsappSent ? 'Send again on WhatsApp' : 'WhatsApp message'}
+                  </button>
                 </div>
               ) : null}
               <div>
