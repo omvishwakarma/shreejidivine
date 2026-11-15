@@ -1,0 +1,27 @@
+{
+  "id": "/admin",
+  "name": "Shreeji Divine Admin",
+  "short_name": "SD Admin",
+  "description": "Manage Shreeji Divine store, orders and customers",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f2ea",
+  "theme_color": "#241912",
+  "lang": "en-IN",
+  "icons": [
+    {
+      "src": "/images/logo-app-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/logo-app-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

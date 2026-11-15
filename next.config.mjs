@@ -9,6 +9,24 @@ const nextConfig = {
   outputFileTracingRoot: path.join(__dirname),
   // API runs inside Next.js (Vercel). Do NOT proxy /api to localhost —
   // that only works on your machine and causes 404 on production.
+  async headers() {
+    return [
+      {
+        source: '/admin/sw.js',
+        headers: [
+          { key: 'Service-Worker-Allowed', value: '/' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+        ],
+      },
+      {
+        source: '/admin/manifest.webmanifest',
+        headers: [
+          { key: 'Content-Type', value: 'application/manifest+json' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+        ],
+      },
+    ]
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
