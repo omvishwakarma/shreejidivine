@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { adminApi } from '../../../../lib/adminApi'
+import { customerWhatsAppHref } from '@/lib/whatsapp/phone'
 
 const SORT_COLUMNS = [
   { key: 'name', label: 'Name' },
@@ -62,6 +63,28 @@ function compareUsers(a, b, sortKey, sortDir) {
   return left.localeCompare(right, 'en', { numeric: true, sensitivity: 'base' }) * dir
 }
 
+function WhatsAppButton({ user, className = '' }) {
+  const href = customerWhatsAppHref({ phone: user.phone, name: user.name })
+  if (!href) {
+    return (
+      <button type="button" className={`admin-btn admin-btn-ghost${className ? ` ${className}` : ''}`} disabled>
+        No WhatsApp
+      </button>
+    )
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`admin-btn admin-btn-wa${className ? ` ${className}` : ''}`}
+      onClick={(e) => e.stopPropagation()}
+    >
+      WhatsApp
+    </a>
+  )
+}
+
 export default function AdminUsersPage() {
   const router = useRouter()
   const [users, setUsers] = useState([])
@@ -96,12 +119,12 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div>
+    <div className="admin-users">
       <h1 className="admin-page-title">Customers</h1>
-      <p className="admin-page-sub">Search customers or click a column to sort</p>
+      <p className="admin-page-sub">Search customers or tap a customer for details</p>
       {error ? <p className="admin-error">{error}</p> : null}
 
-      <div className="admin-toolbar">
+      <div className="admin-toolbar admin-users__toolbar">
         <input
           className="admin-search"
           type="search"
@@ -109,20 +132,40 @@ export default function AdminUsersPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <button
-          type="button"
-          className="admin-btn admin-btn-primary"
-          disabled={filtered.length === 0}
-          onClick={() => downloadCustomersExcel(filtered)}
-        >
-          Download Excel
-        </button>
-        <span className="admin-toolbar__count">
-          {filtered.length} / {users.length}
-        </span>
+        <div className="admin-users__toolbar-actions">
+          <label className="admin-users__sort">
+            <span>Sort</span>
+            <select
+              value={`${sortKey}:${sortDir}`}
+              onChange={(e) => {
+                const [key, dir] = e.target.value.split(':')
+                setSortKey(key)
+                setSortDir(dir === 'asc' ? 'asc' : 'desc')
+              }}
+            >
+              <option value="joined:desc">Newest</option>
+              <option value="joined:asc">Oldest</option>
+              <option value="name:asc">Name A–Z</option>
+              <option value="name:desc">Name Z–A</option>
+              <option value="email:asc">Email A–Z</option>
+              <option value="phone:asc">Phone</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            disabled={filtered.length === 0}
+            onClick={() => downloadCustomersExcel(filtered)}
+          >
+            Download Excel
+          </button>
+          <span className="admin-toolbar__count">
+            {filtered.length} / {users.length}
+          </span>
+        </div>
       </div>
 
-      <div className="admin-card">
+      <div className="admin-card admin-users__card">
         {users.length === 0 ? (
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
             No customers yet
@@ -132,57 +175,99 @@ export default function AdminUsersPage() {
             No customers match your search
           </p>
         ) : (
-          <table className="admin-table">
-            <thead>
-              <tr>
-                {SORT_COLUMNS.map((col) => {
-                  const active = sortKey === col.key
-                  const arrow = !active ? '↕' : sortDir === 'asc' ? '↑' : '↓'
-                  return (
-                    <th key={col.key}>
-                      <button
-                        type="button"
-                        className={`admin-sort-th${active ? ' is-active' : ''}`}
-                        onClick={() => toggleSort(col.key)}
-                        aria-label={`Sort by ${col.label}`}
-                      >
-                        <span>{col.label}</span>
-                        <span className="admin-sort-th__arrow" aria-hidden="true">
-                          {arrow}
-                        </span>
-                      </button>
-                    </th>
-                  )
-                })}
-                <th />
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            <div className="admin-users__list" aria-label="Customers">
               {filtered.map((u) => (
-                <tr
-                  key={u.id}
-                  className="admin-table__row--click"
-                  onClick={() => router.push(`/admin/users/${u.id}`)}
-                >
-                  <td>
-                    <strong>{u.name}</strong>
-                  </td>
-                  <td>{u.email}</td>
-                  <td>{u.phone || '—'}</td>
-                  <td>{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
-                  <td onClick={(e) => e.stopPropagation()}>
+                <div key={u.id} className="admin-users__item">
+                  <button
+                    type="button"
+                    className="admin-users__item-main"
+                    onClick={() => router.push(`/admin/users/${u.id}`)}
+                  >
+                    <strong className="admin-users__name">{u.name || '—'}</strong>
+                    <span className="admin-users__email">{u.email || '—'}</span>
+                    <span className="admin-users__meta">
+                      <span>{u.phone || 'No phone'}</span>
+                      <span>
+                        {u.createdAt
+                          ? new Date(u.createdAt).toLocaleDateString('en-IN')
+                          : '—'}
+                      </span>
+                    </span>
+                  </button>
+                  <div className="admin-users__item-actions">
+                    <WhatsAppButton user={u} />
                     <button
                       type="button"
                       className="admin-btn admin-btn-ghost"
                       onClick={() => router.push(`/admin/users/${u.id}`)}
                     >
-                      View detail
+                      View
                     </button>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            <div className="admin-table-wrap admin-users__table-wrap">
+              <table className="admin-table admin-users__table">
+                <thead>
+                  <tr>
+                    {SORT_COLUMNS.map((col) => {
+                      const active = sortKey === col.key
+                      const arrow = !active ? '↕' : sortDir === 'asc' ? '↑' : '↓'
+                      return (
+                        <th key={col.key}>
+                          <button
+                            type="button"
+                            className={`admin-sort-th${active ? ' is-active' : ''}`}
+                            onClick={() => toggleSort(col.key)}
+                            aria-label={`Sort by ${col.label}`}
+                          >
+                            <span>{col.label}</span>
+                            <span className="admin-sort-th__arrow" aria-hidden="true">
+                              {arrow}
+                            </span>
+                          </button>
+                        </th>
+                      )
+                    })}
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="admin-table__row--click"
+                      onClick={() => router.push(`/admin/users/${u.id}`)}
+                    >
+                      <td>
+                        <strong>{u.name}</strong>
+                      </td>
+                      <td>
+                        <span className="admin-users__email-cell">{u.email}</span>
+                      </td>
+                      <td>{u.phone || '—'}</td>
+                      <td>{new Date(u.createdAt).toLocaleDateString('en-IN')}</td>
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <div className="admin-users__row-actions">
+                          <WhatsAppButton user={u} />
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn-ghost"
+                            onClick={() => router.push(`/admin/users/${u.id}`)}
+                          >
+                            View
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

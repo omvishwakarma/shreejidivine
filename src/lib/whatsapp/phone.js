@@ -16,3 +16,26 @@ export function whatsappHref(number) {
   if (!digits) return ''
   return `https://wa.me/${digits}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 }
+
+/** Prefill chat to a customer number (opens phone WhatsApp / WhatsApp Business). */
+export function customerWhatsAppHref({ phone, name } = {}) {
+  const digits = normalizeWhatsappNumber(phone)
+  if (!digits) return ''
+  const first = String(name || '')
+    .trim()
+    .split(/\s+/)[0]
+  const displayName = first || 'Ji'
+  const text = `🙏 Namaste ${displayName}!
+
+Welcome to *Shreeji Divine* 🕉️
+
+Discover divine spiritual products for your home, पूजा & devotion.
+
+🎁 Explore our special offers and exclusive gifts!
+
+✨ Your spiritual journey starts here.
+
+🛍️ Visit Now:
+https://www.shreejidivine.co/`
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`
+}

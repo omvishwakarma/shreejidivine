@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { adminApi, formatINR } from '../../../../../lib/adminApi'
+import { customerWhatsAppHref } from '@/lib/whatsapp/phone'
 
 export default function AdminUserDetailPage() {
   const { id } = useParams()
@@ -121,6 +122,18 @@ export default function AdminUserDetailPage() {
                 <dt>Phone</dt>
                 <dd>{user.phone || '—'}</dd>
               </div>
+              {customerWhatsAppHref({ phone: user.phone, name: user.name }) ? (
+                <div className="admin-users__detail-wa">
+                  <a
+                    href={customerWhatsAppHref({ phone: user.phone, name: user.name })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="admin-btn admin-btn-wa"
+                  >
+                    WhatsApp message
+                  </a>
+                </div>
+              ) : null}
               <div>
                 <dt>Joined</dt>
                 <dd>

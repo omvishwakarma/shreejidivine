@@ -1,4 +1,4 @@
-export { normalizeWhatsappNumber, whatsappHref } from './phone'
+export { normalizeWhatsappNumber, whatsappHref, customerWhatsAppHref } from './phone'
 export { sendWhatsAppTemplate, isWhatsAppConfigured, whatsappConfigDebug } from './client'
 export { WA_TEMPLATES, buildTemplateComponents } from './templates'
 export {
