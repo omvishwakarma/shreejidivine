@@ -6,6 +6,7 @@ import { getRazorpayClient, getRazorpayKeyId, razorpayErrorMessage } from '@/lib
 import { validateCoupon, redeemCoupon } from '@/lib/coupons'
 import { sendOrderEmail } from '@/lib/mail'
 import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
+import { SITE_URL } from '@/lib/site'
 
 export const maxDuration = 30
 import { applyCartRewards } from '@/lib/cartRewards'
@@ -15,6 +16,43 @@ import {
   maybeSaveAddress,
   orderPayloadFromShipping,
 } from '@/lib/orderHelpers'
+
+function toPaise(amount) {
+  return Math.max(0, Math.round(Number(amount) || 0) * 100)
+}
+
+function absoluteUrl(pathOrUrl) {
+  const value = String(pathOrUrl || '').trim()
+  if (!value) return `${SITE_URL}/images/logo.png`
+  if (/^https?:\/\//i.test(value)) return value
+  return `${SITE_URL}${value.startsWith('/') ? value : `/${value}`}`
+}
+
+/** Magic Checkout requires line_items + line_items_total or it falls back to Standard Checkout. */
+function buildMagicRazorpayLineItems(lineItems) {
+  return lineItems.map((item, index) => {
+    const unitPaise = toPaise(item.price)
+    const variantParts = [item.colour, item.fragrance].filter(Boolean)
+    const variant = variantParts.join(' / ') || 'default'
+    const sku = String(item.productSlug || item.product || `item-${index + 1}`)
+    return {
+      sku,
+      variant_id: `${sku}-${variant}`.slice(0, 120),
+      price: unitPaise,
+      offer_price: unitPaise,
+      quantity: Math.max(1, Number(item.quantity) || 1),
+      name: item.productName || 'Shreeji Divine product',
+      description:
+        variant !== 'default'
+          ? variant
+          : item.productName || 'Shreeji Divine spiritual wearable',
+      image_url: absoluteUrl(item.image),
+      product_url: item.productSlug
+        ? `${SITE_URL}/shop/${item.productSlug}`
+        : `${SITE_URL}/shop`,
+    }
+  })
+}
 
 const shippingSchema = z.object({
   fullName: z.string().min(2),
@@ -154,14 +192,23 @@ export async function POST(request) {
     )
 
     const razorpay = getRazorpayClient()
-    const amountPaise = Math.round(total * 100)
+    const amountPaise = toPaise(total)
+    const merchandiseAfterDiscount = Math.max(
+      0,
+      subtotal - discount - rewards.discount
+    )
+    const lineItemsTotalPaise = toPaise(merchandiseAfterDiscount)
+    const rzpLineItems = buildMagicRazorpayLineItems(lineItems)
     const rzpOrder = await razorpay.orders.create({
       amount: amountPaise,
       currency: 'INR',
       receipt: order.orderNumber,
+      line_items_total: lineItemsTotalPaise,
+      line_items: rzpLineItems,
       notes: {
         orderId: order._id.toString(),
         orderNumber: order.orderNumber,
+        prediscount_applied: String(toPaise(discount + rewards.discount)),
       },
     })
 
