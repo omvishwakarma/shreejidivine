@@ -17,6 +17,7 @@ import './checkout.css'
 import { checkoutFieldErrors } from './checkoutValidation'
 import { applyCartRewards, shippingFeeFor } from '../../lib/cartRewards'
 import CheckoutOffers from '../../components/CheckoutOffers'
+import AbandonedCartSync from '../../components/AbandonedCartSync'
 import { purchaseMeta, trackMeta } from '../../lib/meta'
 
 function CheckoutSkeleton({ mobileOnly = false }) {
@@ -521,6 +522,7 @@ export default function CheckoutPage() {
   if (isMobile) {
     return (
       <div className="ecom-page checkout-page checkout-page--mobile">
+        <AbandonedCartSync phone={shipping.phone} name={shipping.fullName} />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <CheckoutMobile
           user={user}
@@ -588,6 +590,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="ecom-page checkout-page">
+      <AbandonedCartSync phone={shipping.phone} name={shipping.fullName} />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <ShopNav />
 

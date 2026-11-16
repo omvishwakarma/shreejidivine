@@ -15,6 +15,9 @@ export const WA_TEMPLATES = {
   deliveryAttemptFailed: 'sd_delivery_attempt_failed',
   /** Authentication template (created as sd_login_otp). Override with WHATSAPP_OTP_TEMPLATE. */
   otp: process.env.WHATSAPP_OTP_TEMPLATE || 'sd_login_otp',
+  /** Abandoned cart recovery (Meta template sd_abandoned_cart_1). */
+  abandonedCart:
+    process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
 }
 
 function textParams(values) {
@@ -152,6 +155,29 @@ export function buildTemplateComponents(templateName, params = {}) {
         ]),
       },
     ]
+  }
+
+  if (name === WA_TEMPLATES.abandonedCart) {
+    const components = [
+      {
+        type: 'body',
+        parameters: textParams([
+          params.name,
+          params.product,
+          params.amount,
+        ]),
+      },
+    ]
+    const urlPath = String(params.urlPath || '').replace(/^\/+/, '').trim()
+    if (urlPath) {
+      components.push({
+        type: 'button',
+        sub_type: 'url',
+        index: '0',
+        parameters: textParams([urlPath]),
+      })
+    }
+    return components
   }
 
   if (Array.isArray(params.body)) {

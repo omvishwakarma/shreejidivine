@@ -325,6 +325,50 @@ export async function notifyWhatsAppOrderStatus(order, status, customer = {}, op
   return { skipped: true, reason: 'no_template', status: next }
 }
 
+/**
+ * Abandoned cart WhatsApp: {{1}} name, {{2}} product, {{3}} cart value.
+ * CTA button → /checkout (static URL templates ignore urlPath).
+ */
+export async function notifyWhatsAppAbandonedCart({
+  phone,
+  name,
+  product,
+  amount,
+}) {
+  const to = normalizeWhatsappNumber(phone)
+  if (!to) return { skipped: true, reason: 'invalid_phone' }
+
+  const template = WA_TEMPLATES.abandonedCart
+  const displayName = firstName(name)
+  const productLabel = String(product || 'your items').slice(0, 80)
+  const cartAmount = money(amount)
+  const urlPath = 'checkout'
+
+  const withUrl = await sendSafe(
+    to,
+    template,
+    {
+      name: displayName,
+      product: productLabel,
+      amount: cartAmount,
+      urlPath,
+    },
+    `abandoned:${to}`
+  )
+  if (withUrl?.ok || withUrl?.skipped) return withUrl
+
+  return sendSafe(
+    to,
+    template,
+    {
+      name: displayName,
+      product: productLabel,
+      amount: cartAmount,
+    },
+    `abandoned:${to}`
+  )
+}
+
 export async function notifyWhatsAppTrackingUpdate(order, tracking = {}, customer = {}) {
   const to = orderPhone(order, customer)
   if (!to) return { skipped: true }

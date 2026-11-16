@@ -7,6 +7,7 @@ import { validateCoupon, redeemCoupon } from '@/lib/coupons'
 import { sendOrderEmail } from '@/lib/mail'
 import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
 import { SITE_URL } from '@/lib/site'
+import { markAbandonedCartRecovered } from '@/lib/abandonedCart'
 
 export const maxDuration = 30
 import { applyCartRewards } from '@/lib/cartRewards'
@@ -163,6 +164,10 @@ export async function POST(request) {
         name: gate.auth.name || data.shipping.fullName,
         phone: data.shipping.phone,
       })
+      void markAbandonedCartRecovered({
+        phone: data.shipping.phone,
+        userId: gate.auth.sub,
+      })
       return NextResponse.json({
         freeOrder: true,
         orderId: order._id.toString(),
@@ -214,6 +219,11 @@ export async function POST(request) {
 
     order.razorpayOrderId = rzpOrder.id
     await order.save()
+
+    void markAbandonedCartRecovered({
+      phone: data.shipping.phone,
+      userId: gate.auth.sub,
+    })
 
     return NextResponse.json({
       keyId,

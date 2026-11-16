@@ -5,6 +5,7 @@ import { Order } from '@/lib/mongo/Order'
 import { sendOrderEmail } from '@/lib/mail'
 import { notifyWhatsAppOrderPlaced } from '@/lib/whatsapp'
 import { redeemCoupon, validateCoupon } from '@/lib/coupons'
+import { markAbandonedCartRecovered } from '@/lib/abandonedCart'
 
 export const maxDuration = 30
 import { applyCartRewards } from '@/lib/cartRewards'
@@ -152,6 +153,10 @@ export async function POST(request) {
       email: gate.auth.email,
       name: gate.auth.name || data.shipping.fullName,
       phone: data.shipping.phone,
+    })
+    void markAbandonedCartRecovered({
+      phone: data.shipping.phone,
+      userId: gate.auth.sub,
     })
 
     return NextResponse.json({ order: order.toJSONSafe() }, { status: 201 })

@@ -10,6 +10,7 @@ import FreeGiftPopup from './FreeGiftPopup'
 import WhatsAppChat from './WhatsAppChat'
 import PwaClient from './PwaClient'
 import BootSplash from './BootSplash'
+import AbandonedCartSync from './AbandonedCartSync'
 
 export default function Providers({ children }) {
   return (
@@ -20,6 +21,7 @@ export default function Providers({ children }) {
         <KnowBraceletTab />
         <GiftTab />
         <FreeGiftPopup />
+        <AbandonedCartSync />
         <WhatsAppChat />
         <MarketingCookies />
         <PwaClient />
