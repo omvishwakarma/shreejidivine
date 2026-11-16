@@ -19,6 +19,7 @@ export async function PATCH(request, { params }) {
       expiresAt: z.string().nullable().optional(),
       minOrderAmount: z.number().min(0).optional(),
       active: z.boolean().optional(),
+      publiclyVisible: z.boolean().optional(),
       description: z.string().optional(),
     })
     const data = schema.parse(await request.json())

@@ -21,6 +21,8 @@ const couponSchema = new mongoose.Schema(
     expiresAt: { type: Date, default: null },
     minOrderAmount: { type: Number, default: 0, min: 0 },
     active: { type: Boolean, default: true },
+    /** Shown as Magic Checkout coupon suggestions */
+    publiclyVisible: { type: Boolean, default: false },
     description: { type: String, default: '' },
   },
   { timestamps: true }
@@ -37,6 +39,7 @@ couponSchema.methods.toJSONSafe = function () {
     expiresAt: this.expiresAt,
     minOrderAmount: this.minOrderAmount,
     active: this.active,
+    publiclyVisible: this.publiclyVisible === true,
     description: this.description,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,

@@ -22,6 +22,33 @@ export function calcDiscount({ type, value }, subtotal) {
   return Math.min(discount, base)
 }
 
+export function couponSummary(coupon) {
+  if (coupon?.type === 'PERCENT') return `${coupon.value}% off`
+  return `₹${Math.round(Number(coupon?.value) || 0)} off`
+}
+
+export function couponPublicDescription(coupon) {
+  const note = String(coupon?.description || '').trim()
+  if (note) return note
+  const parts = []
+  if (coupon?.type === 'PERCENT') {
+    parts.push(`${coupon.value}% off on cart value`)
+  } else {
+    parts.push(`₹${Math.round(Number(coupon?.value) || 0)} off on cart value`)
+  }
+  if (Number(coupon?.minOrderAmount) > 0) {
+    parts.push(`Min order ₹${Math.round(Number(coupon.minOrderAmount))}`)
+  }
+  return parts.join(' · ')
+}
+
+export function isCouponCurrentlyValid(coupon, now = new Date()) {
+  if (!coupon || !coupon.active) return false
+  if (coupon.expiresAt && new Date(coupon.expiresAt) < now) return false
+  if (coupon.maxUses > 0 && coupon.usedCount >= coupon.maxUses) return false
+  return true
+}
+
 /**
  * Validate coupon against current subtotal. Does not increment usage.
  */

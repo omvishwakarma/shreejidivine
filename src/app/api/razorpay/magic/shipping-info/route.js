@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { dbConnect } from '@/lib/mongo/auth'
-import { Order } from '@/lib/mongo/Order'
+import { findMagicOrder, magicCorsHeaders } from '@/lib/razorpayMagic'
 import { getStoreSettings, calcShippingFee } from '@/lib/shipping'
 
 export const dynamic = 'force-dynamic'
@@ -9,33 +9,8 @@ function toRupeePaise(amount) {
   return Math.max(0, Math.round(Number(amount) || 0) * 100)
 }
 
-function normalizeRazorpayOrderId(raw) {
-  const id = String(raw || '').trim()
-  if (!id) return ''
-  return id.startsWith('order_') ? id : `order_${id}`
-}
-
-async function findOrder({ orderId, razorpayOrderId }) {
-  const receipt = String(orderId || '').trim()
-  const rzpId = normalizeRazorpayOrderId(razorpayOrderId)
-  const filter = []
-  if (rzpId) filter.push({ razorpayOrderId: rzpId })
-  if (receipt) filter.push({ orderNumber: receipt })
-  if (!filter.length) return null
-  return Order.findOne(filter.length === 1 ? filter[0] : { $or: filter }).lean()
-}
-
-function corsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Cache-Control': 'no-store',
-  }
-}
-
 export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: corsHeaders() })
+  return new NextResponse(null, { status: 204, headers: magicCorsHeaders() })
 }
 
 export async function POST(request) {
@@ -45,10 +20,11 @@ export async function POST(request) {
 
     await dbConnect()
     const settings = await getStoreSettings()
-    const order = await findOrder({
+    const orderDoc = await findMagicOrder({
       orderId: body?.order_id,
       razorpayOrderId: body?.razorpay_order_id,
     })
+    const order = orderDoc?.toObject ? orderDoc.toObject() : orderDoc
 
     const subtotal = Math.max(0, Number(order?.subtotal) || 0)
     const discount = Math.max(0, Number(order?.discount) || 0)
@@ -95,13 +71,13 @@ export async function POST(request) {
 
     return NextResponse.json(
       { addresses: responseAddresses },
-      { headers: corsHeaders() }
+      { headers: magicCorsHeaders() }
     )
   } catch (err) {
     console.error('[magic/shipping-info]', err)
     return NextResponse.json(
       { addresses: [], error: err.message || 'shipping_info_failed' },
-      { status: 500, headers: corsHeaders() }
+      { status: 500, headers: magicCorsHeaders() }
     )
   }
 }

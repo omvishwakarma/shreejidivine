@@ -13,6 +13,7 @@ const empty = {
   minOrderAmount: 0,
   description: '',
   active: true,
+  publiclyVisible: false,
 }
 
 export default function AdminCouponsPage() {
@@ -62,6 +63,7 @@ export default function AdminCouponsPage() {
       minOrderAmount: c.minOrderAmount || 0,
       description: c.description || '',
       active: c.active !== false,
+      publiclyVisible: c.publiclyVisible === true,
     })
     setError('')
     setFormOpen(true)
@@ -86,6 +88,7 @@ export default function AdminCouponsPage() {
       minOrderAmount: Number(form.minOrderAmount) || 0,
       description: form.description,
       active: form.active,
+      publiclyVisible: form.publiclyVisible === true,
     }
     try {
       if (editingId) {
@@ -126,7 +129,7 @@ export default function AdminCouponsPage() {
         <div>
           <h1 className="admin-page-title">Coupons</h1>
           <p className="admin-page-sub" style={{ marginBottom: 0 }}>
-            Fixed or percentage discounts with expiry and usage limits
+            Fixed or percentage discounts · turn on Public for Magic Checkout suggestions
           </p>
         </div>
         {!formOpen ? (
@@ -210,13 +213,27 @@ export default function AdminCouponsPage() {
                 placeholder="Optional note"
               />
             </div>
-            <label className="admin-check">
+            <label className="admin-toggle">
               <input
                 type="checkbox"
                 checked={form.active}
                 onChange={(e) => setForm((f) => ({ ...f, active: e.target.checked }))}
               />
-              Active
+              <span>
+                <strong>Active</strong>
+                <small>Coupon can be applied on checkout</small>
+              </span>
+            </label>
+            <label className="admin-toggle">
+              <input
+                type="checkbox"
+                checked={form.publiclyVisible}
+                onChange={(e) => setForm((f) => ({ ...f, publiclyVisible: e.target.checked }))}
+              />
+              <span>
+                <strong>Publicly visible</strong>
+                <small>Show in Razorpay Magic Checkout coupon suggestions</small>
+              </span>
             </label>
             <div className="admin-row-actions">
               <button type="submit" className="admin-btn admin-btn-primary">
@@ -229,6 +246,30 @@ export default function AdminCouponsPage() {
           </form>
         </div>
       ) : null}
+
+      <div className="admin-card" style={{ marginBottom: '1rem' }}>
+        <h2>Razorpay Magic Checkout</h2>
+        <p className="admin-page-sub" style={{ marginBottom: '0.65rem' }}>
+          Dashboard → Magic Checkout → Checkout Settings → Coupon Settings me ye URLs lagao:
+        </p>
+        <ul className="admin-coupon-magic-urls">
+          <li>
+            <span>Get promotions</span>
+            <code>https://www.shreejidivine.co/api/razorpay/magic/get-promotions</code>
+          </li>
+          <li>
+            <span>Apply promotions</span>
+            <code>https://www.shreejidivine.co/api/razorpay/magic/apply-promotions</code>
+          </li>
+          <li>
+            <span>Shipping info</span>
+            <code>https://www.shreejidivine.co/api/razorpay/magic/shipping-info</code>
+          </li>
+        </ul>
+        <p className="admin-page-sub" style={{ marginBottom: 0 }}>
+          Sirf <strong>Publicly visible</strong> + Active coupons Magic suggestions me dikhenge.
+        </p>
+      </div>
 
       <div className="admin-toolbar">
         <input
@@ -268,6 +309,7 @@ export default function AdminCouponsPage() {
                 <th>Used by</th>
                 <th>Expires</th>
                 <th>Active</th>
+                <th>Public</th>
                 <th />
               </tr>
             </thead>
@@ -315,6 +357,7 @@ export default function AdminCouponsPage() {
                       : 'No expiry'}
                   </td>
                   <td>{c.active ? 'Yes' : 'No'}</td>
+                  <td>{c.publiclyVisible ? 'Yes' : 'No'}</td>
                   <td>
                     <div className="admin-row-actions">
                       <button

@@ -61,6 +61,7 @@ export async function POST(request) {
       expiresAt: z.string().nullable().optional(),
       minOrderAmount: z.number().min(0).default(0),
       active: z.boolean().optional(),
+      publiclyVisible: z.boolean().optional(),
       description: z.string().optional(),
     })
     const data = schema.parse(await request.json())
@@ -86,6 +87,7 @@ export async function POST(request) {
       expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
       minOrderAmount: data.minOrderAmount ?? 0,
       active: data.active !== false,
+      publiclyVisible: data.publiclyVisible === true,
       description: data.description || '',
     })
 

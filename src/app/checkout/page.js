@@ -354,7 +354,7 @@ export default function CheckoutPage() {
         order_id: payload.razorpayOrderId,
         retry: { enabled: false },
         one_click_checkout: true,
-        show_coupons: false,
+        show_coupons: true,
         prefill: {
           name: payload.customer?.name || '',
           email: payload.customer?.email || user?.email || '',
