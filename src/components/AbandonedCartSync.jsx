@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
-import { api } from '../lib/api'
+import { api, getToken } from '../lib/api'
 import { normalizeWhatsappNumber } from '../lib/whatsapp/phone'
 
 const PHONE_KEY = 'sj_abandon_phone'
@@ -54,33 +54,75 @@ function delayMs() {
   return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_DELAY_MS
 }
 
+function authHeaders() {
+  const token = getToken()
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
+}
+
+function cartPayload(phone, name, items, subtotal) {
+  return {
+    phone,
+    name,
+    items: (items || []).map((i) => ({
+      productId: i.productId,
+      slug: i.slug,
+      name: i.name,
+      price: Number(i.price) || 0,
+      quantity: Number(i.quantity) || 1,
+      colour: i.colour || '',
+      fragrance: i.fragrance || '',
+      image: i.image || '',
+    })),
+    subtotal: Number(subtotal) || 0,
+  }
+}
+
+async function postRemind(body) {
+  const res = await fetch('/api/cart/abandoned/remind', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(body),
+  })
+  return res.json().catch(() => ({}))
+}
+
 export default function AbandonedCartSync({ phone: phoneOverride = '', name: nameOverride = '' }) {
   const { user } = useAuth()
   const { items, subtotal, ready } = useCart()
   const lastSyncKey = useRef('')
   const remindTimer = useRef(0)
   const remindForKey = useRef('')
-  const phoneRef = useRef('')
+  const latestRef = useRef({ phone: '', name: '', items: [], subtotal: 0 })
 
-  // Keep latest phone for timers / visibility checks
+  const resolvePhone = () =>
+    normalizeWhatsappNumber(phoneOverride) ||
+    normalizeWhatsappNumber(user?.phone) ||
+    readStoredPhone() ||
+    ''
+
+  const resolveName = () => nameOverride || user?.name || readStoredName() || ''
+
+  // Keep latest cart snapshot for timers / focus
   useEffect(() => {
-    phoneRef.current =
-      normalizeWhatsappNumber(phoneOverride) ||
-      normalizeWhatsappNumber(user?.phone) ||
-      readStoredPhone() ||
-      ''
-  }, [phoneOverride, user?.phone])
+    const phone = resolvePhone()
+    const name = resolveName()
+    if (phone) storeContact(phone, name)
+    latestRef.current = {
+      phone,
+      name,
+      items,
+      subtotal,
+    }
+  }, [phoneOverride, user?.phone, user?.name, nameOverride, items, subtotal])
 
-  // Sync cart → server whenever cart/phone changes
+  // Sync cart → server
   useEffect(() => {
     if (!ready) return undefined
 
-    const phone =
-      normalizeWhatsappNumber(phoneOverride) ||
-      normalizeWhatsappNumber(user?.phone) ||
-      readStoredPhone() ||
-      ''
-
+    const phone = resolvePhone()
     if (!phone) {
       console.info(
         '[abandoned-cart] phone missing — login with phone, or open checkout and enter phone'
@@ -88,7 +130,10 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
       return undefined
     }
 
-    const name = nameOverride || user?.name || readStoredName() || ''
+    // Don't wipe server cart during brief empty states before hydration settles
+    if (!items.length) return undefined
+
+    const name = resolveName()
     storeContact(phone, name)
 
     const key = cartFingerprint(phone, items, subtotal)
@@ -96,24 +141,10 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
     lastSyncKey.current = key
 
     const timer = window.setTimeout(() => {
+      const payload = cartPayload(phone, name, items, subtotal)
       api('/api/cart/abandoned', {
         method: 'POST',
-        body: JSON.stringify({
-          phone,
-          name,
-          items: items.map((i) => ({
-            productId: i.productId,
-            slug: i.slug,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            colour: i.colour,
-            fragrance: i.fragrance,
-            image: i.image,
-          })),
-          subtotal,
-          clear: items.length === 0,
-        }),
+        body: JSON.stringify(payload),
         timeoutMs: 8000,
       })
         .then((data) => {
@@ -127,24 +158,19 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
     return () => window.clearTimeout(timer)
   }, [ready, items, subtotal, user?.phone, user?.name, phoneOverride, nameOverride])
 
-  // Schedule WhatsApp remind — survives cart sync re-renders
+  // Schedule WhatsApp remind with full cart payload
   useEffect(() => {
     if (!ready) return undefined
 
-    const phone =
-      normalizeWhatsappNumber(phoneOverride) ||
-      normalizeWhatsappNumber(user?.phone) ||
-      readStoredPhone() ||
-      ''
-
+    const phone = resolvePhone()
     if (!phone || items.length === 0) {
       window.clearTimeout(remindTimer.current)
+      remindTimer.current = 0
       remindForKey.current = ''
       return undefined
     }
 
     const key = cartFingerprint(phone, items, subtotal)
-    // Same cart already scheduled — keep existing timer
     if (key === remindForKey.current && remindTimer.current) return undefined
 
     remindForKey.current = key
@@ -153,22 +179,17 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
     const wait = delayMs() + 3000
     console.info('[abandoned-cart] remind scheduled in', Math.round(wait / 1000), 's')
 
+    const snapshot = cartPayload(phone, resolveName(), items, subtotal)
+
     remindTimer.current = window.setTimeout(() => {
-      fetch('/api/cart/abandoned/remind', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(typeof window !== 'undefined' && window.localStorage.getItem('shreeji_token')
-            ? { Authorization: `Bearer ${window.localStorage.getItem('shreeji_token')}` }
-            : {}),
-        },
-        body: JSON.stringify({ phone }),
-      })
-        .then(async (res) => {
-          const summary = await res.json().catch(() => ({}))
+      postRemind(snapshot)
+        .then((summary) => {
           console.info('[abandoned-cart] remind', summary)
           if (!summary?.ok) {
-            console.warn('[abandoned-cart] remind not sent', summary?.reason || summary?.error || res.status)
+            console.warn(
+              '[abandoned-cart] remind not sent',
+              summary?.reason || summary?.error || 'unknown'
+            )
           }
         })
         .catch((err) => {
@@ -176,36 +197,34 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
         })
     }, wait)
 
-    // Do NOT clear remindTimer on dep churn — only on unmount / empty cart
     return undefined
-  }, [ready, items, subtotal, user?.phone, phoneOverride])
+  }, [ready, items, subtotal, user?.phone, phoneOverride, nameOverride, user?.name])
 
-  // Clear remind only on unmount
   useEffect(() => {
     return () => window.clearTimeout(remindTimer.current)
   }, [])
 
-  // If tab hidden then visible again after delay, retry remind
+  // On tab focus: sync + remind with current cart
   useEffect(() => {
     function onVisible() {
       if (document.visibilityState !== 'visible') return
-      const phone = phoneRef.current
-      if (!phone) return
-      fetch('/api/cart/abandoned/remind', {
+      const { phone, name, items: cartItems, subtotal: cartSubtotal } = latestRef.current
+      if (!phone || !cartItems?.length) return
+
+      const payload = cartPayload(phone, name, cartItems, cartSubtotal)
+      api('/api/cart/abandoned', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(window.localStorage.getItem('shreeji_token')
-            ? { Authorization: `Bearer ${window.localStorage.getItem('shreeji_token')}` }
-            : {}),
-        },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify(payload),
+        timeoutMs: 8000,
       })
-        .then(async (res) => {
-          const summary = await res.json().catch(() => ({}))
-          console.info('[abandoned-cart] remind (focus)', summary)
-        })
         .catch(() => {})
+        .finally(() => {
+          postRemind(payload)
+            .then((summary) => {
+              console.info('[abandoned-cart] remind (focus)', summary)
+            })
+            .catch(() => {})
+        })
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
