@@ -46,6 +46,8 @@ export async function upsertAbandonedCart({
   userId = null,
   items = [],
   subtotal = 0,
+  /** Only bump idle timer when cart content actually changes (default). */
+  touchActivity = undefined,
 }) {
   const normalizedPhone = normalizeWhatsappNumber(phone)
   if (!normalizedPhone) return null
@@ -71,6 +73,9 @@ export async function upsertAbandonedCart({
   const fingerprint = cartFingerprint(normalizedItems)
   const existing = await AbandonedCart.findOne({ phone: normalizedPhone })
   const cartChanged = !existing || existing.fingerprint !== fingerprint
+  // Reminder/focus sync must NOT reset the idle clock when cart is unchanged.
+  const shouldTouch =
+    touchActivity === true || (touchActivity !== false && cartChanged)
 
   const update = {
     phone: normalizedPhone,
@@ -80,8 +85,13 @@ export async function upsertAbandonedCart({
     subtotal: Math.max(0, Number(subtotal) || 0),
     productLabel: abandonedProductLabel(normalizedItems),
     fingerprint,
-    lastActivityAt: new Date(),
     recoveredAt: null,
+  }
+
+  if (shouldTouch) {
+    update.lastActivityAt = new Date()
+  } else if (!existing?.lastActivityAt) {
+    update.lastActivityAt = existing?.createdAt || new Date()
   }
 
   if (cartChanged) {

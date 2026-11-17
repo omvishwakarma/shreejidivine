@@ -74,21 +74,8 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, reason: 'phone_required' }, { status: 400 })
     }
 
-    // If client sends cart items, always upsert first (fixes missed sync).
+    // Ensure cart exists without resetting idle timer (touchActivity: false).
     if (data.items?.length) {
-      await upsertAbandonedCart({
-        phone,
-        name: data.name || user?.name || '',
-        userId: auth?.sub || null,
-        items: data.items,
-        subtotal: data.subtotal,
-      })
-    }
-
-    let cart = await findActiveCart(phone)
-
-    // Last resort: still no DB cart but client sent items — build ephemeral payload
-    if (!cart && data.items?.length) {
       const subtotal =
         data.subtotal != null
           ? Number(data.subtotal)
@@ -96,14 +83,17 @@ export async function POST(request) {
               (sum, i) => sum + (Number(i.price) || 0) * (Number(i.quantity) || 1),
               0
             )
-      cart = await upsertAbandonedCart({
+      await upsertAbandonedCart({
         phone,
         name: data.name || user?.name || '',
         userId: auth?.sub || null,
         items: data.items,
         subtotal,
+        touchActivity: false,
       })
     }
+
+    const cart = await findActiveCart(phone)
 
     if (!cart || !cart.items?.length) {
       return NextResponse.json({

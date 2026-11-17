@@ -31,6 +31,7 @@ export async function POST(request) {
       items: z.array(itemSchema).optional(),
       subtotal: z.number().optional(),
       clear: z.boolean().optional(),
+      touchActivity: z.boolean().optional(),
     })
     const data = schema.parse(body)
 
@@ -57,12 +58,14 @@ export async function POST(request) {
       return NextResponse.json({ ok: true, cleared: true })
     }
 
+    const touch = data.touchActivity !== false
     const cart = await upsertAbandonedCart({
       phone,
       name: data.name || user?.name || '',
       userId: auth?.sub || null,
       items: data.items,
       subtotal: data.subtotal,
+      touchActivity: touch,
     })
 
     return NextResponse.json({
@@ -70,6 +73,7 @@ export async function POST(request) {
       phone,
       itemCount: cart?.items?.length || 0,
       subtotal: cart?.subtotal || 0,
+      lastActivityAt: cart?.lastActivityAt || null,
     })
   } catch (err) {
     if (err instanceof z.ZodError) {

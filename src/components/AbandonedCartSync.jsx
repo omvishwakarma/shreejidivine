@@ -204,27 +204,21 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
     return () => window.clearTimeout(remindTimer.current)
   }, [])
 
-  // On tab focus: sync + remind with current cart
+  // On tab focus: remind only (do not reset idle timer via sync)
   useEffect(() => {
     function onVisible() {
       if (document.visibilityState !== 'visible') return
       const { phone, name, items: cartItems, subtotal: cartSubtotal } = latestRef.current
       if (!phone || !cartItems?.length) return
 
-      const payload = cartPayload(phone, name, cartItems, cartSubtotal)
-      api('/api/cart/abandoned', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        timeoutMs: 8000,
-      })
-        .catch(() => {})
-        .finally(() => {
-          postRemind(payload)
-            .then((summary) => {
-              console.info('[abandoned-cart] remind (focus)', summary)
-            })
-            .catch(() => {})
+      const payload = {
+        ...cartPayload(phone, name, cartItems, cartSubtotal),
+      }
+      postRemind(payload)
+        .then((summary) => {
+          console.info('[abandoned-cart] remind (focus)', summary)
         })
+        .catch(() => {})
     }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
