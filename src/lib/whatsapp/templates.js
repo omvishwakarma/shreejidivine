@@ -20,10 +20,20 @@ export const WA_TEMPLATES = {
     process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
 }
 
+/** WhatsApp body params cannot contain newlines / tabs / 4+ spaces. */
+function sanitizeWaText(value, max = 120) {
+  const text = String(value ?? '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/ {4,}/g, '   ')
+    .trim()
+    .slice(0, max)
+  return text || '-'
+}
+
 function textParams(values) {
   return (values || []).map((value) => ({
     type: 'text',
-    text: String(value ?? '').trim() || '-',
+    text: sanitizeWaText(value),
   }))
 }
 

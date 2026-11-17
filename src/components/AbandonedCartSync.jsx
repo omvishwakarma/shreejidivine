@@ -154,13 +154,22 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
     console.info('[abandoned-cart] remind scheduled in', Math.round(wait / 1000), 's')
 
     remindTimer.current = window.setTimeout(() => {
-      api('/api/cart/abandoned/remind', {
+      fetch('/api/cart/abandoned/remind', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(typeof window !== 'undefined' && window.localStorage.getItem('shreeji_token')
+            ? { Authorization: `Bearer ${window.localStorage.getItem('shreeji_token')}` }
+            : {}),
+        },
         body: JSON.stringify({ phone }),
-        timeoutMs: 20000,
       })
-        .then((summary) => {
+        .then(async (res) => {
+          const summary = await res.json().catch(() => ({}))
           console.info('[abandoned-cart] remind', summary)
+          if (!summary?.ok) {
+            console.warn('[abandoned-cart] remind not sent', summary?.reason || summary?.error || res.status)
+          }
         })
         .catch((err) => {
           console.warn('[abandoned-cart] remind failed', err?.message || err)
@@ -182,15 +191,19 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
       if (document.visibilityState !== 'visible') return
       const phone = phoneRef.current
       if (!phone) return
-      api('/api/cart/abandoned/remind', {
+      fetch('/api/cart/abandoned/remind', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(window.localStorage.getItem('shreeji_token')
+            ? { Authorization: `Bearer ${window.localStorage.getItem('shreeji_token')}` }
+            : {}),
+        },
         body: JSON.stringify({ phone }),
-        timeoutMs: 20000,
       })
-        .then((summary) => {
-          if (summary?.ok || summary?.reason) {
-            console.info('[abandoned-cart] remind (focus)', summary)
-          }
+        .then(async (res) => {
+          const summary = await res.json().catch(() => ({}))
+          console.info('[abandoned-cart] remind (focus)', summary)
         })
         .catch(() => {})
     }

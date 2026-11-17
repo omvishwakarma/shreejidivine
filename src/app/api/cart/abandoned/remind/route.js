@@ -88,29 +88,40 @@ export async function POST(request) {
     }
 
     if (result?.skipped) {
-      cart.reminderSentAt = new Date()
       cart.reminderStatus = 'skipped'
       cart.reminderError = result.reason || 'skipped'
       await cart.save()
       return NextResponse.json({
         ok: false,
         reason: result.reason || 'skipped',
+        error: result.reason || 'skipped',
         status: 'skipped',
+        phone: cart.phone,
+        template: process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
       })
     }
 
+    const failReason = String(result?.error || 'send_failed').slice(0, 300)
     cart.reminderStatus = 'failed'
-    cart.reminderError = String(result?.error || 'send_failed').slice(0, 300)
+    cart.reminderError = failReason
+    // Keep reminderSentAt null so cron/client can retry after fix
     await cart.save()
-    return NextResponse.json(
-      { ok: false, reason: cart.reminderError, status: 'failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      ok: false,
+      reason: failReason,
+      error: failReason,
+      status: 'failed',
+      phone: cart.phone,
+      template: process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
+    })
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
     }
     console.error('[cart/abandoned/remind]', err)
-    return NextResponse.json({ error: err.message || 'remind_failed' }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: err.message || 'remind_failed', reason: err.message || 'remind_failed' },
+      { status: 500 }
+    )
   }
 }

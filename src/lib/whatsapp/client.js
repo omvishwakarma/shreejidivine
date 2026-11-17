@@ -27,27 +27,7 @@ function messagesUrl() {
 /**
  * Send a WhatsApp Cloud API template message via YourBulkSMS Omni.
  */
-export async function sendWhatsAppTemplate({
-  to,
-  template,
-  language = 'en',
-  components = [],
-  callbackData = '',
-}) {
-  if (!isWhatsAppConfigured()) {
-    return { skipped: true, reason: 'not_configured' }
-  }
-
-  const phone = normalizeWhatsappNumber(to)
-  if (!phone) {
-    return { skipped: true, reason: 'invalid_phone' }
-  }
-
-  const name = String(template || '').trim()
-  if (!name) {
-    return { skipped: true, reason: 'missing_template' }
-  }
-
+async function postTemplateOnce({ phone, name, language, components, callbackData }) {
   const body = {
     messaging_product: 'whatsapp',
     recipient_type: 'individual',
@@ -55,7 +35,7 @@ export async function sendWhatsAppTemplate({
     type: 'template',
     template: {
       name,
-      language: { code: language || env('WHATSAPP_TEMPLATE_LANGUAGE') || 'en' },
+      language: { code: language },
       ...(components.length ? { components } : {}),
     },
   }
@@ -83,6 +63,7 @@ export async function sendWhatsAppTemplate({
   const omniMessage =
     data?.response?.[0]?.message ||
     data?.response?.[0]?.status ||
+    data?.error?.error_user_msg ||
     data?.error?.message ||
     data?.message ||
     ''
@@ -95,10 +76,73 @@ export async function sendWhatsAppTemplate({
     const err = new Error(message)
     err.status = res.status || 400
     err.payload = data
-    console.error('[whatsapp] send failed', { url, template: name, to: phone, message, data })
+    err.language = language
     throw err
   }
 
-  console.info('[whatsapp] sent', { template: name, to: phone, id: data?.messages?.[0]?.id })
-  return { ok: true, data, to: phone, template: name }
+  return { ok: true, data, to: phone, template: name, language }
+}
+
+export async function sendWhatsAppTemplate({
+  to,
+  template,
+  language,
+  components = [],
+  callbackData = '',
+}) {
+  if (!isWhatsAppConfigured()) {
+    return { skipped: true, reason: 'not_configured' }
+  }
+
+  const phone = normalizeWhatsappNumber(to)
+  if (!phone) {
+    return { skipped: true, reason: 'invalid_phone' }
+  }
+
+  const name = String(template || '').trim()
+  if (!name) {
+    return { skipped: true, reason: 'missing_template' }
+  }
+
+  const preferred = language || env('WHATSAPP_TEMPLATE_LANGUAGE') || 'en'
+  const languages = [...new Set([preferred, 'en', 'en_US', 'en_GB'].filter(Boolean))]
+
+  let lastError = null
+  for (const code of languages) {
+    try {
+      const result = await postTemplateOnce({
+        phone,
+        name,
+        language: code,
+        components,
+        callbackData,
+      })
+      console.info('[whatsapp] sent', {
+        template: name,
+        to: phone,
+        language: code,
+        id: result.data?.messages?.[0]?.id,
+      })
+      return result
+    } catch (err) {
+      lastError = err
+      const msg = String(err?.message || '').toLowerCase()
+      const retryLang =
+        msg.includes('language') ||
+        msg.includes('translation') ||
+        msg.includes('template') ||
+        msg.includes('not found') ||
+        msg.includes('does not exist')
+      console.error('[whatsapp] send failed', {
+        template: name,
+        to: phone,
+        language: code,
+        message: err?.message,
+        data: err?.payload,
+      })
+      if (!retryLang) break
+    }
+  }
+
+  throw lastError || new Error('WhatsApp send failed')
 }
