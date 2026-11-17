@@ -134,6 +134,17 @@
   padding: 0.8rem 0.85rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
   border-radius: 0;
   box-shadow: none;
+  display: block;
+}
+
+.cart-drawer .cart-summary__rows {
+  flex: none;
+  gap: 0.3rem;
+}
+
+.cart-drawer .cart-summary__rows .is-total {
+  margin-top: 0.15rem;
+  padding-top: 0.35rem;
 }
 
 .cart-drawer .cart-summary h2 {

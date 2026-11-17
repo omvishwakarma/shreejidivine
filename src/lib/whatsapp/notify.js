@@ -342,31 +342,26 @@ export async function notifyWhatsAppAbandonedCart({
   const displayName = firstName(name)
   const productLabel = String(product || 'your items').slice(0, 80)
   const cartAmount = money(amount)
-  const urlPath = 'checkout'
+  const baseParams = {
+    name: displayName,
+    product: productLabel,
+    amount: cartAmount,
+  }
+
+  // Prefer body-only first — Meta template often has static IMAGE + static CTA URL.
+  const bodyOnly = await sendSafe(to, template, baseParams, `abandoned:${to}`)
+  if (bodyOnly?.ok) return bodyOnly
+  if (bodyOnly?.skipped && bodyOnly.reason === 'not_configured') return bodyOnly
 
   const withUrl = await sendSafe(
     to,
     template,
-    {
-      name: displayName,
-      product: productLabel,
-      amount: cartAmount,
-      urlPath,
-    },
+    { ...baseParams, urlPath: 'checkout' },
     `abandoned:${to}`
   )
-  if (withUrl?.ok || withUrl?.skipped) return withUrl
+  if (withUrl?.ok) return withUrl
 
-  return sendSafe(
-    to,
-    template,
-    {
-      name: displayName,
-      product: productLabel,
-      amount: cartAmount,
-    },
-    `abandoned:${to}`
-  )
+  return bodyOnly?.error ? bodyOnly : withUrl
 }
 
 export async function notifyWhatsAppTrackingUpdate(order, tracking = {}, customer = {}) {

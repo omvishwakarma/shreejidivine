@@ -19,6 +19,7 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}))
     const schema = z.object({
       phone: z.string().optional(),
+      force: z.boolean().optional(),
     })
     const data = schema.parse(body)
 
@@ -37,9 +38,15 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, reason: 'phone_required' }, { status: 400 })
     }
 
-    const cart = await AbandonedCart.findOne({ phone })
-    if (!cart || !cart.items?.length || cart.recoveredAt) {
-      return NextResponse.json({ ok: false, reason: 'no_active_cart' })
+    const local = phone.slice(-10)
+    const cart = await AbandonedCart.findOne({
+      $or: [{ phone }, { phone: local }, { phone: `91${local}` }],
+      recoveredAt: null,
+      'items.0': { $exists: true },
+    }).sort({ updatedAt: -1 })
+
+    if (!cart) {
+      return NextResponse.json({ ok: false, reason: 'no_active_cart', phone })
     }
 
     if (cart.reminderSentAt && cart.reminderStatus === 'sent') {
@@ -47,17 +54,21 @@ export async function POST(request) {
         ok: false,
         reason: 'already_sent',
         sentAt: cart.reminderSentAt,
+        phone: cart.phone,
       })
     }
 
+    const force =
+      data.force === true || request.nextUrl?.searchParams?.get('force') === '1'
     const delayMs = abandonedCartDelayMs()
     const idleMs = Date.now() - new Date(cart.lastActivityAt).getTime()
-    if (idleMs < delayMs) {
+    if (!force && idleMs < delayMs) {
       return NextResponse.json({
         ok: false,
         reason: 'too_soon',
         waitSeconds: Math.ceil((delayMs - idleMs) / 1000),
         delaySeconds: Math.round(delayMs / 1000),
+        phone: cart.phone,
       })
     }
 

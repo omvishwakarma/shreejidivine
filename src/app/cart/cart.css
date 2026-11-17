@@ -359,8 +359,8 @@
 }
 
 .cart-summary__rows .is-total {
-  margin-top: 0.2rem;
-  padding-top: 0.5rem;
+  margin-top: 0.15rem;
+  padding-top: 0.4rem;
   border-top: 1px solid rgba(201, 168, 76, 0.28);
   font-family: var(--font-body), system-ui, sans-serif;
   font-size: 1.1rem;
