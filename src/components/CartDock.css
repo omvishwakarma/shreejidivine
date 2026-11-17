@@ -26,8 +26,15 @@ body:has(.cart-dock) {
   align-items: center;
   gap: 0.7rem;
   min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   font-size: 0.95rem;
   font-weight: 600;
+  text-align: left;
+  cursor: pointer;
 }
 
 .cart-dock__meta span {

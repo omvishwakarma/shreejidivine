@@ -22,9 +22,9 @@ const DOCK_GAP = 10
 
 export default function CartDock() {
   const pathname = usePathname() || '/'
-  const { items, count, subtotal, ready } = useCart()
+  const { items, count, subtotal, ready, openCart, drawerOpen } = useCart()
   const hidden = HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix))
-  const visible = ready && count > 0 && !hidden
+  const visible = ready && count > 0 && !hidden && !drawerOpen
   const thumbs = items.slice(0, 3)
   const label = count === 1 ? '1 item added' : `${count} items added`
   const dockRef = useRef(null)
@@ -59,7 +59,7 @@ export default function CartDock() {
 
   return (
     <div className="cart-dock" ref={dockRef} role="region" aria-label="Cart">
-      <div className="cart-dock__meta">
+      <button type="button" className="cart-dock__meta" onClick={openCart}>
         <div className="cart-dock__thumbs" aria-hidden="true">
           {thumbs.map((item) => (
             // eslint-disable-next-line @next/next/no-img-element
@@ -67,7 +67,7 @@ export default function CartDock() {
           ))}
         </div>
         <span>{label}</span>
-      </div>
+      </button>
       <div className="cart-dock__end">
         <strong>{formatINR(subtotal)}</strong>
         <Link href="/checkout" className="cart-dock__go">

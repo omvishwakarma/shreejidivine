@@ -8,6 +8,9 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 function authorized(request) {
+  // Vercel Cron invocations include this header.
+  if (request.headers.get('x-vercel-cron') === '1') return true
+
   const secret = String(process.env.CRON_SECRET || '').trim()
   if (!secret) return process.env.NODE_ENV !== 'production'
   const header = request.headers.get('authorization') || ''

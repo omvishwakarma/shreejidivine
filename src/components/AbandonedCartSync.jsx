@@ -100,27 +100,29 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
         timeoutMs: 8000,
       })
         .then((data) => {
-          if (process.env.NODE_ENV === 'development') {
-            console.info('[abandoned-cart] synced', data)
-          }
-          // Local: cron doesn't auto-run — trigger after ~35s idle
-          if (process.env.NODE_ENV !== 'development' || !items.length) return
+          console.info('[abandoned-cart] synced', data)
+          if (!items.length) return
+
+          // After idle delay, ask server to send WhatsApp for this phone.
+          // Works on production without waiting for Vercel Cron.
+          const delayMs = Number(process.env.NEXT_PUBLIC_ABANDONED_CART_DELAY_MS || 5 * 60 * 1000)
           window.clearTimeout(cronTimer.current)
           cronTimer.current = window.setTimeout(() => {
-            fetch('/api/cron/abandoned-cart')
-              .then((res) => res.json())
+            api('/api/cart/abandoned/remind', {
+              method: 'POST',
+              body: JSON.stringify({ phone }),
+              timeoutMs: 15000,
+            })
               .then((summary) => {
-                console.info('[abandoned-cart] cron', summary)
+                console.info('[abandoned-cart] remind', summary)
               })
               .catch((err) => {
-                console.warn('[abandoned-cart] cron failed', err)
+                console.warn('[abandoned-cart] remind failed', err?.message || err)
               })
-          }, 35000)
+          }, Math.max(delayMs, 5000) + 5000)
         })
         .catch((err) => {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('[abandoned-cart] sync failed', err?.message || err)
-          }
+          console.warn('[abandoned-cart] sync failed', err?.message || err)
         })
     }, 1200)
 

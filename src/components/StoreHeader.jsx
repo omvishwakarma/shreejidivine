@@ -100,7 +100,7 @@ function MenuMedia({ image, icon }) {
 
 export default function StoreHeader({ promo = true }) {
   const pathname = usePathname()
-  const { count } = useCart()
+  const { count, openCart } = useCart()
   const { user, loading, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const [opening, setOpening] = useState(false)
@@ -268,10 +268,11 @@ export default function StoreHeader({ promo = true }) {
             <Link href={user ? '/profile' : '/login'} className="store-header__desk-only">
               {user ? 'Account' : 'Log in'}
             </Link>
-            <Link
-              href="/cart"
+            <button
+              type="button"
               className="store-header__cart"
               aria-label={`Cart${count ? `, ${count} items` : ''}`}
+              onClick={openCart}
             >
               <span className="store-header__cart-mark" aria-hidden="true">
                 <svg className="store-header__cart-icon" viewBox="0 0 32 32">
@@ -297,7 +298,7 @@ export default function StoreHeader({ promo = true }) {
                 {count > 0 ? <span className="store-header__cart-count">{count}</span> : null}
               </span>
               <span className="store-header__cart-label">Cart</span>
-            </Link>
+            </button>
           </div>
         </div>
       </header>

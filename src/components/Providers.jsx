@@ -4,6 +4,7 @@ import { CartProvider } from '../context/CartContext'
 import { AuthProvider } from '../context/AuthContext'
 import MarketingCookies from './MarketingCookies'
 import CartDock from './CartDock'
+import CartDrawer from './CartDrawer'
 import KnowBraceletTab from './KnowBraceletTab'
 import GiftTab from './GiftTab'
 import FreeGiftPopup from './FreeGiftPopup'
@@ -17,6 +18,7 @@ export default function Providers({ children }) {
     <AuthProvider>
       <CartProvider>
         {children}
+        <CartDrawer />
         <CartDock />
         <KnowBraceletTab />
         <GiftTab />

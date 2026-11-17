@@ -9,6 +9,11 @@ const STORAGE_KEY = 'shreeji_cart_v3'
 export function CartProvider({ children }) {
   const [items, setItems] = useState([])
   const [ready, setReady] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  const openCart = useCallback(() => setDrawerOpen(true), [])
+  const closeCart = useCallback(() => setDrawerOpen(false), [])
+  const toggleCart = useCallback(() => setDrawerOpen((open) => !open), [])
 
   useEffect(() => {
     try {
@@ -120,8 +125,25 @@ export function CartProvider({ children }) {
       updateQty,
       removeItem,
       clearCart,
+      drawerOpen,
+      openCart,
+      closeCart,
+      toggleCart,
     }),
-    [items, ready, count, subtotal, addItem, updateQty, removeItem, clearCart]
+    [
+      items,
+      ready,
+      count,
+      subtotal,
+      addItem,
+      updateQty,
+      removeItem,
+      clearCart,
+      drawerOpen,
+      openCart,
+      closeCart,
+      toggleCart,
+    ]
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>

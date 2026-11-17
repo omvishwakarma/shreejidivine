@@ -120,19 +120,16 @@ export async function markAbandonedCartRecovered({ phone, userId = null }) {
 }
 
 export function abandonedCartDelayMs() {
-  // Prefer seconds (handy for local testing). Local default = 30s; production = minutes.
+  // Prefer seconds if set. Default minutes = 5 (test window); raise later for prod.
   const secondsRaw = process.env.ABANDONED_CART_DELAY_SECONDS
-  const seconds =
-    secondsRaw !== undefined && secondsRaw !== ''
-      ? Number(secondsRaw)
-      : process.env.NODE_ENV === 'production'
-        ? NaN
-        : 30
-  if (Number.isFinite(seconds) && seconds > 0) {
-    return Math.round(seconds * 1000)
+  if (secondsRaw !== undefined && secondsRaw !== '') {
+    const seconds = Number(secondsRaw)
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.round(seconds * 1000)
+    }
   }
 
-  const minutes = Number(process.env.ABANDONED_CART_DELAY_MINUTES || 60)
-  const safe = Number.isFinite(minutes) && minutes > 0 ? minutes : 60
+  const minutes = Number(process.env.ABANDONED_CART_DELAY_MINUTES || 5)
+  const safe = Number.isFinite(minutes) && minutes > 0 ? minutes : 5
   return Math.round(safe * 60 * 1000)
 }

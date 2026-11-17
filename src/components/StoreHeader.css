@@ -151,11 +151,17 @@
 }
 
 .store-header__cart {
+  appearance: none;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: inherit;
+  font: inherit;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .store-header__cart-mark {
