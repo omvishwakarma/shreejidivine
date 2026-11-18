@@ -168,25 +168,24 @@ export function buildTemplateComponents(templateName, params = {}) {
   }
 
   if (name === WA_TEMPLATES.abandonedCart) {
-    const components = [
-      {
-        type: 'body',
-        parameters: textParams([
-          params.name,
-          params.product,
-          params.amount,
-        ]),
-      },
-    ]
-    const urlPath = String(params.urlPath || '').replace(/^\/+/, '').trim()
-    if (urlPath) {
+    // Meta template: IMAGE header (dynamic) + body {{1}} name, {{2}} product, {{3}} amount
+    const imageLink = String(params.imageLink || params.image || '').trim()
+    const components = []
+    if (imageLink) {
       components.push({
-        type: 'button',
-        sub_type: 'url',
-        index: '0',
-        parameters: textParams([urlPath]),
+        type: 'header',
+        parameters: [
+          {
+            type: 'image',
+            image: { link: imageLink },
+          },
+        ],
       })
     }
+    components.push({
+      type: 'body',
+      parameters: textParams([params.name, params.product, params.amount]),
+    })
     return components
   }
 

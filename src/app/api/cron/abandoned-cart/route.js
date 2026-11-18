@@ -41,6 +41,7 @@ async function processAbandonedCarts() {
       name: cart.name,
       product: cart.productLabel || cart.items?.[0]?.name || 'your items',
       amount: cart.subtotal,
+      image: cart.items?.[0]?.image || '',
     })
 
     if (result?.ok) {

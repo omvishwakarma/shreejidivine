@@ -132,6 +132,7 @@ export async function POST(request) {
       name: cart.name || data.name || user?.name || '',
       product,
       amount: cart.subtotal,
+      image: cart.items?.[0]?.image || '',
     })
 
     if (result?.ok) {

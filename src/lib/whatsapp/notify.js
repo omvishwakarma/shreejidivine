@@ -3,6 +3,14 @@ import { sendWhatsAppTemplate, isWhatsAppConfigured } from './client'
 import { buildTemplateComponents, WA_TEMPLATES } from './templates'
 import { normalizeWhatsappNumber } from './phone'
 
+function absoluteMediaUrl(pathOrUrl) {
+  const value = String(pathOrUrl || '').trim()
+  const fallback = `${SITE_URL.replace(/\/$/, '')}/images/logo-app-512.png`
+  if (!value) return fallback
+  if (/^https?:\/\//i.test(value)) return value
+  return `${SITE_URL.replace(/\/$/, '')}${value.startsWith('/') ? value : `/${value}`}`
+}
+
 function firstName(value) {
   const name = String(value || '').trim()
   if (!name) return 'Ji'
@@ -327,58 +335,43 @@ export async function notifyWhatsAppOrderStatus(order, status, customer = {}, op
 }
 
 /**
- * Abandoned cart WhatsApp: {{1}} name, {{2}} product, {{3}} cart value.
- * CTA button → /checkout (static URL templates ignore urlPath).
+ * Abandoned cart WhatsApp (sd_abandoned_cart_1):
+ * header IMAGE (required) + body {{1}} name, {{2}} product, {{3}} amount
+ * Language must be `en` (per Meta template JSON).
  */
 export async function notifyWhatsAppAbandonedCart({
   phone,
   name,
   product,
   amount,
+  image,
 }) {
   const to = normalizeWhatsappNumber(phone)
   if (!to) return { skipped: true, reason: 'invalid_phone' }
 
   const template = WA_TEMPLATES.abandonedCart
-  // Meta "English" is often en_US — override with WHATSAPP_ABANDONED_CART_LANGUAGE
   const language =
-    String(process.env.WHATSAPP_ABANDONED_CART_LANGUAGE || '').trim() ||
-    String(process.env.WHATSAPP_TEMPLATE_LANGUAGE || '').trim() ||
-    'en_US'
+    String(process.env.WHATSAPP_ABANDONED_CART_LANGUAGE || '').trim() || 'en'
   const displayName = firstName(name)
   const productLabel = String(product || 'your items').slice(0, 80)
   const cartAmount = money(amount)
-  const baseParams = {
+  const imageLink =
+    absoluteMediaUrl(image) ||
+    absoluteMediaUrl(process.env.WHATSAPP_ABANDONED_CART_IMAGE || '')
+
+  const params = {
     name: displayName,
     product: productLabel,
     amount: cartAmount,
+    imageLink,
   }
 
-  // Prefer body-only first — Meta template often has static IMAGE + static CTA URL.
-  const bodyOnly = await sendSafe(
-    to,
-    template,
-    baseParams,
-    `abandoned:${to}`,
-    language
-  )
-  if (bodyOnly?.ok) return bodyOnly
-  if (bodyOnly?.skipped && bodyOnly.reason === 'not_configured') return bodyOnly
-
-  const withUrl = await sendSafe(
-    to,
-    template,
-    { ...baseParams, urlPath: 'checkout' },
-    `abandoned:${to}`,
-    language
-  )
-  if (withUrl?.ok) return withUrl
-
-  return {
-    ...(bodyOnly?.error ? bodyOnly : withUrl),
-    template,
-    language,
+  const result = await sendSafe(to, template, params, `abandoned:${to}`, language)
+  if (result?.ok || result?.skipped) {
+    return { ...result, template, language, imageLink }
   }
+
+  return { ...result, template, language, imageLink }
 }
 
 export async function notifyWhatsAppTrackingUpdate(order, tracking = {}, customer = {}) {
