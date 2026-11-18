@@ -49,7 +49,7 @@ function trackUrl(order) {
   return `${SITE_URL.replace(/\/$/, '')}/profile`
 }
 
-async function sendSafe(to, template, params, callbackData) {
+async function sendSafe(to, template, params, callbackData, language) {
   if (!isWhatsAppConfigured()) {
     console.warn('[whatsapp] skipped — WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID missing')
     return { skipped: true, reason: 'not_configured' }
@@ -62,6 +62,7 @@ async function sendSafe(to, template, params, callbackData) {
     const result = await sendWhatsAppTemplate({
       to,
       template,
+      language,
       components: buildTemplateComponents(template, params),
       callbackData,
     })
@@ -339,6 +340,11 @@ export async function notifyWhatsAppAbandonedCart({
   if (!to) return { skipped: true, reason: 'invalid_phone' }
 
   const template = WA_TEMPLATES.abandonedCart
+  // Meta "English" is often en_US — override with WHATSAPP_ABANDONED_CART_LANGUAGE
+  const language =
+    String(process.env.WHATSAPP_ABANDONED_CART_LANGUAGE || '').trim() ||
+    String(process.env.WHATSAPP_TEMPLATE_LANGUAGE || '').trim() ||
+    'en_US'
   const displayName = firstName(name)
   const productLabel = String(product || 'your items').slice(0, 80)
   const cartAmount = money(amount)
@@ -349,7 +355,13 @@ export async function notifyWhatsAppAbandonedCart({
   }
 
   // Prefer body-only first — Meta template often has static IMAGE + static CTA URL.
-  const bodyOnly = await sendSafe(to, template, baseParams, `abandoned:${to}`)
+  const bodyOnly = await sendSafe(
+    to,
+    template,
+    baseParams,
+    `abandoned:${to}`,
+    language
+  )
   if (bodyOnly?.ok) return bodyOnly
   if (bodyOnly?.skipped && bodyOnly.reason === 'not_configured') return bodyOnly
 
@@ -357,11 +369,16 @@ export async function notifyWhatsAppAbandonedCart({
     to,
     template,
     { ...baseParams, urlPath: 'checkout' },
-    `abandoned:${to}`
+    `abandoned:${to}`,
+    language
   )
   if (withUrl?.ok) return withUrl
 
-  return bodyOnly?.error ? bodyOnly : withUrl
+  return {
+    ...(bodyOnly?.error ? bodyOnly : withUrl),
+    template,
+    language,
+  }
 }
 
 export async function notifyWhatsAppTrackingUpdate(order, tracking = {}, customer = {}) {

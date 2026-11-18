@@ -104,8 +104,9 @@ export async function sendWhatsAppTemplate({
     return { skipped: true, reason: 'missing_template' }
   }
 
-  const preferred = language || env('WHATSAPP_TEMPLATE_LANGUAGE') || 'en'
-  const languages = [...new Set([preferred, 'en', 'en_US', 'en_GB'].filter(Boolean))]
+  const preferred = language || env('WHATSAPP_TEMPLATE_LANGUAGE') || 'en_US'
+  // Meta UI "English" is usually en_US; also try en / en_GB.
+  const languages = [...new Set([preferred, 'en_US', 'en', 'en_GB'].filter(Boolean))]
 
   let lastError = null
   for (const code of languages) {
