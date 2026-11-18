@@ -133,8 +133,8 @@ export function abandonedCartDelayMs() {
     }
   }
 
-  const minutes = Number(process.env.ABANDONED_CART_DELAY_MINUTES || 5)
-  const safe = Number.isFinite(minutes) && minutes > 0 ? minutes : 5
+  const minutes = Number(process.env.ABANDONED_CART_DELAY_MINUTES || 30)
+  const safe = Number.isFinite(minutes) && minutes > 0 ? minutes : 30
   return Math.round(safe * 60 * 1000)
 }
 

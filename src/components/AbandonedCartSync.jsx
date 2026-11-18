@@ -8,7 +8,7 @@ import { normalizeWhatsappNumber } from '../lib/whatsapp/phone'
 
 const PHONE_KEY = 'sj_abandon_phone'
 const NAME_KEY = 'sj_abandon_name'
-const DEFAULT_DELAY_MS = 5 * 60 * 1000
+const DEFAULT_DELAY_MS = 30 * 60 * 1000
 
 function cartFingerprint(phone, items, subtotal) {
   return JSON.stringify({
