@@ -28,10 +28,10 @@ async function processAbandonedCarts() {
     recoveredAt: null,
     reminderSentAt: null,
     reminderStatus: { $in: ['pending', 'failed'] },
-    lastActivityAt: { $lte: cutoff },
+    $or: [{ idleStartedAt: { $lte: cutoff } }, { idleStartedAt: null, lastActivityAt: { $lte: cutoff } }],
     'items.0': { $exists: true },
   })
-    .sort({ lastActivityAt: 1 })
+    .sort({ idleStartedAt: 1, lastActivityAt: 1 })
     .limit(40)
 
   const results = []

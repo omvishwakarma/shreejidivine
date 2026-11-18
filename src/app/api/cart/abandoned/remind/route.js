@@ -6,6 +6,7 @@ import { AbandonedCart } from '@/lib/mongo/AbandonedCart'
 import {
   abandonedCartDelayMs,
   abandonedProductLabel,
+  cartIdleMs,
   upsertAbandonedCart,
 } from '@/lib/abandonedCart'
 import { normalizeWhatsappNumber } from '@/lib/whatsapp/phone'
@@ -34,18 +35,11 @@ async function findActiveCart(phone) {
 
   return (
     carts.find(
-      (c) =>
-        !c.recoveredAt &&
-        Array.isArray(c.items) &&
-        c.items.length > 0
+      (c) => !c.recoveredAt && Array.isArray(c.items) && c.items.length > 0
     ) || null
   )
 }
 
-/**
- * Send abandoned-cart WhatsApp for one phone after delay.
- * Accepts optional cart items so send still works if sync was missed.
- */
 export async function POST(request) {
   try {
     await dbConnect()
@@ -74,7 +68,6 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, reason: 'phone_required' }, { status: 400 })
     }
 
-    // Ensure cart exists without resetting idle timer (touchActivity: false).
     if (data.items?.length) {
       const subtotal =
         data.subtotal != null
@@ -89,7 +82,6 @@ export async function POST(request) {
         userId: auth?.sub || null,
         items: data.items,
         subtotal,
-        touchActivity: false,
       })
     }
 
@@ -100,7 +92,7 @@ export async function POST(request) {
         ok: false,
         reason: 'no_active_cart',
         phone,
-        hint: 'Cart was not saved on server. Keep the tab open after adding items, or retry force with items.',
+        hint: 'Cart was not saved on server. Keep the tab open after adding items.',
       })
     }
 
@@ -116,13 +108,14 @@ export async function POST(request) {
     const force =
       data.force === true || request.nextUrl?.searchParams?.get('force') === '1'
     const delayMs = abandonedCartDelayMs()
-    const idleMs = Date.now() - new Date(cart.lastActivityAt || cart.updatedAt || Date.now()).getTime()
+    const idleMs = cartIdleMs(cart)
     if (!force && idleMs < delayMs) {
       return NextResponse.json({
         ok: false,
         reason: 'too_soon',
         waitSeconds: Math.ceil((delayMs - idleMs) / 1000),
         delaySeconds: Math.round(delayMs / 1000),
+        idleSeconds: Math.round(idleMs / 1000),
         phone: cart.phone,
         itemCount: cart.items.length,
       })

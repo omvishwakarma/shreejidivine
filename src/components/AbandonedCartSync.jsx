@@ -179,7 +179,11 @@ export default function AbandonedCartSync({ phone: phoneOverride = '', name: nam
     const wait = delayMs() + 3000
     console.info('[abandoned-cart] remind scheduled in', Math.round(wait / 1000), 's')
 
-    const snapshot = cartPayload(phone, resolveName(), items, subtotal)
+    // Snapshot + force: client already waited the full delay for this cart fingerprint.
+    const snapshot = {
+      ...cartPayload(phone, resolveName(), items, subtotal),
+      force: true,
+    }
 
     remindTimer.current = window.setTimeout(() => {
       postRemind(snapshot)

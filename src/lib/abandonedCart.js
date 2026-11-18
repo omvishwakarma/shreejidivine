@@ -46,8 +46,6 @@ export async function upsertAbandonedCart({
   userId = null,
   items = [],
   subtotal = 0,
-  /** Only bump idle timer when cart content actually changes (default). */
-  touchActivity = undefined,
 }) {
   const normalizedPhone = normalizeWhatsappNumber(phone)
   if (!normalizedPhone) return null
@@ -73,9 +71,7 @@ export async function upsertAbandonedCart({
   const fingerprint = cartFingerprint(normalizedItems)
   const existing = await AbandonedCart.findOne({ phone: normalizedPhone })
   const cartChanged = !existing || existing.fingerprint !== fingerprint
-  // Reminder/focus sync must NOT reset the idle clock when cart is unchanged.
-  const shouldTouch =
-    touchActivity === true || (touchActivity !== false && cartChanged)
+  const now = new Date()
 
   const update = {
     phone: normalizedPhone,
@@ -86,18 +82,17 @@ export async function upsertAbandonedCart({
     productLabel: abandonedProductLabel(normalizedItems),
     fingerprint,
     recoveredAt: null,
+    lastActivityAt: now,
   }
 
-  if (shouldTouch) {
-    update.lastActivityAt = new Date()
-  } else if (!existing?.lastActivityAt) {
-    update.lastActivityAt = existing?.createdAt || new Date()
-  }
-
+  // Idle clock only restarts when cart contents change — not on sync/focus noise.
   if (cartChanged) {
+    update.idleStartedAt = now
     update.reminderSentAt = null
     update.reminderStatus = 'pending'
     update.reminderError = ''
+  } else if (!existing?.idleStartedAt) {
+    update.idleStartedAt = existing?.lastActivityAt || existing?.createdAt || now
   }
 
   return AbandonedCart.findOneAndUpdate(
@@ -130,7 +125,6 @@ export async function markAbandonedCartRecovered({ phone, userId = null }) {
 }
 
 export function abandonedCartDelayMs() {
-  // Prefer seconds if set. Default minutes = 5 (test window); raise later for prod.
   const secondsRaw = process.env.ABANDONED_CART_DELAY_SECONDS
   if (secondsRaw !== undefined && secondsRaw !== '') {
     const seconds = Number(secondsRaw)
@@ -142,4 +136,10 @@ export function abandonedCartDelayMs() {
   const minutes = Number(process.env.ABANDONED_CART_DELAY_MINUTES || 5)
   const safe = Number.isFinite(minutes) && minutes > 0 ? minutes : 5
   return Math.round(safe * 60 * 1000)
+}
+
+export function cartIdleMs(cart) {
+  const start = cart?.idleStartedAt || cart?.lastActivityAt || cart?.updatedAt || cart?.createdAt
+  if (!start) return 0
+  return Math.max(0, Date.now() - new Date(start).getTime())
 }

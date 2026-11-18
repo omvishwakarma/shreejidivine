@@ -24,6 +24,8 @@ const abandonedCartSchema = new mongoose.Schema(
     productLabel: { type: String, default: '' },
     fingerprint: { type: String, default: '' },
     lastActivityAt: { type: Date, default: Date.now, index: true },
+    /** Set only when cart contents change — used for abandoned delay. */
+    idleStartedAt: { type: Date, default: Date.now, index: true },
     reminderSentAt: { type: Date, default: null },
     reminderStatus: {
       type: String,
