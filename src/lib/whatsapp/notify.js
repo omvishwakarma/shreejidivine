@@ -374,6 +374,56 @@ export async function notifyWhatsAppAbandonedCart({
   return { ...result, template, language, imageLink }
 }
 
+/**
+ * Abandoned cart follow-up (sd_abandoned_cart_2):
+ * body {{1}} name only. Language `en`.
+ */
+export async function notifyWhatsAppAbandonedCartFollowUp({ phone, name }) {
+  const to = normalizeWhatsappNumber(phone)
+  if (!to) return { skipped: true, reason: 'invalid_phone' }
+
+  const template = WA_TEMPLATES.abandonedCart2
+  const language =
+    String(process.env.WHATSAPP_ABANDONED_CART_2_LANGUAGE || '').trim() ||
+    String(process.env.WHATSAPP_ABANDONED_CART_LANGUAGE || '').trim() ||
+    'en'
+  const displayName = firstName(name)
+
+  const result = await sendSafe(
+    to,
+    template,
+    { name: displayName },
+    `abandoned2:${to}`,
+    language
+  )
+  return { ...result, template, language }
+}
+
+/**
+ * Abandoned cart day follow-up (sd_abandoned_cart_3):
+ * body {{1}} name only. Language `en`. ~24h after cart_2.
+ */
+export async function notifyWhatsAppAbandonedCartFollowUp3({ phone, name }) {
+  const to = normalizeWhatsappNumber(phone)
+  if (!to) return { skipped: true, reason: 'invalid_phone' }
+
+  const template = WA_TEMPLATES.abandonedCart3
+  const language =
+    String(process.env.WHATSAPP_ABANDONED_CART_3_LANGUAGE || '').trim() ||
+    String(process.env.WHATSAPP_ABANDONED_CART_LANGUAGE || '').trim() ||
+    'en'
+  const displayName = firstName(name)
+
+  const result = await sendSafe(
+    to,
+    template,
+    { name: displayName },
+    `abandoned3:${to}`,
+    language
+  )
+  return { ...result, template, language }
+}
+
 export async function notifyWhatsAppTrackingUpdate(order, tracking = {}, customer = {}) {
   const to = orderPhone(order, customer)
   if (!to) return { skipped: true }

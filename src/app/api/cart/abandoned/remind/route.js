@@ -5,12 +5,20 @@ import { User } from '@/lib/mongo/User'
 import { AbandonedCart } from '@/lib/mongo/AbandonedCart'
 import {
   abandonedCartDelayMs,
+  abandonedCartFollowUp3DelayMs,
+  abandonedCartFollowUpDelayMs,
   abandonedProductLabel,
+  cartFollowUp3IdleMs,
+  cartFollowUpIdleMs,
   cartIdleMs,
   upsertAbandonedCart,
 } from '@/lib/abandonedCart'
 import { normalizeWhatsappNumber } from '@/lib/whatsapp/phone'
-import { notifyWhatsAppAbandonedCart } from '@/lib/whatsapp'
+import {
+  notifyWhatsAppAbandonedCart,
+  notifyWhatsAppAbandonedCartFollowUp,
+  notifyWhatsAppAbandonedCartFollowUp3,
+} from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,6 +48,22 @@ async function findActiveCart(phone) {
   )
 }
 
+function template1() {
+  return process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1'
+}
+
+function template2() {
+  return process.env.WHATSAPP_ABANDONED_CART_2_TEMPLATE || 'sd_abandoned_cart_2'
+}
+
+function template3() {
+  return process.env.WHATSAPP_ABANDONED_CART_3_TEMPLATE || 'sd_abandoned_cart_3'
+}
+
+function isSent(at, status) {
+  return Boolean(at && status === 'sent')
+}
+
 export async function POST(request) {
   try {
     await dbConnect()
@@ -48,6 +72,8 @@ export async function POST(request) {
       phone: z.string().optional(),
       name: z.string().optional(),
       force: z.boolean().optional(),
+      /** 1 / 2 / 3. Auto next pending step if omitted. */
+      step: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
       items: z.array(itemSchema).optional(),
       subtotal: z.number().optional(),
     })
@@ -96,23 +122,223 @@ export async function POST(request) {
       })
     }
 
-    if (cart.reminderSentAt && cart.reminderStatus === 'sent') {
+    const force =
+      data.force === true || request.nextUrl?.searchParams?.get('force') === '1'
+    const firstDone = isSent(cart.reminderSentAt, cart.reminderStatus)
+    const followUpDone = isSent(cart.reminder2SentAt, cart.reminder2Status)
+    const followUp3Done = isSent(cart.reminder3SentAt, cart.reminder3Status)
+    const displayName = cart.name || data.name || user?.name || ''
+
+    let step = data.step
+    if (!step) {
+      if (!firstDone) step = 1
+      else if (!followUpDone) step = 2
+      else if (!followUp3Done) step = 3
+      else {
+        return NextResponse.json({
+          ok: false,
+          reason: 'already_sent',
+          step: 3,
+          sentAt: cart.reminder3SentAt,
+          firstSentAt: cart.reminderSentAt,
+          secondSentAt: cart.reminder2SentAt,
+          phone: cart.phone,
+        })
+      }
+    }
+
+    if (step === 1 && firstDone) {
       return NextResponse.json({
         ok: false,
         reason: 'already_sent',
+        step: 1,
         sentAt: cart.reminderSentAt,
         phone: cart.phone,
+        hint: followUpDone
+          ? followUp3Done
+            ? undefined
+            : 'Use step: 3 for the 24h follow-up (sd_abandoned_cart_3).'
+          : 'Use step: 2 for the 6h follow-up (sd_abandoned_cart_2).',
       })
     }
 
-    const force =
-      data.force === true || request.nextUrl?.searchParams?.get('force') === '1'
+    if (step === 2) {
+      if (!firstDone) {
+        return NextResponse.json({
+          ok: false,
+          reason: 'first_not_sent',
+          phone: cart.phone,
+          hint: 'Send step 1 (sd_abandoned_cart_1) before the 6h follow-up.',
+        })
+      }
+      if (followUpDone) {
+        return NextResponse.json({
+          ok: false,
+          reason: 'already_sent',
+          step: 2,
+          sentAt: cart.reminder2SentAt,
+          phone: cart.phone,
+          hint: followUp3Done
+            ? undefined
+            : 'Use step: 3 for the 24h follow-up (sd_abandoned_cart_3).',
+        })
+      }
+
+      const delayMs = abandonedCartFollowUpDelayMs()
+      const sinceFirstMs = cartFollowUpIdleMs(cart)
+      if (!force && sinceFirstMs < delayMs) {
+        return NextResponse.json({
+          ok: false,
+          reason: 'too_soon',
+          step: 2,
+          waitSeconds: Math.ceil((delayMs - sinceFirstMs) / 1000),
+          delaySeconds: Math.round(delayMs / 1000),
+          sinceFirstSeconds: Math.round(sinceFirstMs / 1000),
+          phone: cart.phone,
+          itemCount: cart.items.length,
+        })
+      }
+
+      const result = await notifyWhatsAppAbandonedCartFollowUp({
+        phone: cart.phone || phone,
+        name: displayName,
+      })
+
+      if (result?.ok) {
+        cart.reminder2SentAt = new Date()
+        cart.reminder2Status = 'sent'
+        cart.reminder2Error = ''
+        await cart.save()
+        return NextResponse.json({
+          ok: true,
+          status: 'sent',
+          step: 2,
+          phone: cart.phone,
+          template: result.template || template2(),
+        })
+      }
+
+      if (result?.skipped) {
+        cart.reminder2Status = 'skipped'
+        cart.reminder2Error = result.reason || 'skipped'
+        await cart.save()
+        return NextResponse.json({
+          ok: false,
+          reason: result.reason || 'skipped',
+          error: result.reason || 'skipped',
+          status: 'skipped',
+          step: 2,
+          phone: cart.phone,
+          template: result.template || template2(),
+        })
+      }
+
+      const failReason = String(result?.error || 'send_failed').slice(0, 300)
+      cart.reminder2Status = 'failed'
+      cart.reminder2Error = failReason
+      await cart.save()
+      return NextResponse.json({
+        ok: false,
+        reason: failReason,
+        error: failReason,
+        status: 'failed',
+        step: 2,
+        phone: cart.phone,
+        template: result?.template || template2(),
+      })
+    }
+
+    if (step === 3) {
+      if (!followUpDone) {
+        return NextResponse.json({
+          ok: false,
+          reason: 'second_not_sent',
+          phone: cart.phone,
+          hint: 'Send step 2 (sd_abandoned_cart_2) before the 24h follow-up.',
+        })
+      }
+      if (followUp3Done) {
+        return NextResponse.json({
+          ok: false,
+          reason: 'already_sent',
+          step: 3,
+          sentAt: cart.reminder3SentAt,
+          phone: cart.phone,
+        })
+      }
+
+      const delayMs = abandonedCartFollowUp3DelayMs()
+      const sinceSecondMs = cartFollowUp3IdleMs(cart)
+      if (!force && sinceSecondMs < delayMs) {
+        return NextResponse.json({
+          ok: false,
+          reason: 'too_soon',
+          step: 3,
+          waitSeconds: Math.ceil((delayMs - sinceSecondMs) / 1000),
+          delaySeconds: Math.round(delayMs / 1000),
+          sinceSecondSeconds: Math.round(sinceSecondMs / 1000),
+          phone: cart.phone,
+          itemCount: cart.items.length,
+        })
+      }
+
+      const result = await notifyWhatsAppAbandonedCartFollowUp3({
+        phone: cart.phone || phone,
+        name: displayName,
+      })
+
+      if (result?.ok) {
+        cart.reminder3SentAt = new Date()
+        cart.reminder3Status = 'sent'
+        cart.reminder3Error = ''
+        await cart.save()
+        return NextResponse.json({
+          ok: true,
+          status: 'sent',
+          step: 3,
+          phone: cart.phone,
+          template: result.template || template3(),
+        })
+      }
+
+      if (result?.skipped) {
+        cart.reminder3Status = 'skipped'
+        cart.reminder3Error = result.reason || 'skipped'
+        await cart.save()
+        return NextResponse.json({
+          ok: false,
+          reason: result.reason || 'skipped',
+          error: result.reason || 'skipped',
+          status: 'skipped',
+          step: 3,
+          phone: cart.phone,
+          template: result.template || template3(),
+        })
+      }
+
+      const failReason = String(result?.error || 'send_failed').slice(0, 300)
+      cart.reminder3Status = 'failed'
+      cart.reminder3Error = failReason
+      await cart.save()
+      return NextResponse.json({
+        ok: false,
+        reason: failReason,
+        error: failReason,
+        status: 'failed',
+        step: 3,
+        phone: cart.phone,
+        template: result?.template || template3(),
+      })
+    }
+
+    // —— Step 1 (sd_abandoned_cart_1) ——
     const delayMs = abandonedCartDelayMs()
     const idleMs = cartIdleMs(cart)
     if (!force && idleMs < delayMs) {
       return NextResponse.json({
         ok: false,
         reason: 'too_soon',
+        step: 1,
         waitSeconds: Math.ceil((delayMs - idleMs) / 1000),
         delaySeconds: Math.round(delayMs / 1000),
         idleSeconds: Math.round(idleMs / 1000),
@@ -129,7 +355,7 @@ export async function POST(request) {
 
     const result = await notifyWhatsAppAbandonedCart({
       phone: cart.phone || phone,
-      name: cart.name || data.name || user?.name || '',
+      name: displayName,
       product,
       amount: cart.subtotal,
       image: cart.items?.[0]?.image || '',
@@ -143,9 +369,11 @@ export async function POST(request) {
       return NextResponse.json({
         ok: true,
         status: 'sent',
+        step: 1,
         phone: cart.phone,
         product,
         amount: cart.subtotal,
+        template: result.template || template1(),
       })
     }
 
@@ -158,8 +386,9 @@ export async function POST(request) {
         reason: result.reason || 'skipped',
         error: result.reason || 'skipped',
         status: 'skipped',
+        step: 1,
         phone: cart.phone,
-        template: process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
+        template: result.template || template1(),
       })
     }
 
@@ -172,8 +401,9 @@ export async function POST(request) {
       reason: failReason,
       error: failReason,
       status: 'failed',
+      step: 1,
       phone: cart.phone,
-      template: process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
+      template: result?.template || template1(),
     })
   } catch (err) {
     if (err instanceof z.ZodError) {

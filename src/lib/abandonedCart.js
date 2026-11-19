@@ -91,6 +91,12 @@ export async function upsertAbandonedCart({
     update.reminderSentAt = null
     update.reminderStatus = 'pending'
     update.reminderError = ''
+    update.reminder2SentAt = null
+    update.reminder2Status = 'pending'
+    update.reminder2Error = ''
+    update.reminder3SentAt = null
+    update.reminder3Status = 'pending'
+    update.reminder3Error = ''
   } else if (!existing?.idleStartedAt) {
     update.idleStartedAt = existing?.lastActivityAt || existing?.createdAt || now
   }
@@ -138,8 +144,64 @@ export function abandonedCartDelayMs() {
   return Math.round(safe * 60 * 1000)
 }
 
+function delayFromEnv({ secondsKey, minutesKey, hoursKey, defaultHours }) {
+  const secondsRaw = process.env[secondsKey]
+  if (secondsRaw !== undefined && secondsRaw !== '') {
+    const seconds = Number(secondsRaw)
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.round(seconds * 1000)
+    }
+  }
+
+  const minutesRaw = process.env[minutesKey]
+  if (minutesRaw !== undefined && minutesRaw !== '') {
+    const minutes = Number(minutesRaw)
+    if (Number.isFinite(minutes) && minutes > 0) {
+      return Math.round(minutes * 60 * 1000)
+    }
+  }
+
+  const hours = Number(process.env[hoursKey] || defaultHours)
+  const safe = Number.isFinite(hours) && hours > 0 ? hours : defaultHours
+  return Math.round(safe * 60 * 60 * 1000)
+}
+
+/** Delay after first reminder before sd_abandoned_cart_2 (default 6h). */
+export function abandonedCartFollowUpDelayMs() {
+  return delayFromEnv({
+    secondsKey: 'ABANDONED_CART_FOLLOWUP_SECONDS',
+    minutesKey: 'ABANDONED_CART_FOLLOWUP_MINUTES',
+    hoursKey: 'ABANDONED_CART_FOLLOWUP_HOURS',
+    defaultHours: 6,
+  })
+}
+
+/** Delay after second reminder before sd_abandoned_cart_3 (default 24h). */
+export function abandonedCartFollowUp3DelayMs() {
+  return delayFromEnv({
+    secondsKey: 'ABANDONED_CART_FOLLOWUP_3_SECONDS',
+    minutesKey: 'ABANDONED_CART_FOLLOWUP_3_MINUTES',
+    hoursKey: 'ABANDONED_CART_FOLLOWUP_3_HOURS',
+    defaultHours: 24,
+  })
+}
+
 export function cartIdleMs(cart) {
   const start = cart?.idleStartedAt || cart?.lastActivityAt || cart?.updatedAt || cart?.createdAt
+  if (!start) return 0
+  return Math.max(0, Date.now() - new Date(start).getTime())
+}
+
+/** Ms since first abandoned reminder was sent. */
+export function cartFollowUpIdleMs(cart) {
+  const start = cart?.reminderSentAt
+  if (!start) return 0
+  return Math.max(0, Date.now() - new Date(start).getTime())
+}
+
+/** Ms since second abandoned reminder was sent. */
+export function cartFollowUp3IdleMs(cart) {
+  const start = cart?.reminder2SentAt
   if (!start) return 0
   return Math.max(0, Date.now() - new Date(start).getTime())
 }

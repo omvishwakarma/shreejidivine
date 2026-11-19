@@ -33,6 +33,22 @@ const abandonedCartSchema = new mongoose.Schema(
       default: 'pending',
     },
     reminderError: { type: String, default: '' },
+    /** Follow-up (sd_abandoned_cart_2), ~6h after first reminder. */
+    reminder2SentAt: { type: Date, default: null },
+    reminder2Status: {
+      type: String,
+      enum: ['pending', 'sent', 'skipped', 'failed'],
+      default: 'pending',
+    },
+    reminder2Error: { type: String, default: '' },
+    /** Follow-up (sd_abandoned_cart_3), ~24h after second reminder. */
+    reminder3SentAt: { type: Date, default: null },
+    reminder3Status: {
+      type: String,
+      enum: ['pending', 'sent', 'skipped', 'failed'],
+      default: 'pending',
+    },
+    reminder3Error: { type: String, default: '' },
     recoveredAt: { type: Date, default: null },
   },
   { timestamps: true }
@@ -40,6 +56,8 @@ const abandonedCartSchema = new mongoose.Schema(
 
 abandonedCartSchema.index({ phone: 1 }, { unique: true })
 abandonedCartSchema.index({ reminderSentAt: 1, lastActivityAt: 1, recoveredAt: 1 })
+abandonedCartSchema.index({ reminder2SentAt: 1, reminderSentAt: 1, recoveredAt: 1 })
+abandonedCartSchema.index({ reminder3SentAt: 1, reminder2SentAt: 1, recoveredAt: 1 })
 
 if (mongoose.models.AbandonedCart) {
   delete mongoose.models.AbandonedCart

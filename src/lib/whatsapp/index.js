@@ -9,6 +9,8 @@ export {
   notifyWhatsAppShipped,
   notifyWhatsAppTrackingUpdate,
   notifyWhatsAppAbandonedCart,
+  notifyWhatsAppAbandonedCartFollowUp,
+  notifyWhatsAppAbandonedCartFollowUp3,
 } from './notify'
 export { createAndSendWhatsAppOtp, verifyWhatsAppOtp } from './otp'
 export { scheduleWhatsApp } from './schedule'

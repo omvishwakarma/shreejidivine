@@ -18,6 +18,12 @@ export const WA_TEMPLATES = {
   /** Abandoned cart recovery (Meta template sd_abandoned_cart_1). */
   abandonedCart:
     process.env.WHATSAPP_ABANDONED_CART_TEMPLATE || 'sd_abandoned_cart_1',
+  /** Abandoned cart follow-up ~6h later (Meta template sd_abandoned_cart_2). */
+  abandonedCart2:
+    process.env.WHATSAPP_ABANDONED_CART_2_TEMPLATE || 'sd_abandoned_cart_2',
+  /** Abandoned cart follow-up ~24h after #2 (Meta template sd_abandoned_cart_3). */
+  abandonedCart3:
+    process.env.WHATSAPP_ABANDONED_CART_3_TEMPLATE || 'sd_abandoned_cart_3',
 }
 
 /** WhatsApp body params cannot contain newlines / tabs / 4+ spaces. */
@@ -187,6 +193,11 @@ export function buildTemplateComponents(templateName, params = {}) {
       parameters: textParams([params.name, params.product, params.amount]),
     })
     return components
+  }
+
+  if (name === WA_TEMPLATES.abandonedCart2 || name === WA_TEMPLATES.abandonedCart3) {
+    // sd_abandoned_cart_2 / _3: body {{1}} name only
+    return [{ type: 'body', parameters: textParams([params.name]) }]
   }
 
   if (Array.isArray(params.body)) {
